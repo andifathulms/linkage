@@ -44,7 +44,7 @@ body {
 /* The ground is not flat paper. One very quiet ruling, at the 8 px rhythm, so the
    surface reads as stock rather than as a blank div. It never touches a data area. */
 body::before {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
@@ -195,7 +195,7 @@ strong {
 
 .header__mark::before,
 .header__mark::after {
-  content: "";
+  content: '';
   position: absolute;
   width: 5px;
   height: 5px;
@@ -264,7 +264,7 @@ strong {
     background-color var(--d-tap) var(--e-standard);
 }
 
-.ground__option[aria-pressed="true"] {
+.ground__option[aria-pressed='true'] {
   background: var(--ink);
   color: var(--ledger-panel);
 }
@@ -296,7 +296,7 @@ strong {
 }
 
 .synthetic__marker::before {
-  content: "";
+  content: '';
   width: 5px;
   height: 5px;
   border-radius: 50%;
@@ -305,7 +305,7 @@ strong {
 }
 
 .synthetic__marker:hover,
-.synthetic__marker[aria-expanded="true"] {
+.synthetic__marker[aria-expanded='true'] {
   border-color: var(--rule-strong);
   color: var(--ink);
 }
@@ -361,7 +361,7 @@ strong {
 
 /* The connecting rail. Drawn behind the discs, clipped at the ends of the row. */
 .cases__item::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   right: 0;
@@ -383,7 +383,7 @@ strong {
   color: var(--ink);
 }
 
-.cases__item[aria-current="true"] {
+.cases__item[aria-current='true'] {
   color: var(--ink);
   border-bottom-color: var(--ink);
   font-weight: 600;
@@ -413,18 +413,18 @@ strong {
     color var(--d-tap) var(--e-standard);
 }
 
-.cases__item[aria-current="true"] .cases__index {
+.cases__item[aria-current='true'] .cases__index {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--ledger-panel);
 }
 
-.cases__item[data-done="true"] .cases__index {
+.cases__item[data-done='true'] .cases__index {
   border-color: var(--safe);
   color: var(--safe);
 }
 
-.cases__item[data-done="true"][aria-current="true"] .cases__index {
+.cases__item[data-done='true'][aria-current='true'] .cases__index {
   color: var(--ledger-panel);
 }
 
@@ -495,7 +495,7 @@ strong {
 }
 
 .panel__title::after {
-  content: "";
+  content: '';
   flex: 1;
   height: 1px;
   background: var(--rule);
@@ -558,7 +558,7 @@ strong {
 }
 
 .eyebrow::before {
-  content: "";
+  content: '';
   display: inline-block;
   width: var(--s-4);
   height: 1px;
@@ -734,12 +734,12 @@ strong {
   scrollbar-width: thin;
 }
 
-.table tr[data-exposure="exposed"] td:first-child {
+.table tr[data-exposure='exposed'] td:first-child {
   box-shadow: inset 2px 0 0 var(--exposed);
   padding-left: var(--s-1);
 }
 
-.table tr[data-exposure="narrow"] td:first-child {
+.table tr[data-exposure='narrow'] td:first-child {
   box-shadow: inset 2px 0 0 var(--narrow);
   padding-left: var(--s-1);
 }
@@ -776,7 +776,7 @@ strong {
 /* Continuous control, direct mapping, zero easing (DESIGN §6.1). No transition on the
    thumb or the fill on purpose: the slider is the value. The fill is painted into the
    track from a custom property the component sets. */
-input[type="range"] {
+input[type='range'] {
   width: 100%;
   margin: 0;
   appearance: none;
@@ -786,7 +786,7 @@ input[type="range"] {
   cursor: ew-resize;
 }
 
-input[type="range"]::-webkit-slider-runnable-track {
+input[type='range']::-webkit-slider-runnable-track {
   height: 3px;
   border-radius: 999px;
   background: linear-gradient(
@@ -796,19 +796,19 @@ input[type="range"]::-webkit-slider-runnable-track {
   );
 }
 
-input[type="range"]::-moz-range-track {
+input[type='range']::-moz-range-track {
   height: 3px;
   border-radius: 999px;
   background: var(--rule-strong);
 }
 
-input[type="range"]::-moz-range-progress {
+input[type='range']::-moz-range-progress {
   height: 3px;
   border-radius: 999px;
   background: var(--ink);
 }
 
-input[type="range"]::-webkit-slider-thumb {
+input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 14px;
   height: 14px;
@@ -819,7 +819,7 @@ input[type="range"]::-webkit-slider-thumb {
   box-shadow: var(--lift-1);
 }
 
-input[type="range"]::-moz-range-thumb {
+input[type='range']::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
@@ -827,7 +827,7 @@ input[type="range"]::-moz-range-thumb {
   border: 2px solid var(--ink);
 }
 
-input[type="range"]:hover::-webkit-slider-thumb {
+input[type='range']:hover::-webkit-slider-thumb {
   box-shadow: 0 0 0 5px var(--glow);
 }
 
@@ -920,7 +920,7 @@ input[type="range"]:hover::-webkit-slider-thumb {
   color: var(--ink);
 }
 
-.tabs__item[aria-selected="true"] {
+.tabs__item[aria-selected='true'] {
   color: var(--ink);
   border-top-color: var(--exposed);
   font-weight: 600;
@@ -937,7 +937,7 @@ input[type="range"]:hover::-webkit-slider-thumb {
 }
 
 .cite:hover,
-.cite[aria-expanded="true"] {
+.cite[aria-expanded='true'] {
   color: var(--exposed);
   border-bottom-color: var(--exposed);
 }
@@ -992,7 +992,7 @@ input[type="range"]:hover::-webkit-slider-thumb {
 /* A vignette, so the marks nearest the edge do not read as cut off. Pointer-events off:
    the canvas underneath owns every interaction. */
 .field::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -1104,7 +1104,7 @@ input[type="range"]:hover::-webkit-slider-thumb {
     background-color var(--d-join) var(--e-standard);
 }
 
-.linkage__table tbody tr[data-state="matched"] {
+.linkage__table tbody tr[data-state='matched'] {
   color: var(--matched);
   background: var(--exposed-wash);
 }
@@ -1117,8 +1117,7 @@ input[type="range"]:hover::-webkit-slider-thumb {
   flex-direction: column;
   /* Aligns with the table body: caption plus header row. */
   padding-top: calc(
-    var(--t-micro-size) * 1.4 + var(--s-1) + var(--t-micro-size) * 1.4 +
-      var(--s-1) * 2 + 1px
+    var(--t-micro-size) * 1.4 + var(--s-1) + var(--t-micro-size) * 1.4 + var(--s-1) * 2 + 1px
   );
 }
 
@@ -1131,7 +1130,7 @@ input[type="range"]:hover::-webkit-slider-thumb {
 }
 
 .linkage__join::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   right: 0;
@@ -1146,12 +1145,12 @@ input[type="range"]:hover::-webkit-slider-thumb {
     background-color var(--d-join) var(--e-standard);
 }
 
-.linkage__join[data-state="ambiguous"]::before {
+.linkage__join[data-state='ambiguous']::before {
   opacity: 0.4;
   transform: scaleX(1);
 }
 
-.linkage__join[data-state="resolved"]::before {
+.linkage__join[data-state='resolved']::before {
   opacity: 1;
   transform: scaleX(1);
   background: var(--exposed);
@@ -1173,11 +1172,11 @@ input[type="range"]:hover::-webkit-slider-thumb {
     border-color var(--d-join) var(--e-standard);
 }
 
-.linkage__join:not([data-state="pending"]) .linkage__joinCount {
+.linkage__join:not([data-state='pending']) .linkage__joinCount {
   opacity: 1;
 }
 
-.linkage__join[data-state="resolved"] .linkage__joinCount {
+.linkage__join[data-state='resolved'] .linkage__joinCount {
   color: var(--exposed);
   border-color: var(--exposed);
   font-weight: 600;
@@ -1339,11 +1338,11 @@ input[type="range"]:hover::-webkit-slider-thumb {
   /* NIK mask drag is continuous, no duration (DESIGN §6.2). */
 }
 
-.nik__digit[data-boundary="true"] {
+.nik__digit[data-boundary='true'] {
   border-left-color: var(--ink-mid);
 }
 
-.nik__digit[data-masked="true"] {
+.nik__digit[data-masked='true'] {
   background: var(--ledger-sunk);
   color: var(--ink-ghost);
   border-color: var(--ledger-sunk);
