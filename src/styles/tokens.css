@@ -1,0 +1,89 @@
+/**
+ * Design tokens. DESIGN.md §2, §3, §4.3.
+ *
+ * On the typefaces: DESIGN §3 specifies Fira Sans and Fira Mono. PRD §6.5 forbids
+ * network requests at runtime, so webfonts cannot be fetched from a CDN, and bundling
+ * four faces would take a large share of the 250 KB budget (PRD §8.10). The stacks below
+ * name Fira first, so a reader who has it installed gets the intended setting, and fall
+ * back to the closest system faces otherwise. The one typographic requirement that
+ * actually matters — individually addressable digits in the NIK dissector — is met by
+ * any of the mono fallbacks.
+ */
+
+:root {
+  /* 2.1 Ground — ledger stock, ruled. */
+  --ledger: #e6e9e3;
+  --ledger-panel: #eff1ec;
+  --ledger-deep: #d6dad2;
+  --ink: #191c18;
+  --ink-mid: #575e56;
+  --ink-faint: #9aa098;
+  --rule: #c6cbc2;
+
+  /* 2.2 The primary distinction. Protected is the default and carries no colour. */
+  --exposed: #a8452c;
+  --narrow: #c08a3e;
+  --protected: #191c18;
+
+  /* 2.3 The two tables, linkage view only. */
+  --released: #3f6b7a;
+  --auxiliary: #6b5b8a;
+  --matched: #191c18;
+
+  /* 2.4 Sensitive values. Muted, low-chroma, no traffic-light mapping. */
+  --sensitive-1: #5a7d6e;
+  --sensitive-2: #7a6a8c;
+  --sensitive-3: #8c6f52;
+  --sensitive-4: #4e6e8c;
+  --sensitive-5: #7d6363;
+
+  --font-sans: 'Fira Sans', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    system-ui, sans-serif;
+  --font-mono: 'Fira Mono', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', ui-monospace,
+    monospace;
+
+  /* 3.1 Scale. Base 15 px, ratio 1.2. */
+  --t-display-size: 37px;
+  --t-display-line: 1.05;
+  --t-figure-size: 22px;
+  --t-figure-line: 1.1;
+  --t-h2-size: 18px;
+  --t-h2-line: 1.3;
+  --t-body-size: 15px;
+  --t-body-line: 1.6;
+  --t-nik-size: 17px;
+  --t-nik-line: 1.4;
+  --t-data-size: 13px;
+  --t-data-line: 1.45;
+  --t-small-size: 12px;
+  --t-small-line: 1.35;
+
+  /* 4.3 Grid and rhythm. 8 px base. */
+  --s-1: 8px;
+  --s-2: 12px;
+  --s-3: 16px;
+  --s-4: 24px;
+  --s-5: 40px;
+  --s-6: 64px;
+
+  /* 6.2 Durations and curves. */
+  --d-coalesce: 620ms;
+  --e-coalesce: cubic-bezier(0.32, 0.72, 0, 1);
+  --d-join: 400ms;
+  --e-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --d-inspector: 180ms;
+  --d-budget: 300ms;
+  --d-node: 90ms;
+}
+
+/* 6.6 Reduced motion: coalescence becomes an instant re-layout, join lines resolve
+   without transition, the budget meter jumps. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --d-coalesce: 0ms;
+    --d-join: 0ms;
+    --d-inspector: 0ms;
+    --d-budget: 0ms;
+    --d-node: 0ms;
+  }
+}

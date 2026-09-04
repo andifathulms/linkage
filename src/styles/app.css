@@ -1,0 +1,873 @@
+/**
+ * The shell. DESIGN.md §1 (the register), §4 (layout), §6.5 (restraint).
+ *
+ * Panels are raised by value with a hairline. 0 radius. No shadows. Register ruling
+ * appears in tabular areas and nowhere else — it is a material cue, not a grid overlay.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--ledger);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--t-body-size);
+  line-height: var(--t-body-line);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100%;
+}
+
+/* Focus is visible everywhere, including field marks and lattice nodes (DESIGN §8). */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: var(--t-h2-size);
+  line-height: var(--t-h2-line);
+}
+
+p {
+  margin: 0 0 var(--s-2);
+  max-width: 66ch;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+/* ------------------------------------------------------------------ app frame */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--rule);
+  background: var(--ledger-panel);
+  flex-wrap: wrap;
+}
+
+.header__name {
+  font-size: var(--t-h2-size);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.header__descriptor {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+}
+
+.header__case {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  font-family: var(--font-mono);
+}
+
+.header__spacer {
+  flex: 1;
+}
+
+/* The synthetic-data statement: a plain marker that opens a short explanation, in the
+   header of every case (PRD §6.1). Not a dismissible banner. */
+.synthetic {
+  position: relative;
+}
+
+.synthetic__marker {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  border-bottom: 1px dotted var(--ink-faint);
+  text-align: left;
+}
+
+.synthetic__body {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--s-1));
+  z-index: 20;
+  width: min(340px, calc(100vw - var(--s-4)));
+  padding: var(--s-2);
+  background: var(--ledger-panel);
+  border: 1px solid var(--rule);
+  font-size: var(--t-small-size);
+  line-height: 1.5;
+  color: var(--ink-mid);
+}
+
+/* ------------------------------------------------------------- case progression */
+
+.cases {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--rule);
+  background: var(--ledger-panel);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.cases__item {
+  padding: var(--s-1) var(--s-3);
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  white-space: nowrap;
+  border-right: 1px solid var(--rule);
+  border-bottom: 2px solid transparent;
+}
+
+.cases__item[aria-current='true'] {
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+  font-weight: 600;
+}
+
+.cases__item[disabled] {
+  color: var(--ink-faint);
+  cursor: default;
+}
+
+.cases__index {
+  font-family: var(--font-mono);
+  margin-right: var(--s-1);
+}
+
+/* ------------------------------------------------------------------- structure */
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.panel {
+  background: var(--ledger-panel);
+  border: 1px solid var(--rule);
+  padding: var(--s-3);
+}
+
+.panel__title {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  margin-bottom: var(--s-2);
+  font-weight: 600;
+}
+
+.columns {
+  display: grid;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3) var(--s-3);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.prose {
+  padding: var(--s-3);
+  border-bottom: 1px solid var(--rule);
+}
+
+.prose h2 {
+  margin-bottom: var(--s-1);
+}
+
+.note {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  line-height: 1.5;
+  max-width: 66ch;
+}
+
+/* A defense is introduced with the threat model it assumes and the attack that defeats
+   it, in that order (PRD §6.3). This is the block that carries it. */
+.assumption {
+  border-left: 2px solid var(--rule);
+  padding-left: var(--s-2);
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  line-height: 1.5;
+  max-width: 62ch;
+}
+
+.assumption dt {
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: var(--s-1);
+}
+
+.assumption dt:first-child {
+  margin-top: 0;
+}
+
+.assumption dd {
+  margin: 0 0 var(--s-1);
+}
+
+/* ---------------------------------------------------------------------- figures */
+
+.figure {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-figure-size);
+  line-height: var(--t-figure-line);
+  font-weight: 600;
+}
+
+.display {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-display-size);
+  line-height: var(--t-display-line);
+  font-weight: 600;
+}
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3) var(--s-4);
+}
+
+.readout__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.readout__label {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+}
+
+.readout__value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-figure-size);
+  line-height: var(--t-figure-line);
+  font-weight: 600;
+}
+
+.readout__value--exposed {
+  color: var(--exposed);
+}
+
+/* ----------------------------------------------------------------------- tables */
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-data-size);
+  line-height: var(--t-data-line);
+}
+
+.table th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink-mid);
+  font-family: var(--font-sans);
+  font-size: var(--t-small-size);
+  padding: 4px var(--s-1) 4px 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 3px var(--s-1) 3px 0;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+
+.table td.num,
+.table th.num {
+  text-align: right;
+  padding-right: 0;
+}
+
+.table__scroll {
+  overflow: auto;
+  max-height: 320px;
+}
+
+.table tr[data-exposure='exposed'] td:first-child {
+  box-shadow: inset 2px 0 0 var(--exposed);
+  padding-left: var(--s-1);
+}
+
+.table tr[data-exposure='narrow'] td:first-child {
+  box-shadow: inset 2px 0 0 var(--narrow);
+  padding-left: var(--s-1);
+}
+
+/* ---------------------------------------------------------------------- controls */
+
+.control {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr auto;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 2px 0;
+}
+
+.control__label {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+}
+
+.control__value {
+  font-family: var(--font-mono);
+  font-size: var(--t-data-size);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Continuous control, direct mapping, zero easing (DESIGN §6.1). No transition here on
+   purpose: the slider is the value. */
+input[type='range'] {
+  width: 100%;
+  accent-color: var(--ink);
+  margin: 0;
+}
+
+.button {
+  border: 1px solid var(--ink);
+  padding: 6px var(--s-2);
+  font-size: var(--t-small-size);
+  background: var(--ledger-panel);
+  color: var(--ink);
+}
+
+.button:hover {
+  background: var(--ledger-deep);
+}
+
+.button[disabled] {
+  border-color: var(--ink-faint);
+  color: var(--ink-faint);
+  cursor: default;
+  background: var(--ledger-panel);
+}
+
+.button--quiet {
+  border-color: var(--rule);
+  color: var(--ink-mid);
+}
+
+.buttons {
+  display: flex;
+  gap: var(--s-1);
+  flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------------- instruments */
+
+.tabs {
+  display: flex;
+  border-top: 1px solid var(--rule);
+  background: var(--ledger-panel);
+  overflow-x: auto;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.tabs__item {
+  padding: var(--s-1) var(--s-3);
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  white-space: nowrap;
+  border-right: 1px solid var(--rule);
+  border-top: 2px solid transparent;
+}
+
+.tabs__item[aria-selected='true'] {
+  color: var(--ink);
+  border-top-color: var(--ink);
+  font-weight: 600;
+  background: var(--ledger);
+}
+
+/* Sources cited inline via the popover pattern (CLAUDE.md §10). */
+.cite {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  border-bottom: 1px dotted var(--ink-faint);
+}
+
+.cite__popover {
+  position: absolute;
+  z-index: 30;
+  max-width: min(360px, calc(100vw - var(--s-4)));
+  padding: var(--s-2);
+  background: var(--ledger-panel);
+  border: 1px solid var(--rule);
+  font-size: var(--t-small-size);
+  line-height: 1.5;
+  color: var(--ink-mid);
+}
+
+.citation {
+  position: relative;
+  display: inline-block;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 4.4 Mobile. Below 860 px the field keeps the top of the viewport at reduced height and
+   stays the hero; everything else stacks beneath it. */
+@media (max-width: 860px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ------------------------------------------------------------------- the field */
+
+/* The field is always the largest element and always at the top. Everything else is a
+   control on it or a reading of it (DESIGN §4.1). It is the one element that breaks the
+   register's grid, because a population is not a list. */
+.field {
+  position: relative;
+  background: var(--ledger-deep);
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.field__canvas {
+  display: block;
+  touch-action: none;
+}
+
+.field__readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-4);
+  padding: var(--s-1) var(--s-3);
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  min-height: 28px;
+  align-items: center;
+}
+
+.field__readout strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.field__readout--exposed strong {
+  color: var(--exposed);
+}
+
+/* ---------------------------------------------------------------- the linkage */
+
+.linkage {
+  padding: var(--s-3);
+}
+
+.linkage__scored {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-3);
+}
+
+.linkage__tables {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 3rem minmax(0, 1fr);
+  gap: var(--s-2);
+  align-items: start;
+}
+
+.linkage__table caption {
+  text-align: left;
+  margin-bottom: var(--s-1);
+}
+
+.linkage__table--auxiliary th {
+  color: var(--auxiliary);
+}
+
+.linkage__table--released th {
+  color: var(--released);
+}
+
+/* A row matching many fades its lines. A row matching exactly one resolves — both rows
+   and their connecting line settle into plain matched ink (DESIGN §5.2). */
+.linkage__table tbody tr {
+  color: var(--ink-faint);
+  transition: color var(--d-join) var(--e-standard);
+}
+
+.linkage__table tbody tr[data-state='matched'] {
+  color: var(--matched);
+}
+
+.linkage__joins {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  /* Aligns with the table body: caption plus header row. */
+  padding-top: calc(var(--t-small-size) * 1.35 + var(--s-1) + var(--t-small-size) * 1.35 + 9px);
+}
+
+.linkage__join {
+  height: calc(var(--t-data-size) * var(--t-data-line) + 6px + 1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.linkage__join::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--ink-faint);
+  opacity: 0;
+  transition: opacity var(--d-join) var(--e-standard), background-color var(--d-join) var(--e-standard);
+}
+
+.linkage__join[data-state='ambiguous']::before {
+  opacity: 0.4;
+}
+
+.linkage__join[data-state='resolved']::before {
+  opacity: 1;
+  background: var(--matched);
+}
+
+.linkage__joinCount {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--t-small-size);
+  background: var(--ledger);
+  padding: 0 4px;
+  color: var(--ink-faint);
+  opacity: 0;
+  transition: opacity var(--d-join) var(--e-standard);
+}
+
+.linkage__join:not([data-state='pending']) .linkage__joinCount {
+  opacity: 1;
+}
+
+.linkage__join[data-state='resolved'] .linkage__joinCount {
+  color: var(--matched);
+  font-weight: 600;
+}
+
+@media (max-width: 860px) {
+  .linkage__tables {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .linkage__joins {
+    flex-direction: row;
+    padding-top: 0;
+    overflow-x: auto;
+  }
+
+  .linkage__join {
+    height: auto;
+    min-width: 2rem;
+  }
+
+  .linkage__join::before {
+    left: 0;
+    right: 0;
+    top: 50%;
+  }
+}
+
+.footer {
+  padding: var(--s-2) var(--s-3);
+  border-top: 1px solid var(--rule);
+  background: var(--ledger-panel);
+}
+
+.field__controls {
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+  padding: var(--s-1) var(--s-3);
+  border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+
+.field__controls .control {
+  min-width: 240px;
+  flex: 0 1 320px;
+}
+
+/* ------------------------------------------------------------ class inspector */
+
+.inspector {
+  margin: var(--s-3);
+  /* Discrete control: a timed transition (DESIGN §6.2, 180 ms). */
+  animation: inspector-open var(--d-inspector) var(--e-standard);
+}
+
+@keyframes inspector-open {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.inspector__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--s-2);
+}
+
+.inspector__chart {
+  display: block;
+  margin: var(--s-3) 0;
+  max-width: 420px;
+}
+
+.rule {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: var(--s-2) 0;
+}
+
+.select {
+  font: inherit;
+  font-size: var(--t-data-size);
+  font-family: var(--font-mono);
+  background: var(--ledger);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 3px var(--s-1);
+  width: 100%;
+}
+
+.bench__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+/* ------------------------------------------------------------- the budget meter */
+
+.meter {
+  height: 14px;
+  background: var(--ledger-deep);
+  border: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.meter__fill {
+  height: 100%;
+  background: var(--ink);
+  transition: width var(--d-budget) var(--e-standard);
+}
+
+.lattice {
+  display: block;
+  margin: var(--s-3) 0;
+  background: var(--ledger);
+  border: 1px solid var(--rule);
+}
+
+.lattice rect:focus-visible {
+  outline: 2px solid var(--exposed);
+}
+
+/* -------------------------------------------------------------- NIK dissector */
+
+/* Phone-first: sixteen digits across a phone width, and desktop inherits. */
+.nik {
+  margin: var(--s-3) 0;
+  touch-action: none;
+}
+
+.nik__segments,
+.nik__digits {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 2px;
+  max-width: 520px;
+}
+
+.nik__segment {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 2px;
+  margin-bottom: 4px;
+  min-width: 0;
+}
+
+.nik__segmentLabel {
+  font-size: 9px;
+  color: var(--ink-mid);
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nik__digit {
+  font-family: var(--font-mono);
+  font-size: var(--t-nik-size);
+  line-height: var(--t-nik-line);
+  letter-spacing: 0.02em;
+  text-align: center;
+  padding: 6px 0;
+  border: 1px solid var(--rule);
+  background: var(--ledger);
+  color: var(--ink);
+  min-width: 0;
+  /* NIK mask drag is continuous, no duration (DESIGN §6.2). */
+}
+
+.nik__digit[data-boundary='true'] {
+  border-left-color: var(--ink-mid);
+}
+
+.nik__digit[data-masked='true'] {
+  background: var(--ledger-deep);
+  color: var(--ink-faint);
+  border-color: var(--ledger-deep);
+}
+
+.nik__presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--s-3);
+  margin: var(--s-3) 0;
+}
+
+.nik__preset {
+  border: 1px solid var(--rule);
+  padding: var(--s-2);
+  background: var(--ledger);
+}
+
+.nik__presetDigits {
+  font-family: var(--font-mono);
+  font-size: var(--t-data-size);
+  letter-spacing: 0.08em;
+  margin-bottom: var(--s-1);
+  overflow-wrap: anywhere;
+}
+
+.frontier__legend {
+  display: flex;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+  margin-top: var(--s-2);
+}
+
+.frontier__key {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  border-left: 3px solid;
+  padding-left: var(--s-1);
+}
+
+.uniqueness__published {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--t-small-size);
+}
+
+/* -------------------------------------------------------------- the assessor */
+
+/* Deliberately plainer than everything else: a form and a table (DESIGN §5.9). */
+.assessor {
+  margin: var(--s-3);
+}
+
+.assessor__head {
+  display: flex;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--s-3);
+}
+
+.assessor__head .control {
+  grid-template-columns: 8rem 10rem;
+  flex: 0 0 auto;
+}
+
+.input {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--t-data-size);
+  background: var(--ledger);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 3px var(--s-1);
+  width: 100%;
+  min-width: 6rem;
+}
+
+.input--num {
+  text-align: right;
+}
