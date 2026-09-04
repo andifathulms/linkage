@@ -41,19 +41,61 @@ export interface FieldProps {
   onHover?: (hover: FieldHover | null) => void;
 }
 
-/** DESIGN §2.2. Protected is the default and carries no colour; only the exposed and the
- * nearly exposed are tinted, so a well-anonymised field is a field of plain ink marks. */
-const PROTECTED = '#191c18';
-const NARROW = '#c08a3e';
-const EXPOSED = '#a8452c';
-const GROUND = '#d6dad2';
+/**
+ * DESIGN §2.2. Protected is the default and carries no colour; only the exposed and the
+ * nearly exposed are tinted, so a well-anonymised field is a field of plain ink marks.
+ *
+ * The values are read from the stylesheet rather than written here, so the field and the
+ * rest of the interface cannot drift apart and the plate ground needs no second table.
+ * The literals below are the ledger values and are used only where there is no computed
+ * style to read — a server render, or a test environment without a layout engine.
+ */
+export interface Palette {
+  protected: string;
+  narrow: string;
+  exposed: string;
+  ground: string;
+  boundary: string;
+  select: string;
+}
+
+const LEDGER_PALETTE: Palette = {
+  protected: '#22261c',
+  narrow: '#b07f2e',
+  exposed: '#ad4127',
+  ground: '#dfe3da',
+  boundary: 'rgba(20, 23, 15, 0.2)',
+  select: '#14170f',
+};
+
+const PALETTE_VARS: ReadonlyArray<[keyof Palette, string]> = [
+  ['protected', '--mark-protected'],
+  ['narrow', '--mark-narrow'],
+  ['exposed', '--mark-exposed'],
+  ['ground', '--mark-ground'],
+  ['boundary', '--mark-boundary'],
+  ['select', '--mark-select'],
+];
+
+export function readPalette(element: Element | null): Palette {
+  if (!element || typeof window === 'undefined' || !window.getComputedStyle) {
+    return LEDGER_PALETTE;
+  }
+  const style = window.getComputedStyle(element);
+  const palette = { ...LEDGER_PALETTE };
+  for (const [key, variable] of PALETTE_VARS) {
+    const value = style.getPropertyValue(variable).trim();
+    if (value) palette[key] = value;
+  }
+  return palette;
+}
 
 /** Kept as the single definition of the mapping, and asserted against exposureOf. */
-export function colourFor(size: number): string {
+export function colourFor(size: number, palette: Palette = LEDGER_PALETTE): string {
   const exposure = exposureOf(size);
-  if (exposure === 'exposed') return EXPOSED;
-  if (exposure === 'narrow') return NARROW;
-  return PROTECTED;
+  if (exposure === 'exposed') return palette.exposed;
+  if (exposure === 'narrow') return palette.narrow;
+  return palette.protected;
 }
 
 export function Field({
@@ -68,6 +110,8 @@ export function Field({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(800);
+  const [palette, setPalette] = useState<Palette>(LEDGER_PALETTE);
+  const [hoverClass, setHoverClass] = useState<number | null>(null);
   const reducedMotion = usePrefersReducedMotion();
 
   const aspect = Math.max(0.2, width / Math.max(1, height));
@@ -103,9 +147,9 @@ export function Field({
     // Protected first, so the two tinted states draw over the plain ink rather than
     // under it — a lone mark must never be hidden by a neighbouring clump.
     return [
-      { colour: PROTECTED, indices: arrays[0] },
-      { colour: NARROW, indices: arrays[1] },
-      { colour: EXPOSED, indices: arrays[2] },
+      { role: 'protected' as const, indices: arrays[0] },
+      { role: 'narrow' as const, indices: arrays[1] },
+      { role: 'exposed' as const, indices: arrays[2] },
     ];
   }, [layout, set]);
 
@@ -125,6 +169,23 @@ export function Field({
     return () => observer.disconnect();
   }, []);
 
+  /**
+   * The field takes its colours from the stylesheet, and re-reads them when the ground
+   * changes. Canvas cannot inherit a custom property, so this is the join between the
+   * two grounds and the one drawing surface that is not CSS.
+   */
+  useEffect(() => {
+    const read = () => setPalette(readPalette(wrapRef.current));
+    read();
+    if (typeof MutationObserver === 'undefined') return;
+    const observer = new MutationObserver(read);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+    return () => observer.disconnect();
+  }, []);
+
   const draw = useCallback(
     (progress: number) => {
       const canvas = canvasRef.current;
@@ -135,13 +196,16 @@ export function Field({
       const dpr = Math.min(2, window.devicePixelRatio || 1);
       const cssWidth = width;
       const cssHeight = height;
-      if (canvas.width !== Math.round(cssWidth * dpr) || canvas.height !== Math.round(cssHeight * dpr)) {
+      if (
+        canvas.width !== Math.round(cssWidth * dpr) ||
+        canvas.height !== Math.round(cssHeight * dpr)
+      ) {
         canvas.width = Math.round(cssWidth * dpr);
         canvas.height = Math.round(cssHeight * dpr);
       }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      ctx.fillStyle = GROUND;
+      ctx.fillStyle = palette.ground;
       ctx.fillRect(0, 0, cssWidth, cssHeight);
 
       // Scale so the layout fills the canvas, then apply the user's zoom about the
@@ -155,10 +219,15 @@ export function Field({
       const from = previousLayout.current;
       const t = from && from.x.length === layout.x.length ? EASE(progress) : 1;
 
+      // First paint: the population arrives rather than appearing. One alpha ramp over
+      // the same transition, which costs nothing per mark — the positions are already
+      // final, so nothing is being implied about where a record came from.
+      ctx.globalAlpha = from ? 1 : EASE(progress);
+
       // One pass over precomputed buckets: no allocation inside the frame.
       for (const bucket of buckets) {
         if (bucket.indices.length === 0) continue;
-        ctx.fillStyle = bucket.colour;
+        ctx.fillStyle = palette[bucket.role];
         for (let n = 0; n < bucket.indices.length; n++) {
           const i = bucket.indices[n];
           const lx = from && t < 1 ? from.x[i] + (layout.x[i] - from.x[i]) * t : layout.x[i];
@@ -170,9 +239,11 @@ export function Field({
         }
       }
 
+      ctx.globalAlpha = 1;
+
       // At close zoom, classes gain a boundary — the second reading (DESIGN §5.1).
       if (zoom >= 4) {
-        ctx.strokeStyle = 'rgba(25, 28, 24, 0.22)';
+        ctx.strokeStyle = palette.boundary;
         ctx.lineWidth = 1;
         for (const box of layout.boxes) {
           if (!box) continue;
@@ -181,29 +252,62 @@ export function Field({
           const bw = box.w * scale;
           const bh = box.h * scale;
           if (bx + bw < 0 || by + bh < 0 || bx > cssWidth || by > cssHeight) continue;
-          ctx.strokeRect(Math.round(bx) + 0.5, Math.round(by) + 0.5, Math.round(bw), Math.round(bh));
+          ctx.strokeRect(
+            Math.round(bx) + 0.5,
+            Math.round(by) + 0.5,
+            Math.round(bw),
+            Math.round(bh),
+          );
         }
+      }
+
+      // The class under the pointer gets a hairline before it gets a click, so the
+      // thing the readout is describing is visible in the field at the same moment.
+      if (hoverClass != null && hoverClass !== selectedClass && layout.boxes[hoverClass]) {
+        const box = layout.boxes[hoverClass];
+        ctx.strokeStyle = palette.boundary;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(
+          offsetX + box.x * scale - 1.5,
+          offsetY + box.y * scale - 1.5,
+          box.w * scale + 3,
+          box.h * scale + 3,
+        );
       }
 
       if (selectedClass != null && layout.boxes[selectedClass]) {
         const box = layout.boxes[selectedClass];
-        ctx.strokeStyle = '#191c18';
+        const bx = offsetX + box.x * scale;
+        const by = offsetY + box.y * scale;
+        const bw = box.w * scale;
+        const bh = box.h * scale;
+        // Crosshairs to the edges: at 200,000 marks a 3 px box is not findable on its
+        // own, and the selected class is usually the smallest one in the field.
+        ctx.strokeStyle = palette.boundary;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, Math.round(by + bh / 2) + 0.5);
+        ctx.lineTo(Math.max(0, bx - 4), Math.round(by + bh / 2) + 0.5);
+        ctx.moveTo(Math.min(cssWidth, bx + bw + 4), Math.round(by + bh / 2) + 0.5);
+        ctx.lineTo(cssWidth, Math.round(by + bh / 2) + 0.5);
+        ctx.moveTo(Math.round(bx + bw / 2) + 0.5, 0);
+        ctx.lineTo(Math.round(bx + bw / 2) + 0.5, Math.max(0, by - 4));
+        ctx.moveTo(Math.round(bx + bw / 2) + 0.5, Math.min(cssHeight, by + bh + 4));
+        ctx.lineTo(Math.round(bx + bw / 2) + 0.5, cssHeight);
+        ctx.stroke();
+
+        ctx.strokeStyle = palette.select;
         ctx.lineWidth = 2;
-        ctx.strokeRect(
-          offsetX + box.x * scale - 1,
-          offsetY + box.y * scale - 1,
-          box.w * scale + 2,
-          box.h * scale + 2,
-        );
+        ctx.strokeRect(bx - 2, by - 2, bw + 4, bh + 4);
       }
     },
-    [layout, buckets, width, height, zoom, selectedClass],
+    [layout, buckets, width, height, zoom, selectedClass, hoverClass, palette],
   );
 
   // Coalescence: one rAF loop, all marks moving together (DESIGN §6.3).
   useEffect(() => {
     const from = previousLayout.current;
-    const shouldAnimate = !reducedMotion && from !== null && from.x.length === layout.x.length;
+    const shouldAnimate = !reducedMotion && (from === null || from.x.length === layout.x.length);
 
     if (!shouldAnimate) {
       draw(1);
@@ -226,7 +330,7 @@ export function Field({
   // Zoom and resize redraw without animation: continuous control, direct mapping.
   useEffect(() => {
     if (previousLayout.current === layout) draw(1);
-  }, [zoom, width, height, selectedClass, draw, layout]);
+  }, [zoom, width, height, selectedClass, hoverClass, palette, draw, layout]);
 
   const pointerToField = (event: { clientX: number; clientY: number }) => {
     const canvas = canvasRef.current;
@@ -248,9 +352,11 @@ export function Field({
     if (!point) return;
     const i = index.nearest(point.x, point.y, 2.5);
     if (i === null) {
+      setHoverClass(null);
       onHover(null);
       return;
     }
+    setHoverClass(layout.classOf[i]);
     const cls = set.classes[layout.classOf[i]];
     onHover({
       recordIndex: i,
@@ -332,7 +438,10 @@ export function Field({
         className="field__canvas"
         style={{ width: '100%', height }}
         onPointerMove={handleMove}
-        onPointerLeave={() => onHover?.(null)}
+        onPointerLeave={() => {
+          setHoverClass(null);
+          onHover?.(null);
+        }}
         onPointerDown={handleClick}
         onKeyDown={handleKeyDown}
         tabIndex={0}

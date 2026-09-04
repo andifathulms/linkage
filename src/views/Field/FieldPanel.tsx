@@ -24,7 +24,7 @@ export interface FieldPanelProps {
 export function FieldPanel({
   set,
   recordCount,
-  height = 300,
+  height = 340,
   selectedClass,
   onSelectClass,
   seed,
@@ -49,6 +49,25 @@ export function FieldPanel({
       .slice(0, 300);
   }, [set]);
 
+  /**
+   * The three exposure states as shares of the population, with their counts.
+   *
+   * The field says which records are exposed; this says how many, in one length, and it
+   * is the reading that survives when the field is scrolled off. Counts carry their
+   * denominator (DESIGN §7) — a proportion alone would be the wrong claim.
+   */
+  const exposure = useMemo(() => {
+    const total = Math.max(1, recordCount);
+    const alone = set.singletons;
+    const narrow = set.narrow;
+    const grouped = Math.max(0, recordCount - alone - narrow);
+    return [
+      { key: 'alone', label: 'Alone in their class', count: alone, share: alone / total },
+      { key: 'narrow', label: 'In a class of 2 to 4', count: narrow, share: narrow / total },
+      { key: 'grouped', label: 'In a class of 5 or more', count: grouped, share: grouped / total },
+    ] as const;
+  }, [set, recordCount]);
+
   const exportClasses = () => {
     const csv = toCsv(
       ['class_key', 'size', 'l', 't'],
@@ -72,9 +91,7 @@ export function FieldPanel({
           </>
         ) : (
           <>
-            <span>
-              {recordCount.toLocaleString('en')} records, grouped by class
-            </span>
+            <span>{recordCount.toLocaleString('en')} records, grouped by class</span>
             <span>
               smallest class <strong>{set.k.toLocaleString('en')}</strong>
             </span>
@@ -95,6 +112,39 @@ export function FieldPanel({
         onSelectClass={onSelectClass}
         onHover={setHover}
       />
+
+      <div className="exposure">
+        <div
+          className="exposure__bar"
+          role="img"
+          aria-label={exposure
+            .map(
+              (band) =>
+                `${band.count.toLocaleString('en')} of ${recordCount.toLocaleString('en')} ${band.label.toLowerCase()}`,
+            )
+            .join('. ')}
+        >
+          {exposure.map((band) => (
+            <span
+              key={band.key}
+              className="exposure__band"
+              data-band={band.key}
+              style={{ width: `${band.share * 100}%` }}
+            />
+          ))}
+        </div>
+        <ul className="exposure__keys">
+          {exposure.map((band) => (
+            <li key={band.key} className="exposure__key" data-band={band.key}>
+              <span className="exposure__count">{band.count.toLocaleString('en')}</span>
+              <span className="exposure__label">
+                {band.label} ·{' '}
+                {(band.share * 100).toFixed(band.share < 0.01 && band.share > 0 ? 2 : 1)}%
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div className="field__controls">
         <Slider

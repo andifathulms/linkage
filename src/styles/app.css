@@ -1057,6 +1057,88 @@ input[type='range']:hover::-webkit-slider-thumb {
   flex: 0 1 320px;
 }
 
+/* The exposure bar: the field's reading in one length. Three bands, in the same roles
+   the marks use, so the bar and the field cannot say different things. */
+.exposure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2) var(--s-4);
+  padding: var(--s-2) var(--gutter);
+  border-bottom: 1px solid var(--rule);
+  background: var(--ledger-panel);
+}
+
+.exposure__bar {
+  display: flex;
+  flex: 1 1 260px;
+  height: 8px;
+  min-width: 200px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--ledger-sunk);
+  box-shadow: inset 0 0 0 1px var(--rule);
+}
+
+.exposure__band {
+  height: 100%;
+  transition: width var(--d-coalesce) var(--e-coalesce);
+}
+
+.exposure__band[data-band='alone'] {
+  background: var(--exposed);
+}
+
+.exposure__band[data-band='narrow'] {
+  background: var(--narrow);
+}
+
+.exposure__band[data-band='grouped'] {
+  background: var(--ink-ghost);
+}
+
+.exposure__keys {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+
+.exposure__key {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-left: var(--s-1);
+  border-left: 2px solid var(--ink-ghost);
+}
+
+.exposure__key[data-band='alone'] {
+  border-left-color: var(--exposed);
+}
+
+.exposure__key[data-band='narrow'] {
+  border-left-color: var(--narrow);
+}
+
+.exposure__count {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-data-size);
+  font-weight: 600;
+}
+
+.exposure__key[data-band='alone'] .exposure__count {
+  color: var(--exposed);
+}
+
+.exposure__label {
+  font-size: var(--t-micro-size);
+  color: var(--ink-faint);
+  letter-spacing: 0.03em;
+}
+
 /* ---------------------------------------------------------------- the linkage */
 
 .linkage {
