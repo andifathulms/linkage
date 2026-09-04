@@ -871,3 +871,88 @@ input[type='range'] {
 .input--num {
   text-align: right;
 }
+
+/* ---------------------------------------------------------------------- mobile */
+
+/* PRD §8.11: usable at 380 px, with the field legible. */
+@media (max-width: 520px) {
+  .header {
+    gap: var(--s-1);
+    padding: var(--s-1) var(--s-2);
+  }
+
+  .header__descriptor {
+    /* The descriptor is the first thing to go; the name and the synthetic-data
+       statement are not negotiable at any width. */
+    display: none;
+  }
+
+  .header__spacer {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  .prose,
+  .field__readout,
+  .field__controls,
+  .linkage {
+    padding-left: var(--s-2);
+    padding-right: var(--s-2);
+  }
+
+  .columns {
+    padding: var(--s-2);
+    gap: var(--s-2);
+  }
+
+  .panel {
+    padding: var(--s-2);
+  }
+
+  .inspector,
+  .assessor {
+    margin: var(--s-2);
+  }
+
+  .control {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+    padding: var(--s-1) 0;
+  }
+
+  .control__value {
+    justify-self: start;
+  }
+
+  .field__controls .control {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  /* Sixteen digits across a phone width. This view improves on mobile and is designed
+     for it first (DESIGN §4.4). */
+  .nik__digit {
+    font-size: 13px;
+    padding: 8px 0;
+  }
+
+  .nik__segmentLabel {
+    font-size: 7px;
+  }
+
+  .display {
+    font-size: 28px;
+  }
+
+  .readout {
+    gap: var(--s-2) var(--s-3);
+  }
+}
+
+/* The field keeps the top of the viewport at reduced height and stays the hero. */
+@media (max-width: 860px) {
+  .field,
+  .field__canvas {
+    max-height: 40vh;
+  }
+}
