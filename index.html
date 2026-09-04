@@ -8,7 +8,26 @@
       name="description"
       content="An explainer on re-identification. All records are generated. No real person's data is used or accepted."
     />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23E6E9E3'/%3E%3Crect x='3' y='3' width='3' height='3' fill='%23191C18'/%3E%3Crect x='10' y='10' width='3' height='3' fill='%23A8452C'/%3E%3C/svg%3E" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23ECEEE7'/%3E%3Crect x='2' y='2' width='4' height='4' fill='%2314170F'/%3E%3Crect x='8' y='2' width='4' height='4' fill='%2314170F'/%3E%3Crect x='2' y='8' width='4' height='4' fill='%2314170F'/%3E%3Crect x='10' y='10' width='4' height='4' fill='%23A8452C'/%3E%3C/svg%3E" />
+    <!--
+      The ground is applied before first paint, so a reader who has chosen the plate does
+      not get a frame of the ledger first. Kept in the document rather than in the bundle
+      because by the time a module runs, the page has already painted. It reads one
+      preference and writes one attribute; it makes no request and touches nothing else.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = window.localStorage.getItem('linkage.ground.v1');
+          var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var ground = stored === 'ledger' || stored === 'plate' ? stored : dark ? 'plate' : 'ledger';
+          document.documentElement.setAttribute('data-theme', ground);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'ledger');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

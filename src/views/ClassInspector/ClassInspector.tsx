@@ -12,7 +12,18 @@ import { useMemo } from 'react';
 import type { ClassSet } from '../../engine/classes';
 import { entropyL } from '../../engine/classes';
 
-const SENSITIVE_COLOURS = ['#5a7d6e', '#7a6a8c', '#8c6f52', '#4e6e8c', '#7d6363'];
+/**
+ * Named as custom properties rather than as values, so the chart follows the ground.
+ * DESIGN §2.4: muted, low-chroma, and deliberately not a traffic light — no sensitive
+ * value in this application is drawn as the bad one.
+ */
+const SENSITIVE_COLOURS = [
+  'var(--sensitive-1)',
+  'var(--sensitive-2)',
+  'var(--sensitive-3)',
+  'var(--sensitive-4)',
+  'var(--sensitive-5)',
+];
 
 export interface ClassInspectorProps {
   set: ClassSet;
@@ -30,8 +41,12 @@ export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps
     return set.sensitiveOrder.map((value, i) => ({
       value: String(value),
       colour: SENSITIVE_COLOURS[i % SENSITIVE_COLOURS.length],
-      classShare: cls.members.length === 0 ? 0 : (cls.sensitiveDistribution.get(value) ?? 0) / cls.members.length,
-      populationShare: populationTotal === 0 ? 0 : (set.populationDistribution.get(value) ?? 0) / populationTotal,
+      classShare:
+        cls.members.length === 0
+          ? 0
+          : (cls.sensitiveDistribution.get(value) ?? 0) / cls.members.length,
+      populationShare:
+        populationTotal === 0 ? 0 : (set.populationDistribution.get(value) ?? 0) / populationTotal,
       count: cls.sensitiveDistribution.get(value) ?? 0,
     }));
   }, [cls, set]);
@@ -60,7 +75,9 @@ export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps
         </div>
         <div className="readout__item">
           <span className="readout__label">Size</span>
-          <span className={`readout__value${cls.members.length === 1 ? ' readout__value--exposed' : ''}`}>
+          <span
+            className={`readout__value${cls.members.length === 1 ? ' readout__value--exposed' : ''}`}
+          >
             {cls.members.length.toLocaleString('en')}
           </span>
         </div>
@@ -99,16 +116,24 @@ export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps
                 width={barWidth + 6}
                 height={ph}
                 fill="none"
-                stroke="#9aa098"
+                stroke="var(--ink-faint)"
                 strokeWidth="1"
               />
-              <rect x={x} y={height - h} width={barWidth} height={h} fill={bar.colour} />
+              <rect
+                className="inspector__bar"
+                x={x}
+                y={height - h}
+                width={barWidth}
+                height={h}
+                fill={bar.colour}
+                style={{ transformOrigin: `0px ${height}px` }}
+              />
               <text
                 x={x + barWidth / 2}
                 y={height + 14}
                 textAnchor="middle"
                 fontSize="9"
-                fill="#575e56"
+                fill="var(--ink-mid)"
                 fontFamily="var(--font-sans)"
               >
                 {bar.value.slice(0, 6)}

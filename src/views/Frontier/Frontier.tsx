@@ -68,25 +68,25 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
         role="img"
         aria-label="Re-identification rate and information loss against generalisation level."
       >
-        <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#c6cbc2" />
-        <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="#c6cbc2" />
+        <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="var(--rule)" />
+        <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="var(--rule)" />
 
         <path
           d={line((i) => points[i].reidentificationRate)}
           fill="none"
-          stroke="#a8452c"
+          stroke="var(--exposed)"
           strokeWidth="1.5"
         />
         <path
           d={line((i) => points[i].informationLoss)}
           fill="none"
-          stroke="#191c18"
+          stroke="var(--ink)"
           strokeWidth="1.5"
         />
         <path
           d={line((i) => points[i].queryError)}
           fill="none"
-          stroke="#575e56"
+          stroke="var(--ink-mid)"
           strokeWidth="1"
           strokeDasharray="3 3"
         />
@@ -96,19 +96,19 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
           y1={PAD}
           x2={x(marker)}
           y2={H - PAD}
-          stroke="#191c18"
+          stroke="var(--ink)"
           strokeWidth="1"
         />
-        <circle cx={x(marker)} cy={y(current.reidentificationRate)} r="3.5" fill="#a8452c" />
-        <circle cx={x(marker)} cy={y(current.informationLoss)} r="3.5" fill="#191c18" />
+        <circle cx={x(marker)} cy={y(current.reidentificationRate)} r="3.5" fill="var(--exposed)" />
+        <circle cx={x(marker)} cy={y(current.informationLoss)} r="3.5" fill="var(--ink)" />
 
-        <text x={PAD} y={PAD - 8} fontSize="9" fill="#575e56">
+        <text x={PAD} y={PAD - 8} fontSize="9" fill="var(--ink-mid)">
           1.0
         </text>
-        <text x={PAD} y={H - PAD + 14} fontSize="9" fill="#575e56">
+        <text x={PAD} y={H - PAD + 14} fontSize="9" fill="var(--ink-mid)">
           raw
         </text>
-        <text x={W - PAD} y={H - PAD + 14} fontSize="9" fill="#575e56" textAnchor="end">
+        <text x={W - PAD} y={H - PAD + 14} fontSize="9" fill="var(--ink-mid)" textAnchor="end">
           fully suppressed
         </text>
       </svg>
@@ -138,13 +138,13 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
       </div>
 
       <div className="frontier__legend">
-        <span className="frontier__key" style={{ borderColor: '#a8452c' }}>
+        <span className="frontier__key" style={{ borderColor: 'var(--exposed)' }}>
           Re-identification rate
         </span>
-        <span className="frontier__key" style={{ borderColor: '#191c18' }}>
+        <span className="frontier__key" style={{ borderColor: 'var(--ink)' }}>
           Information loss
         </span>
-        <span className="frontier__key" style={{ borderColor: '#575e56' }}>
+        <span className="frontier__key" style={{ borderColor: 'var(--ink-mid)' }}>
           Query error
         </span>
       </div>

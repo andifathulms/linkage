@@ -37,8 +37,14 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
     () => searchLattice(records, taxonomy, targetK, { columns }),
     [records, taxonomy, targetK, columns],
   );
-  const frontier = useMemo(() => new Set(frontierNodes(search).map((n) => vectorKey(n.vector, columns))), [search, columns]);
-  const minimal = useMemo(() => new Set(search.minimal.map((v) => vectorKey(v, columns))), [search, columns]);
+  const frontier = useMemo(
+    () => new Set(frontierNodes(search).map((n) => vectorKey(n.vector, columns))),
+    [search, columns],
+  );
+  const minimal = useMemo(
+    () => new Set(search.minimal.map((v) => vectorKey(v, columns))),
+    [search, columns],
+  );
 
   /**
    * The test order is replayed at 90 ms per node (DESIGN §6.2). Under reduced motion the
@@ -131,7 +137,7 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
               y1={a.y}
               x2={b.x}
               y2={b.y}
-              stroke="#c6cbc2"
+              stroke="var(--rule)"
               strokeWidth="0.5"
             />
           );
@@ -139,19 +145,32 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
 
         {search.nodes.map((node) => {
           const key = vectorKey(node.vector, columns);
-          const known = node.tested ? testedByStep.has(key) : node.prunedBy !== null && testedByStep.has(node.prunedBy);
+          const known = node.tested
+            ? testedByStep.has(key)
+            : node.prunedBy !== null && testedByStep.has(node.prunedBy);
           const p = positionOf(node);
           const isMinimal = minimal.has(key);
           const onFrontier = frontier.has(key);
           const isSelected = key === selectedKey;
 
-          const fill = !known ? 'none' : node.satisfies ? '#191c18' : 'none';
-          const stroke = !known ? '#9aa098' : node.satisfies ? '#191c18' : '#575e56';
+          const fill = !known ? 'none' : node.satisfies ? 'var(--ink)' : 'none';
+          const stroke = !known
+            ? 'var(--ink-faint)'
+            : node.satisfies
+              ? 'var(--ink)'
+              : 'var(--ink-mid)';
 
           return (
             <g key={key}>
               {isMinimal && known && (
-                <circle cx={p.x} cy={p.y} r={NODE / 2 + 3} fill="none" stroke="#191c18" strokeWidth="1" />
+                <circle
+                  cx={p.x}
+                  cy={p.y}
+                  r={NODE / 2 + 3}
+                  fill="none"
+                  stroke="var(--ink)"
+                  strokeWidth="1"
+                />
               )}
               <rect
                 x={p.x - NODE / 2}
@@ -185,7 +204,7 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
                   width={NODE + 6}
                   height={NODE + 6}
                   fill="none"
-                  stroke="#a8452c"
+                  stroke="var(--exposed)"
                   strokeWidth="1.5"
                 />
               )}
@@ -211,7 +230,11 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
         >
           Step forward
         </button>
-        <button type="button" className="button button--quiet" onClick={() => setStep(search.order.length)}>
+        <button
+          type="button"
+          className="button button--quiet"
+          onClick={() => setStep(search.order.length)}
+        >
           Run to the end
         </button>
         <span className="control__value">
@@ -221,7 +244,9 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
 
       <div className="table__scroll" style={{ marginTop: 'var(--s-3)' }}>
         <table className="table">
-          <caption className="panel__title">Minimal generalisations achieving k = {targetK}</caption>
+          <caption className="panel__title">
+            Minimal generalisations achieving k = {targetK}
+          </caption>
           <thead>
             <tr>
               {columns.map((c) => (
@@ -241,7 +266,11 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
                   ))}
                   <td className="num">{node?.k ?? '—'}</td>
                   <td>
-                    <button type="button" className="button button--quiet" onClick={() => onSelect(v)}>
+                    <button
+                      type="button"
+                      className="button button--quiet"
+                      onClick={() => onSelect(v)}
+                    >
                       Apply
                     </button>
                   </td>
@@ -261,9 +290,9 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
       </div>
 
       <p className="note" style={{ marginTop: 'var(--s-2)' }}>
-        Generalising further can only merge classes, so it can only raise k. That is why a satisfying
-        node implies everything above it and a failing node implies everything below it — the
-        hairlines show which result implied which, and only the frontier between them had to be
+        Generalising further can only merge classes, so it can only raise k. That is why a
+        satisfying node implies everything above it and a failing node implies everything below it —
+        the hairlines show which result implied which, and only the frontier between them had to be
         tested.
       </p>
     </section>

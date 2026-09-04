@@ -1393,6 +1393,21 @@ input[type='range']:hover::-webkit-slider-thumb {
   margin-bottom: var(--s-2);
 }
 
+/* The bars grow from the baseline once, when the class is opened. A distribution that
+   animated on every re-render would read as movement in the data. */
+.inspector__bar {
+  animation: bar-grow var(--d-inspector) var(--e-out) both;
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
 .inspector__chart {
   display: block;
   margin: var(--s-3) 0;
