@@ -2,6 +2,11 @@
 
 **Removing names does not anonymize anything.**
 
+[**andifathulms.github.io/linkage**](https://andifathulms.github.io/linkage/)
+
+[![CI](https://github.com/andifathulms/linkage/actions/workflows/ci.yml/badge.svg)](https://github.com/andifathulms/linkage/actions/workflows/ci.yml)
+[![Deploy](https://github.com/andifathulms/linkage/actions/workflows/deploy.yml/badge.svg)](https://github.com/andifathulms/linkage/actions/workflows/deploy.yml)
+
 A static single-page application about re-identification. It generates synthetic
 populations in the browser, runs published attacks against them, applies the standard
 defenses, and scores every attack against ground truth.
@@ -41,8 +46,12 @@ npm run build        # production bundle into dist/
 npm run preview      # serve the built bundle
 ```
 
-The deployed base path is `/linkage/`. Override it with `VITE_BASE=/ npm run build` for a
-root deployment.
+The deployed base path is `/linkage/`, matching the project-site URL. Override it with
+`VITE_BASE=/ npm run build` for a root deployment.
+
+CI runs typecheck, lint, build, the full test suite and the bundle budget on every push.
+Deployment to Pages runs the same gates again and publishes only on green, so the bundle
+grep is asserted against the artefact that actually ships.
 
 ## What is in it
 
