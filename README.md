@@ -106,7 +106,7 @@ in the URL.
 
 ## Correctness
 
-`npm test` runs 200 tests. The ones that matter:
+`npm test` runs 212 tests. The ones that matter:
 
 | Test | What it holds |
 |---|---|
@@ -120,6 +120,7 @@ in the URL.
 | `field-layout` | Singletons are more isolated; a record does not move when an unrelated class changes |
 | `performance` | 200,000 records re-cluster and re-lay-out inside one coalescence transition |
 | `render` | Every case and instrument renders; the copy holds to its register |
+| `mount` | The application boots in a DOM, the progression gates, and no file input exists in the mounted tree |
 
 ## Known deviations from the specification
 

@@ -89,9 +89,19 @@ export function Linkage({
     };
   }, [visible, reducedMotion]);
 
+  /**
+   * The score is reported once the join has finished resolving, not on mount.
+   *
+   * The attack runs immediately — PRD §8.4 requires the ignition within 60 seconds of
+   * first load, and it is on screen at once. But the case is complete when the attack has
+   * been *performed*, and reporting on mount would advance the progression before the
+   * rows had settled, which is neither what §4.4 describes nor what a reader would
+   * expect from watching it.
+   */
   useEffect(() => {
+    if (visible.length === 0 || revealed < visible.length) return;
     onScored?.(result.correct, result.attempted);
-  }, [result, onScored]);
+  }, [result, onScored, revealed, visible.length]);
 
   const byId = useMemo(() => new Map(records.map((r) => [r.id, r])), [records]);
 
