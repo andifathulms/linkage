@@ -7,7 +7,7 @@
 import { useCallback } from 'react';
 import type { CaseProps } from './shared';
 import { Differencing } from '../views/Differencing/Differencing';
-import { ThreatModel, Cite } from '../ui/primitives';
+import { Cite, Eyebrow, ThreatModel } from '../ui/primitives';
 
 export function CaseAggregates({ derived, config, onComplete }: CaseProps) {
   const { population } = derived;
@@ -16,6 +16,7 @@ export function CaseAggregates({ derived, config, onComplete }: CaseProps) {
   return (
     <>
       <div className="prose">
+        <Eyebrow>Case 4 · no records, two averages, one subtraction</Eyebrow>
         <h2>The aggregates</h2>
         <p>
           Suppose the release contains no records at all. A statistics portal publishes counts and
@@ -61,9 +62,9 @@ export function CaseAggregates({ derived, config, onComplete }: CaseProps) {
             distribution was safe to reveal.
           </p>
           <p className="note">
-            Every one of those is a claim about what the attacker knows, and every one of them can be
-            wrong. Case 5 introduces the only guarantee in this application that does not make such a
-            claim — and the price it charges for that.
+            Every one of those is a claim about what the attacker knows, and every one of them can
+            be wrong. Case 5 introduces the only guarantee in this application that does not make
+            such a claim — and the price it charges for that.
           </p>
         </section>
       </div>

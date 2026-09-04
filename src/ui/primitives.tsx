@@ -4,6 +4,7 @@
  */
 import { useEffect, useId, useState, type CSSProperties, type ReactNode } from 'react';
 import { applyGround, readGround, type Ground } from './theme';
+import { useCountUp } from './useCountUp';
 
 /**
  * The synthetic-data statement. PRD §6.1: at the top of every case, not once at load,
@@ -260,4 +261,44 @@ export function GroundToggle() {
  */
 export function Eyebrow({ children }: { children: ReactNode }) {
   return <span className="eyebrow">{children}</span>;
+}
+
+/**
+ * The finding: the one number a case turns on, set at display size with its denominator
+ * and the sentence that qualifies it.
+ *
+ * The figure counts to its value rather than replacing it, which is the only emphasis
+ * the register allows. It does not flash, it does not grow, and the copy beside it says
+ * what was measured — an attack is scored or it is not reported (CLAUDE.md §3).
+ */
+export function Finding({
+  of,
+  total,
+  label,
+  detail,
+  exposed = true,
+}: {
+  of: number;
+  total: number;
+  label: string;
+  detail?: ReactNode;
+  exposed?: boolean;
+}) {
+  const shown = useCountUp(of);
+  const share = total > 0 ? (of / total) * 100 : 0;
+  return (
+    <div className={`finding${exposed ? ' finding--exposed' : ''}`}>
+      <div className="finding__figure">
+        <span className="display">{shown.toLocaleString('en')}</span>
+        <span className="finding__denominator">{` of ${total.toLocaleString('en')}`}</span>
+      </div>
+      <div className="finding__body">
+        <span className="finding__label">{label}</span>
+        <span className="finding__track" role="img" aria-label={`${share.toFixed(1)} per cent`}>
+          <span className="finding__fill" style={{ width: `${Math.min(100, share)}%` }} />
+        </span>
+        {detail && <span className="finding__detail">{detail}</span>}
+      </div>
+    </div>
+  );
 }

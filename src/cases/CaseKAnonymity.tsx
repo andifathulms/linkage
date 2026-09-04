@@ -12,10 +12,14 @@ import type { CaseProps } from './shared';
 import { FieldPanel } from '../views/Field/FieldPanel';
 import { ClassInspector } from '../views/ClassInspector/ClassInspector';
 import { Generalisation } from '../views/Generalisation';
-import { Cite, Count, Readout, ThreatModel } from '../ui/primitives';
+import { Cite, Count, Eyebrow, Readout, ThreatModel } from '../ui/primitives';
 import { generalisePopulation } from '../engine/generalise';
 import { buildClasses } from '../engine/classes';
-import { runHomogeneity, homogeneousClasses, populationBaseline } from '../engine/attacks/homogeneity';
+import {
+  runHomogeneity,
+  homogeneousClasses,
+  populationBaseline,
+} from '../engine/attacks/homogeneity';
 import { searchLattice, bestMinimal } from '../engine/lattice';
 
 /** Region and age: the columns the sensitive attribute actually varies with. */
@@ -35,19 +39,25 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
 
   const satisfied = set.k >= config.targetK;
 
-  const homogeneous = useMemo(() => homogeneousClasses(set, Math.max(2, config.targetK)), [set, config.targetK]);
+  const homogeneous = useMemo(
+    () => homogeneousClasses(set, Math.max(2, config.targetK)),
+    [set, config.targetK],
+  );
   const targets = useMemo(
     () => homogeneous.flatMap((i) => set.classes[i].members),
     [homogeneous, set],
   );
   const attack = useMemo(
-    () => (targets.length > 0 ? runHomogeneity(population.records, set, { targetIds: targets }) : null),
+    () =>
+      targets.length > 0 ? runHomogeneity(population.records, set, { targetIds: targets }) : null,
     [population, set, targets],
   );
   const baseline = useMemo(() => populationBaseline(set), [set]);
 
   const applyMinimal = () => {
-    const search = searchLattice(population.records, taxonomy, config.targetK, { columns: COLUMNS });
+    const search = searchLattice(population.records, taxonomy, config.targetK, {
+      columns: COLUMNS,
+    });
     const best = bestMinimal(search, taxonomy);
     if (best) setVector({ ...best });
   };
@@ -69,17 +79,19 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
       />
 
       <div className="prose">
+        <Eyebrow>Case 2 · the first defense, and what it misses</Eyebrow>
         <h2>k-anonymity</h2>
         <p>
-          Every record indistinguishable from at least k−1 others on the quasi-identifiers. Raise the
-          levels below and watch the field: marks travel from their old class into their new one, and
-          the count of records standing alone falls. When no mark is left alone, k is at least 2.
+          Every record indistinguishable from at least k−1 others on the quasi-identifiers. Raise
+          the levels below and watch the field: marks travel from their old class into their new
+          one, and the count of records standing alone falls. When no mark is left alone, k is at
+          least 2.
         </p>
         <ThreatModel
           assumes={
             <>
-              That the attacker knows quasi-identifiers and wants to put a name to a record. k is the
-              size of the smallest group they can narrow to, so at k = 5 they are left choosing
+              That the attacker knows quasi-identifiers and wants to put a name to a record. k is
+              the size of the smallest group they can narrow to, so at k = 5 they are left choosing
               between five people.
             </>
           }
@@ -107,7 +119,11 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
           <section className="panel">
             <div className="panel__title">Achieved</div>
             <div className="readout">
-              <Readout label="k" value={set.k.toLocaleString('en')} exposed={set.k < config.targetK} />
+              <Readout
+                label="k"
+                value={set.k.toLocaleString('en')}
+                exposed={set.k < config.targetK}
+              />
               <Readout label="Target k" value={config.targetK} />
               <Readout
                 label="Records standing alone"
@@ -169,10 +185,11 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
                 </p>
                 <p className="note">
                   Nobody was identified. Every one of those records sits in a class of at least{' '}
-                  {set.k}. An attacker guessing the commonest value in the population would have been
-                  right {attack.baselineCorrect.toLocaleString('en')} of {attack.attempted.toLocaleString('en')}{' '}
-                  times, or {(baseline.rate * 100).toFixed(1)}% — the gap between that number and the
-                  one above is what the release disclosed.
+                  {set.k}. An attacker guessing the commonest value in the population would have
+                  been right {attack.baselineCorrect.toLocaleString('en')} of{' '}
+                  {attack.attempted.toLocaleString('en')} times, or{' '}
+                  {(baseline.rate * 100).toFixed(1)}% — the gap between that number and the one
+                  above is what the release disclosed.
                 </p>
               </div>
             )}
@@ -181,7 +198,11 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
       </div>
 
       {selectedClass !== null && (
-        <ClassInspector set={set} classIndex={selectedClass} onClose={() => setSelectedClass(null)} />
+        <ClassInspector
+          set={set}
+          classIndex={selectedClass}
+          onClose={() => setSelectedClass(null)}
+        />
       )}
     </>
   );

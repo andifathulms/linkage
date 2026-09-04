@@ -13,7 +13,7 @@ import type { CaseProps } from './shared';
 import { Linkage } from '../views/Linkage/Linkage';
 import { FieldPanel } from '../views/Field/FieldPanel';
 import { ClassInspector } from '../views/ClassInspector/ClassInspector';
-import { Cite, Count, Readout } from '../ui/primitives';
+import { Cite, Count, Eyebrow, Readout } from '../ui/primitives';
 import { generalisePopulation } from '../engine/generalise';
 import { buildClasses } from '../engine/classes';
 import { runLinkage } from '../engine/attacks/linkage';
@@ -28,7 +28,13 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
 
   // The triple, raw. This is the release before any defense is applied.
   const keys = useMemo(
-    () => generalisePopulation(population.records, taxonomy, { kelurahan: 0, birthdate: 0, gender: 0 }, TRIPLE),
+    () =>
+      generalisePopulation(
+        population.records,
+        taxonomy,
+        { kelurahan: 0, birthdate: 0, gender: 0 },
+        TRIPLE,
+      ),
     [population, taxonomy],
   );
   const set = useMemo(() => buildClasses(population.records, keys), [population, keys]);
@@ -59,6 +65,7 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
       />
 
       <div className="prose">
+        <Eyebrow>Case 1 · two tables, one join</Eyebrow>
         <h2>The linkage</h2>
         <p>
           A health authority publishes a table with the names removed. It keeps region, date of
@@ -67,8 +74,8 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
           gender.
         </p>
         <p>
-          Neither table identifies anyone. Joining them on the three attributes they share does. This
-          is the founding result in the field: <Cite source="sweeney" /> did exactly this to
+          Neither table identifies anyone. Joining them on the three attributes they share does.
+          This is the founding result in the field: <Cite source="sweeney" /> did exactly this to
           Massachusetts hospital discharge data.
         </p>
         <p className="note">
@@ -101,7 +108,11 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
       />
 
       {selectedClass !== null && (
-        <ClassInspector set={set} classIndex={selectedClass} onClose={() => setSelectedClass(null)} />
+        <ClassInspector
+          set={set}
+          classIndex={selectedClass}
+          onClose={() => setSelectedClass(null)}
+        />
       )}
 
       {joined && (

@@ -680,6 +680,83 @@ strong {
   font-size: var(--t-small-size);
 }
 
+/* The finding: the one number a case turns on. Display figure, denominator beside it,
+   and the sentence that qualifies it — never a number without what it is out of. */
+.finding {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-4);
+  flex-wrap: wrap;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--ink);
+  border-radius: var(--radius-lg);
+  background: var(--ledger-panel);
+  box-shadow: var(--lift-1), var(--lift-inset);
+}
+
+.finding--exposed {
+  border-left-color: var(--exposed);
+  background: linear-gradient(100deg, var(--exposed-wash), var(--ledger-panel) 55%);
+}
+
+.finding__figure {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+}
+
+.finding--exposed .finding__figure .display {
+  color: var(--exposed);
+}
+
+.finding__denominator {
+  font-family: var(--font-mono);
+  font-size: var(--t-data-size);
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.finding__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.finding__label {
+  font-size: var(--t-body-size);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.finding__track {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ledger-sunk);
+  overflow: hidden;
+  max-width: 420px;
+}
+
+.finding__fill {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transition: width var(--d-coalesce) var(--e-coalesce);
+}
+
+.finding--exposed .finding__fill {
+  background: var(--exposed);
+}
+
+.finding__detail {
+  font-size: var(--t-small-size);
+  color: var(--ink-mid);
+  line-height: 1.5;
+}
+
 /* ----------------------------------------------------------------------- tables */
 
 .table {

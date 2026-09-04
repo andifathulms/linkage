@@ -23,7 +23,8 @@ import { Slider } from '../ui/primitives';
 import { QUASI } from '../state/store';
 import { toCsv, downloadCsv } from '../ui/csv';
 
-type Instrument = 'lattice' | 'nik' | 'frontier' | 'uniqueness' | 'differencing' | 'budget' | 'assessor';
+type Instrument =
+  'lattice' | 'nik' | 'frontier' | 'uniqueness' | 'differencing' | 'budget' | 'assessor';
 
 const INSTRUMENTS: Array<{ id: Instrument; label: string }> = [
   { id: 'frontier', label: 'Frontier' },
@@ -51,7 +52,18 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
     // Ground truth included, because the population is generated and belongs to nobody —
     // and because a reader checking the app's arithmetic needs it.
     const csv = toCsv(
-      ['id', 'nik', 'name', 'kelurahan', 'birthdate', 'gender', 'age', 'diagnosis', 'income', 'generalised_key'],
+      [
+        'id',
+        'nik',
+        'name',
+        'kelurahan',
+        'birthdate',
+        'gender',
+        'age',
+        'diagnosis',
+        'income',
+        'generalised_key',
+      ],
       population.records.map((r, i) => [
         r.id,
         r.nik,
@@ -131,8 +143,8 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
             />
             <p className="note" style={{ marginTop: 'var(--s-2)' }}>
               Correlation ties the sensitive value to region and age band. At 0 it is drawn from the
-              population distribution; at 1 the stratum determines it, and homogeneous classes appear
-              wherever the generalisation happens to align with a stratum.
+              population distribution; at 1 the stratum determines it, and homogeneous classes
+              appear wherever the generalisation happens to align with a stratum.
             </p>
             <div className="buttons" style={{ marginTop: 'var(--s-2)' }}>
               <button type="button" className="button button--quiet" onClick={exportPopulation}>
@@ -185,7 +197,11 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
             <Uniqueness records={population.records} seed={config.seed} />
           )}
           {instrument === 'differencing' && (
-            <Differencing records={population.records} seed={config.seed} epsilon={config.epsilon} />
+            <Differencing
+              records={population.records}
+              seed={config.seed}
+              epsilon={config.epsilon}
+            />
           )}
           {instrument === 'budget' && (
             <BudgetPanel

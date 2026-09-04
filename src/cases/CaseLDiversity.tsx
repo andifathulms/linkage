@@ -9,7 +9,7 @@ import type { CaseProps } from './shared';
 import { FieldPanel } from '../views/Field/FieldPanel';
 import { ClassInspector } from '../views/ClassInspector/ClassInspector';
 import { Generalisation } from '../views/Generalisation';
-import { Cite, Count, Readout, ThreatModel } from '../ui/primitives';
+import { Cite, Count, Eyebrow, Readout, ThreatModel } from '../ui/primitives';
 import { generalisePopulation } from '../engine/generalise';
 import { buildClasses, entropyL } from '../engine/classes';
 import { runSkewness, diverseButSkewed, mostSkewedClasses } from '../engine/attacks/skewness';
@@ -56,12 +56,18 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
   const background = useMemo(
     () =>
       targets.length > 0
-        ? runBackground(population.records, set, { targetIds: targets, factCount: Math.max(0, targetL - 1) })
+        ? runBackground(population.records, set, {
+            targetIds: targets,
+            factCount: Math.max(0, targetL - 1),
+          })
         : null,
     [population, set, targets, targetL],
   );
   const facts = useMemo(
-    () => (targets.length > 0 ? factsRequired(population.records, set, targets) : new Map<number, number>()),
+    () =>
+      targets.length > 0
+        ? factsRequired(population.records, set, targets)
+        : new Map<number, number>(),
     [population, set, targets],
   );
 
@@ -83,6 +89,7 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
       />
 
       <div className="prose">
+        <Eyebrow>Case 3 · diversity, and near-certainty inside it</Eyebrow>
         <h2>l-diversity</h2>
         <p>
           At least l well-represented sensitive values in every equivalence class, so that knowing
@@ -168,7 +175,12 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
               <Readout label="Records in them" value={targets.length.toLocaleString('en')} />
             </div>
             <div className="buttons" style={{ marginTop: 'var(--s-2)' }}>
-              <button type="button" className="button" onClick={run} disabled={targets.length === 0}>
+              <button
+                type="button"
+                className="button"
+                onClick={run}
+                disabled={targets.length === 0}
+              >
                 Run the skewness attack
               </button>
             </div>
@@ -183,10 +195,11 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
                   />
                 </p>
                 <p className="note">
-                  Mean confidence at the moment of claiming: {(attack.meanConfidence * 100).toFixed(1)}%.
-                  From the population distribution alone the same guess would be right{' '}
-                  {(attack.baselineConfidence * 100).toFixed(1)}% of the time. {attack.incorrect.toLocaleString('en')}{' '}
-                  claims were wrong, and they are counted here rather than dropped.
+                  Mean confidence at the moment of claiming:{' '}
+                  {(attack.meanConfidence * 100).toFixed(1)}%. From the population distribution
+                  alone the same guess would be right {(attack.baselineConfidence * 100).toFixed(1)}
+                  % of the time. {attack.incorrect.toLocaleString('en')} claims were wrong, and they
+                  are counted here rather than dropped.
                 </p>
                 {background && (
                   <p className="note">
@@ -197,8 +210,8 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
                       total={background.attempted}
                       label="values are determined outright"
                     />
-                    . {(facts.get(0) ?? 0) + (facts.get(1) ?? 0)} of {targets.length} needed one fact
-                    or none.
+                    . {(facts.get(0) ?? 0) + (facts.get(1) ?? 0)} of {targets.length} needed one
+                    fact or none.
                   </p>
                 )}
               </div>
@@ -256,7 +269,11 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
       </div>
 
       {selectedClass !== null && (
-        <ClassInspector set={set} classIndex={selectedClass} onClose={() => setSelectedClass(null)} />
+        <ClassInspector
+          set={set}
+          classIndex={selectedClass}
+          onClose={() => setSelectedClass(null)}
+        />
       )}
     </>
   );

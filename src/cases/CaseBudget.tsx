@@ -10,7 +10,7 @@
 import { useCallback, useState } from 'react';
 import type { CaseProps } from './shared';
 import { BudgetPanel } from '../views/Budget/Budget';
-import { Cite, ThreatModel } from '../ui/primitives';
+import { Cite, Eyebrow, ThreatModel } from '../ui/primitives';
 
 export function CaseBudget({ derived, config, setConfig, onComplete }: CaseProps) {
   const { population } = derived;
@@ -24,6 +24,7 @@ export function CaseBudget({ derived, config, setConfig, onComplete }: CaseProps
   return (
     <>
       <div className="prose">
+        <Eyebrow>Case 5 · a guarantee, and its price</Eyebrow>
         <h2>Differential privacy</h2>
         <p>
           A mechanism is ε-differentially private if, for any two datasets differing in one person,

@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { PersonRecord } from '../../engine/types';
 import { runLinkage, buildAuxiliaryRoll } from '../../engine/attacks/linkage';
 import { usePrefersReducedMotion } from '../../ui/useReducedMotion';
-import { Count } from '../../ui/primitives';
+import { Finding } from '../../ui/primitives';
 
 export interface LinkageProps {
   records: readonly PersonRecord[];
@@ -108,12 +108,21 @@ export function Linkage({
   return (
     <div className="linkage">
       <div className="linkage__scored">
-        <Count of={result.correct} total={result.attempted} label="targets uniquely identified" />
-        <span className="note">
-          {result.failed.toLocaleString('en')} not determined.{' '}
-          {result.perTarget.filter((t) => t.candidateCount > 1 && t.candidateCount <= 5).length.toLocaleString('en')}{' '}
-          narrowed to five candidates or fewer.
-        </span>
+        <Finding
+          of={result.correct}
+          total={result.attempted}
+          label="targets uniquely identified"
+          detail={
+            <>
+              {result.failed.toLocaleString('en')} not determined.{' '}
+              {result.perTarget
+                .filter((t) => t.candidateCount > 1 && t.candidateCount <= 5)
+                .length.toLocaleString('en')}{' '}
+              narrowed to five candidates or fewer — an attack that finishes with five candidates
+              has done most of the work, and the count says so.
+            </>
+          }
+        />
       </div>
 
       <div className="linkage__tables">
@@ -131,7 +140,10 @@ export function Linkage({
           </thead>
           <tbody>
             {visible.map((row, i) => (
-              <tr key={row.recordId} data-state={i < revealed && row.resolved ? 'matched' : 'pending'}>
+              <tr
+                key={row.recordId}
+                data-state={i < revealed && row.resolved ? 'matched' : 'pending'}
+              >
                 <td>{row.name}</td>
                 {columns.map((c) => (
                   <td key={c}>{row.values[c]}</td>
@@ -147,11 +159,21 @@ export function Linkage({
               key={row.recordId}
               className="linkage__join"
               data-state={
-                i >= revealed ? 'pending' : row.resolved ? 'resolved' : row.matches.length === 0 ? 'none' : 'ambiguous'
+                i >= revealed
+                  ? 'pending'
+                  : row.resolved
+                    ? 'resolved'
+                    : row.matches.length === 0
+                      ? 'none'
+                      : 'ambiguous'
               }
             >
               <span className="linkage__joinCount">
-                {row.matches.length === 1 ? '1' : row.matches.length === 0 ? '0' : `${row.matches.length}`}
+                {row.matches.length === 1
+                  ? '1'
+                  : row.matches.length === 0
+                    ? '0'
+                    : `${row.matches.length}`}
               </span>
             </li>
           ))}
