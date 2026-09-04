@@ -1397,6 +1397,9 @@ input[type='range']:hover::-webkit-slider-thumb {
 
 .inspector {
   margin: 0 var(--gutter) var(--s-4);
+  /* The inspector is opened by a click and should answer it immediately, so it does not
+     inherit the case body's staggered delay. */
+  animation-delay: 0s;
   /* Discrete control: a timed transition (DESIGN §6.2, 180 ms). */
   animation: inspector-open var(--d-inspector) var(--e-out) both;
   box-shadow: var(--lift-2);
