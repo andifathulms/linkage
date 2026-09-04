@@ -1052,6 +1052,26 @@ input[type='range']:hover::-webkit-slider-thumb {
   display: inline-block;
 }
 
+/* The rail is seven controls before the case begins, which is a long way in by
+   keyboard. This is the way past it. */
+.skip {
+  position: absolute;
+  left: var(--s-2);
+  top: -60px;
+  z-index: 60;
+  padding: var(--s-1) var(--s-3);
+  background: var(--ink);
+  color: var(--ledger-panel);
+  border-radius: var(--radius);
+  font-size: var(--t-small-size);
+  text-decoration: none;
+  transition: top var(--d-tap) var(--e-out);
+}
+
+.skip:focus {
+  top: var(--s-2);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

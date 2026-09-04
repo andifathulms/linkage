@@ -46,6 +46,9 @@ export function App() {
 
   return (
     <div className="app">
+      <a className="skip" href="#case">
+        Skip to the case
+      </a>
       {/* Header and rail stick together, so the rail's offset is not a magic number that
           a wrapped header would falsify. */}
       <div className="topbar">
@@ -90,7 +93,7 @@ export function App() {
       {/* The case body is keyed, so switching cases replays the staggered entrance
           rather than swapping content in place. Discrete control, timed transition
           (DESIGN §6.2). */}
-      <main className="main" key={current}>
+      <main className="main" id="case" key={current}>
         {current === 'linkage' && <CaseLinkage {...shared} />}
         {current === 'k-anonymity' && <CaseKAnonymity {...shared} />}
         {current === 'l-diversity' && <CaseLDiversity {...shared} />}
