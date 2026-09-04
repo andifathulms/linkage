@@ -172,7 +172,9 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
           </section>
         </div>
 
-        <div className="stack">
+        {/* Keyed on the instrument, so switching replays the entrance rather than
+            swapping content in place. Discrete control, timed transition. */}
+        <div className="stack enter" key={instrument}>
           {instrument === 'frontier' && (
             <Frontier
               records={population.records}
