@@ -8,27 +8,42 @@
  * back to the closest system faces otherwise. The one typographic requirement that
  * actually matters — individually addressable digits in the NIK dissector — is met by
  * any of the mono fallbacks.
+ *
+ * Two grounds, one system. The ledger is the daylight reading; the plate is the same
+ * instrument under a darkroom lamp. Every colour is defined once as a role, so a view
+ * never names a hex value and both grounds stay in step.
  */
 
 :root {
+  color-scheme: light;
+
   /* 2.1 Ground — ledger stock, ruled. */
-  --ledger: #e6e9e3;
-  --ledger-panel: #eff1ec;
-  --ledger-deep: #d6dad2;
-  --ink: #191c18;
-  --ink-mid: #575e56;
-  --ink-faint: #9aa098;
-  --rule: #c6cbc2;
+  --ledger: #eceee7;
+  --ledger-panel: #f6f7f3;
+  --ledger-raised: #fbfbf8;
+  --ledger-deep: #dfe3da;
+  --ledger-sunk: #d5dacf;
+  --ink: #14170f;
+  --ink-mid: #555c50;
+  --ink-faint: #949a8c;
+  --ink-ghost: #b9bfb0;
+  --rule: #cdd2c5;
+  --rule-strong: #b3b9a9;
 
   /* 2.2 The primary distinction. Protected is the default and carries no colour. */
   --exposed: #a8452c;
-  --narrow: #c08a3e;
-  --protected: #191c18;
+  --exposed-lift: #c25a3c;
+  --exposed-wash: rgba(168, 69, 44, 0.09);
+  --narrow: #ad7a2b;
+  --narrow-wash: rgba(173, 122, 43, 0.1);
+  --protected: #14170f;
+  --safe: #3f6f52;
+  --safe-wash: rgba(63, 111, 82, 0.1);
 
   /* 2.3 The two tables, linkage view only. */
-  --released: #3f6b7a;
-  --auxiliary: #6b5b8a;
-  --matched: #191c18;
+  --released: #35606f;
+  --auxiliary: #5f5081;
+  --matched: #14170f;
 
   /* 2.4 Sensitive values. Muted, low-chroma, no traffic-light mapping. */
   --sensitive-1: #5a7d6e;
@@ -37,43 +52,130 @@
   --sensitive-4: #4e6e8c;
   --sensitive-5: #7d6363;
 
-  --font-sans: 'Fira Sans', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    system-ui, sans-serif;
-  --font-mono: 'Fira Mono', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', ui-monospace,
+  /* Field marks, read by the canvas so both grounds share one definition. */
+  --mark-protected: #22261c;
+  --mark-narrow: #b07f2e;
+  --mark-exposed: #ad4127;
+  --mark-ground: #dfe3da;
+  --mark-boundary: rgba(20, 23, 15, 0.2);
+  --mark-select: #14170f;
+
+  /* Depth. Hairlines carry the structure; shadow is reserved for what floats. */
+  --lift-1: 0 1px 2px rgba(20, 23, 15, 0.05);
+  --lift-2:
+    0 2px 6px rgba(20, 23, 15, 0.07), 0 12px 28px rgba(20, 23, 15, 0.08);
+  --lift-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --glow: rgba(168, 69, 44, 0.16);
+
+  --font-sans:
+    "Fira Sans", "Inter", "Helvetica Neue", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", system-ui, sans-serif;
+  --font-mono:
+    "Fira Mono", "SF Mono", "Menlo", "Consolas", "Roboto Mono", ui-monospace,
     monospace;
 
-  /* 3.1 Scale. Base 15 px, ratio 1.2. */
-  --t-display-size: 37px;
-  --t-display-line: 1.05;
-  --t-figure-size: 22px;
+  /* 3.1 Scale. Base 15 px, ratio 1.2, fluid at the two largest steps so the display
+     figure keeps its authority on a phone without overrunning it. */
+  --t-hero-size: clamp(34px, 2.2rem + 2.6vw, 68px);
+  --t-hero-line: 0.98;
+  --t-display-size: clamp(28px, 1.6rem + 1.5vw, 44px);
+  --t-display-line: 1.04;
+  --t-figure-size: clamp(20px, 1rem + 0.5vw, 24px);
   --t-figure-line: 1.1;
-  --t-h2-size: 18px;
-  --t-h2-line: 1.3;
+  --t-h2-size: clamp(17px, 1rem + 0.35vw, 21px);
+  --t-h2-line: 1.24;
   --t-body-size: 15px;
-  --t-body-line: 1.6;
+  --t-body-line: 1.62;
   --t-nik-size: 17px;
   --t-nik-line: 1.4;
   --t-data-size: 13px;
   --t-data-line: 1.45;
   --t-small-size: 12px;
-  --t-small-line: 1.35;
+  --t-small-line: 1.4;
+  --t-micro-size: 10.5px;
+
+  /* Tracking. Display sets tight, small caps-ish labels set open. */
+  --track-hero: -0.03em;
+  --track-display: -0.022em;
+  --track-h2: -0.012em;
+  --track-label: 0.08em;
+  --track-micro: 0.14em;
 
   /* 4.3 Grid and rhythm. 8 px base. */
+  --s-0: 4px;
   --s-1: 8px;
   --s-2: 12px;
   --s-3: 16px;
   --s-4: 24px;
   --s-5: 40px;
   --s-6: 64px;
+  --s-7: 96px;
+
+  --radius: 3px;
+  --radius-lg: 5px;
+  --gutter: clamp(var(--s-3), 2.5vw, var(--s-5));
+  --measure: 68ch;
 
   /* 6.2 Durations and curves. */
   --d-coalesce: 620ms;
   --e-coalesce: cubic-bezier(0.32, 0.72, 0, 1);
   --d-join: 400ms;
   --e-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --e-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --e-spring: cubic-bezier(0.34, 1.42, 0.5, 1);
   --d-inspector: 180ms;
   --d-budget: 300ms;
   --d-node: 90ms;
+  --d-enter: 460ms;
+  --d-tap: 120ms;
+}
+
+/* The plate. Same instrument, darkroom lamp. Roles only — no view names a hex. */
+:root[data-theme="plate"] {
+  color-scheme: dark;
+
+  --ledger: #14160f;
+  --ledger-panel: #1b1e16;
+  --ledger-raised: #22261d;
+  --ledger-deep: #101208;
+  --ledger-sunk: #0c0e06;
+  --ink: #e9ece1;
+  --ink-mid: #a0a695;
+  --ink-faint: #6f7566;
+  --ink-ghost: #4b5044;
+  --rule: #333829;
+  --rule-strong: #4a5040;
+
+  --exposed: #e0764f;
+  --exposed-lift: #f08d63;
+  --exposed-wash: rgba(224, 118, 79, 0.14);
+  --narrow: #d9a545;
+  --narrow-wash: rgba(217, 165, 69, 0.13);
+  --protected: #e9ece1;
+  --safe: #74b58c;
+  --safe-wash: rgba(116, 181, 140, 0.13);
+
+  --released: #6fb0c6;
+  --auxiliary: #a48fd0;
+  --matched: #e9ece1;
+
+  --sensitive-1: #7fb69f;
+  --sensitive-2: #a795bb;
+  --sensitive-3: #c19a72;
+  --sensitive-4: #7ba4c6;
+  --sensitive-5: #b08e8e;
+
+  --mark-protected: #cfd4c4;
+  --mark-narrow: #d9a545;
+  --mark-exposed: #e0764f;
+  --mark-ground: #101208;
+  --mark-boundary: rgba(233, 236, 225, 0.18);
+  --mark-select: #e9ece1;
+
+  --lift-1: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --lift-2: 0 2px 8px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.55);
+  --lift-inset: inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  --glow: rgba(224, 118, 79, 0.24);
 }
 
 /* 6.6 Reduced motion: coalescence becomes an instant re-layout, join lines resolve
@@ -85,5 +187,7 @@
     --d-inspector: 0ms;
     --d-budget: 0ms;
     --d-node: 0ms;
+    --d-enter: 0ms;
+    --d-tap: 0ms;
   }
 }

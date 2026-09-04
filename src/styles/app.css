@@ -1,8 +1,12 @@
 /**
  * The shell. DESIGN.md §1 (the register), §4 (layout), §6.5 (restraint).
  *
- * Panels are raised by value with a hairline. 0 radius. No shadows. Register ruling
- * appears in tabular areas and nowhere else — it is a material cue, not a grid overlay.
+ * The material is still a ruled ledger: hairlines carry structure, panels are raised by
+ * value rather than by shadow, and register ruling appears in tabular areas and nowhere
+ * else. What has been added is hierarchy — a display scale that lets a finding sit at
+ * the top of a case, and entrance motion that puts the field on screen before the prose.
+ * Shadow is spent only on the two things that genuinely float: popovers and the
+ * inspector.
  */
 
 *,
@@ -18,6 +22,10 @@ body {
   height: 100%;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--ledger);
   color: var(--ink);
@@ -25,16 +33,38 @@ body {
   font-size: var(--t-body-size);
   line-height: var(--t-body-line);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color 320ms var(--e-standard),
+    color 320ms var(--e-standard);
+}
+
+/* The ground is not flat paper. One very quiet ruling, at the 8 px rhythm, so the
+   surface reads as stock rather than as a blank div. It never touches a data area. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: linear-gradient(var(--rule) 1px, transparent 1px);
+  background-size: 100% var(--s-6);
+  opacity: 0.35;
 }
 
 #root {
   min-height: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 /* Focus is visible everywhere, including field marks and lattice nodes (DESIGN §8). */
 :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--exposed);
   outline-offset: 2px;
+  border-radius: 2px;
 }
 
 button {
@@ -56,15 +86,80 @@ h3 {
 h2 {
   font-size: var(--t-h2-size);
   line-height: var(--t-h2-line);
+  letter-spacing: var(--track-h2);
 }
 
 p {
   margin: 0 0 var(--s-2);
-  max-width: 66ch;
+  max-width: var(--measure);
 }
 
 p:last-child {
   margin-bottom: 0;
+}
+
+strong {
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------- motion kit */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sweep {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes tick {
+  0% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.25;
+  }
+}
+
+/* The one alarm in the system, and it is quiet: a count that has just moved off zero
+   breathes once rather than flashing. */
+@keyframes settle {
+  0% {
+    transform: translate3d(0, 4px, 0);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.enter {
+  animation: rise var(--d-enter) var(--e-out) both;
 }
 
 /* ------------------------------------------------------------------ app frame */
@@ -77,33 +172,105 @@ p:last-child {
 
 .header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--s-3);
-  padding: var(--s-2) var(--s-3);
+  padding: var(--s-2) var(--gutter);
   border-bottom: 1px solid var(--rule);
-  background: var(--ledger-panel);
+  background: color-mix(in srgb, var(--ledger-panel) 88%, transparent);
+  backdrop-filter: saturate(1.2) blur(10px);
   flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+/* The mark: two squares, one grouped and one alone. The whole argument, at 14 px. */
+.header__mark {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 auto;
+  display: block;
+  position: relative;
+}
+
+.header__mark::before,
+.header__mark::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+}
+
+.header__mark::before {
+  inset: 0 auto auto 0;
+  background: var(--ink);
+  box-shadow:
+    7px 0 0 var(--ink),
+    0 7px 0 var(--ink);
+}
+
+.header__mark::after {
+  inset: auto 0 0 auto;
+  background: var(--exposed);
+  animation: tick 3.6s var(--e-standard) infinite;
 }
 
 .header__name {
   font-size: var(--t-h2-size);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .header__descriptor {
   font-size: var(--t-small-size);
   color: var(--ink-mid);
+  padding-left: var(--s-3);
+  border-left: 1px solid var(--rule);
 }
 
 .header__case {
-  font-size: var(--t-small-size);
+  font-size: var(--t-micro-size);
   color: var(--ink-mid);
   font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: var(--track-micro);
+  white-space: nowrap;
 }
 
 .header__spacer {
   flex: 1;
+}
+
+/* Ground toggle. A switch, not a menu — there are two grounds and that is all. */
+.ground {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--ledger);
+}
+
+.ground__option {
+  width: 26px;
+  height: 20px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--ink-faint);
+  transition:
+    color var(--d-tap) var(--e-standard),
+    background-color var(--d-tap) var(--e-standard);
+}
+
+.ground__option[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--ledger-panel);
+}
+
+.ground__option svg {
+  display: block;
 }
 
 /* The synthetic-data statement: a plain marker that opens a short explanation, in the
@@ -115,26 +282,55 @@ p:last-child {
 .synthetic__marker {
   font-size: var(--t-small-size);
   color: var(--ink-mid);
-  border-bottom: 1px dotted var(--ink-faint);
   text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: 3px var(--s-2);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: var(--ledger);
+  transition:
+    border-color var(--d-tap) var(--e-standard),
+    color var(--d-tap) var(--e-standard);
+}
+
+.synthetic__marker::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--safe);
+  flex: 0 0 auto;
+}
+
+.synthetic__marker:hover,
+.synthetic__marker[aria-expanded="true"] {
+  border-color: var(--rule-strong);
+  color: var(--ink);
 }
 
 .synthetic__body {
   position: absolute;
   right: 0;
   top: calc(100% + var(--s-1));
-  z-index: 20;
-  width: min(340px, calc(100vw - var(--s-4)));
-  padding: var(--s-2);
-  background: var(--ledger-panel);
+  z-index: 50;
+  width: min(360px, calc(100vw - var(--s-4)));
+  padding: var(--s-3);
+  background: var(--ledger-raised);
   border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--lift-2);
   font-size: var(--t-small-size);
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--ink-mid);
+  animation: rise 200ms var(--e-out) both;
 }
 
 /* ------------------------------------------------------------- case progression */
 
+/* A rail, not a tab bar. The line behind the numbers is the sequence: each case is an
+   attack, its defense, and the attack that beats the defense, and they have an order. */
 .cases {
   display: flex;
   gap: 0;
@@ -142,31 +338,101 @@ p:last-child {
   background: var(--ledger-panel);
   overflow-x: auto;
   scrollbar-width: thin;
+  padding: 0 var(--gutter);
+  position: sticky;
+  top: 45px;
+  z-index: 30;
 }
 
 .cases__item {
-  padding: var(--s-1) var(--s-3);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+  padding: var(--s-2) var(--s-3) calc(var(--s-2) - 2px);
   font-size: var(--t-small-size);
   color: var(--ink-mid);
   white-space: nowrap;
-  border-right: 1px solid var(--rule);
   border-bottom: 2px solid transparent;
+  transition:
+    color var(--d-tap) var(--e-standard),
+    border-color var(--d-tap) var(--e-standard);
 }
 
-.cases__item[aria-current='true'] {
+/* The connecting rail. Drawn behind the discs, clipped at the ends of the row. */
+.cases__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--rule);
+  z-index: 0;
+}
+
+.cases__item:first-child::before {
+  left: 50%;
+}
+
+.cases__item:last-child::before {
+  right: 50%;
+}
+
+.cases__item:hover:not([disabled]) {
+  color: var(--ink);
+}
+
+.cases__item[aria-current="true"] {
   color: var(--ink);
   border-bottom-color: var(--ink);
   font-weight: 600;
 }
 
 .cases__item[disabled] {
-  color: var(--ink-faint);
+  color: var(--ink-ghost);
   cursor: default;
 }
 
 .cases__index {
+  position: relative;
+  z-index: 1;
   font-family: var(--font-mono);
-  margin-right: var(--s-1);
+  font-size: var(--t-micro-size);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--rule);
+  background: var(--ledger-panel);
+  color: var(--ink-mid);
+  transition:
+    background-color var(--d-tap) var(--e-standard),
+    border-color var(--d-tap) var(--e-standard),
+    color var(--d-tap) var(--e-standard);
+}
+
+.cases__item[aria-current="true"] .cases__index {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--ledger-panel);
+}
+
+.cases__item[data-done="true"] .cases__index {
+  border-color: var(--safe);
+  color: var(--safe);
+}
+
+.cases__item[data-done="true"][aria-current="true"] .cases__index {
+  color: var(--ledger-panel);
+}
+
+.cases__label {
+  position: relative;
+  z-index: 1;
+  background: var(--ledger-panel);
+  padding-right: 2px;
 }
 
 /* ------------------------------------------------------------------- structure */
@@ -178,23 +444,67 @@ p:last-child {
   min-height: 0;
 }
 
+/* Each case fades its content in once, staggered top to bottom, so the field is read
+   before the prose. Discrete control, timed transition (DESIGN §6.2). */
+.main > * {
+  animation: rise var(--d-enter) var(--e-out) both;
+}
+
+.main > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.main > *:nth-child(2) {
+  animation-delay: 45ms;
+}
+.main > *:nth-child(3) {
+  animation-delay: 90ms;
+}
+.main > *:nth-child(4) {
+  animation-delay: 135ms;
+}
+.main > *:nth-child(n + 5) {
+  animation-delay: 170ms;
+}
+
 .panel {
+  position: relative;
   background: var(--ledger-panel);
   border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
   padding: var(--s-3);
+  box-shadow: var(--lift-1), var(--lift-inset);
+  transition:
+    border-color 200ms var(--e-standard),
+    box-shadow 200ms var(--e-standard);
+}
+
+.panel:hover {
+  border-color: var(--rule-strong);
 }
 
 .panel__title {
-  font-size: var(--t-small-size);
-  color: var(--ink-mid);
+  font-size: var(--t-micro-size);
+  text-transform: uppercase;
+  letter-spacing: var(--track-micro);
+  color: var(--ink-faint);
   margin-bottom: var(--s-2);
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.panel__title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
 }
 
 .columns {
   display: grid;
-  gap: var(--s-2);
-  padding: var(--s-2) var(--s-3) var(--s-3);
+  gap: var(--s-3);
+  padding: var(--s-3) var(--gutter) var(--s-4);
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: start;
 }
@@ -202,40 +512,90 @@ p:last-child {
 .stack {
   display: flex;
   flex-direction: column;
-  gap: var(--s-2);
+  gap: var(--s-3);
 }
 
+/* Editorial column. The prose is the argument and gets a real measure and a real
+   opening line; everything around it is instrumentation. */
 .prose {
-  padding: var(--s-3);
+  padding: var(--s-5) var(--gutter) var(--s-4);
   border-bottom: 1px solid var(--rule);
+  position: relative;
 }
 
 .prose h2 {
-  margin-bottom: var(--s-1);
+  font-size: var(--t-display-size);
+  line-height: var(--t-display-line);
+  letter-spacing: var(--track-display);
+  margin-bottom: var(--s-2);
+  max-width: 22ch;
+}
+
+.prose h2 + p {
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: 60ch;
+}
+
+.prose p {
+  color: var(--ink-mid);
+}
+
+.prose p:first-of-type {
+  color: var(--ink);
+}
+
+/* A short tracked line above the heading, naming what the case is. */
+.eyebrow {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--t-micro-size);
+  text-transform: uppercase;
+  letter-spacing: var(--track-micro);
+  color: var(--exposed);
+  margin-bottom: var(--s-2);
+}
+
+.eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: var(--s-4);
+  height: 1px;
+  background: var(--exposed);
+  vertical-align: middle;
+  margin-right: var(--s-1);
+  transform-origin: left;
+  animation: sweep 520ms var(--e-out) both;
 }
 
 .note {
   font-size: var(--t-small-size);
   color: var(--ink-mid);
-  line-height: 1.5;
-  max-width: 66ch;
+  line-height: 1.55;
+  max-width: var(--measure);
 }
 
 /* A defense is introduced with the threat model it assumes and the attack that defeats
    it, in that order (PRD §6.3). This is the block that carries it. */
 .assumption {
-  border-left: 2px solid var(--rule);
-  padding-left: var(--s-2);
+  margin: var(--s-3) 0 0;
+  border-left: 2px solid var(--rule-strong);
+  padding: var(--s-2) 0 var(--s-2) var(--s-3);
   font-size: var(--t-small-size);
   color: var(--ink-mid);
-  line-height: 1.5;
-  max-width: 62ch;
+  line-height: 1.55;
+  max-width: 64ch;
+  background: linear-gradient(90deg, var(--ledger-panel), transparent 70%);
 }
 
 .assumption dt {
   font-weight: 600;
   color: var(--ink);
-  margin-top: var(--s-1);
+  margin-top: var(--s-2);
+  font-size: var(--t-micro-size);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
 }
 
 .assumption dt:first-child {
@@ -243,7 +603,7 @@ p:last-child {
 }
 
 .assumption dd {
-  margin: 0 0 var(--s-1);
+  margin: var(--s-0) 0 0;
 }
 
 /* ---------------------------------------------------------------------- figures */
@@ -254,6 +614,7 @@ p:last-child {
   font-size: var(--t-figure-size);
   line-height: var(--t-figure-line);
   font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .display {
@@ -262,23 +623,41 @@ p:last-child {
   font-size: var(--t-display-size);
   line-height: var(--t-display-line);
   font-weight: 600;
+  letter-spacing: var(--track-display);
 }
 
 .readout {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s-3) var(--s-4);
+  gap: var(--s-2) var(--s-4);
 }
 
+/* A readout is a tile: label above in tracked micro caps, figure below. Exposed tiles
+   take a wash and a rule rather than a colour change alone, so the state survives
+   greyscale (DESIGN §2.2). */
 .readout__item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  padding: var(--s-1) var(--s-2) var(--s-1) var(--s-2);
+  border-left: 2px solid var(--rule);
+  min-width: 0;
+  transition:
+    border-color 260ms var(--e-standard),
+    background-color 260ms var(--e-standard);
+}
+
+.readout__item:has(.readout__value--exposed) {
+  border-left-color: var(--exposed);
+  background: linear-gradient(90deg, var(--exposed-wash), transparent 80%);
 }
 
 .readout__label {
-  font-size: var(--t-small-size);
-  color: var(--ink-mid);
+  font-size: var(--t-micro-size);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  color: var(--ink-faint);
+  text-wrap: balance;
 }
 
 .readout__value {
@@ -287,10 +666,18 @@ p:last-child {
   font-size: var(--t-figure-size);
   line-height: var(--t-figure-line);
   font-weight: 600;
+  letter-spacing: -0.02em;
+  animation: settle 320ms var(--e-out) both;
 }
 
 .readout__value--exposed {
   color: var(--exposed);
+}
+
+.readout__value .readout__label {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--t-small-size);
 }
 
 /* ----------------------------------------------------------------------- tables */
@@ -307,18 +694,32 @@ p:last-child {
 .table th {
   text-align: left;
   font-weight: 600;
-  color: var(--ink-mid);
+  color: var(--ink-faint);
   font-family: var(--font-sans);
-  font-size: var(--t-small-size);
+  font-size: var(--t-micro-size);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  padding: var(--s-1) var(--s-1) var(--s-1) 0;
+  border-bottom: 1px solid var(--rule-strong);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--ledger-panel);
+  z-index: 1;
+}
+
+.table td {
   padding: 4px var(--s-1) 4px 0;
   border-bottom: 1px solid var(--rule);
   white-space: nowrap;
 }
 
-.table td {
-  padding: 3px var(--s-1) 3px 0;
-  border-bottom: 1px solid var(--rule);
-  white-space: nowrap;
+.table tbody tr {
+  transition: background-color var(--d-tap) linear;
+}
+
+.table tbody tr:hover {
+  background: var(--ledger-deep);
 }
 
 .table td.num,
@@ -329,15 +730,16 @@ p:last-child {
 
 .table__scroll {
   overflow: auto;
-  max-height: 320px;
+  max-height: 340px;
+  scrollbar-width: thin;
 }
 
-.table tr[data-exposure='exposed'] td:first-child {
+.table tr[data-exposure="exposed"] td:first-child {
   box-shadow: inset 2px 0 0 var(--exposed);
   padding-left: var(--s-1);
 }
 
-.table tr[data-exposure='narrow'] td:first-child {
+.table tr[data-exposure="narrow"] td:first-child {
   box-shadow: inset 2px 0 0 var(--narrow);
   padding-left: var(--s-1);
 }
@@ -349,7 +751,7 @@ p:last-child {
   grid-template-columns: 8.5rem 1fr auto;
   align-items: center;
   gap: var(--s-2);
-  padding: 2px 0;
+  padding: var(--s-0) 0;
 }
 
 .control__label {
@@ -363,44 +765,130 @@ p:last-child {
   font-variant-numeric: tabular-nums;
   color: var(--ink);
   white-space: nowrap;
+  padding: 1px var(--s-1);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--ledger);
+  min-width: 3.5rem;
+  text-align: right;
 }
 
-/* Continuous control, direct mapping, zero easing (DESIGN §6.1). No transition here on
-   purpose: the slider is the value. */
-input[type='range'] {
+/* Continuous control, direct mapping, zero easing (DESIGN §6.1). No transition on the
+   thumb or the fill on purpose: the slider is the value. The fill is painted into the
+   track from a custom property the component sets. */
+input[type="range"] {
   width: 100%;
-  accent-color: var(--ink);
   margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  height: 20px;
+  cursor: ew-resize;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--ink) 0 var(--fill, 0%),
+    var(--rule-strong) var(--fill, 0%) 100%
+  );
+}
+
+input[type="range"]::-moz-range-track {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--rule-strong);
+}
+
+input[type="range"]::-moz-range-progress {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: var(--ledger-raised);
+  border: 2px solid var(--ink);
+  box-shadow: var(--lift-1);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ledger-raised);
+  border: 2px solid var(--ink);
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px var(--glow);
 }
 
 .button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
   border: 1px solid var(--ink);
-  padding: 6px var(--s-2);
+  border-radius: var(--radius);
+  padding: 7px var(--s-3);
   font-size: var(--t-small-size);
-  background: var(--ledger-panel);
-  color: var(--ink);
+  font-weight: 500;
+  background: var(--ink);
+  color: var(--ledger-panel);
+  box-shadow: var(--lift-1);
+  transition:
+    transform var(--d-tap) var(--e-standard),
+    box-shadow var(--d-tap) var(--e-standard),
+    background-color var(--d-tap) var(--e-standard),
+    color var(--d-tap) var(--e-standard),
+    border-color var(--d-tap) var(--e-standard);
 }
 
 .button:hover {
-  background: var(--ledger-deep);
+  transform: translateY(-1px);
+  box-shadow: var(--lift-2);
+}
+
+.button:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .button[disabled] {
-  border-color: var(--ink-faint);
-  color: var(--ink-faint);
+  border-color: var(--rule);
+  color: var(--ink-ghost);
   cursor: default;
-  background: var(--ledger-panel);
+  background: var(--ledger-deep);
+  box-shadow: none;
+  transform: none;
 }
 
 .button--quiet {
-  border-color: var(--rule);
+  background: var(--ledger-raised);
+  border-color: var(--rule-strong);
   color: var(--ink-mid);
+  box-shadow: none;
+}
+
+.button--quiet:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+  box-shadow: var(--lift-1);
 }
 
 .buttons {
   display: flex;
   gap: var(--s-1);
   flex-wrap: wrap;
+  align-items: center;
 }
 
 /* ------------------------------------------------------------------- instruments */
@@ -408,46 +896,68 @@ input[type='range'] {
 .tabs {
   display: flex;
   border-top: 1px solid var(--rule);
-  background: var(--ledger-panel);
+  background: color-mix(in srgb, var(--ledger-panel) 92%, transparent);
+  backdrop-filter: blur(10px);
   overflow-x: auto;
   position: sticky;
   bottom: 0;
-  z-index: 10;
+  z-index: 20;
+  padding: 0 var(--gutter);
 }
 
 .tabs__item {
-  padding: var(--s-1) var(--s-3);
+  padding: var(--s-2) var(--s-3);
   font-size: var(--t-small-size);
   color: var(--ink-mid);
   white-space: nowrap;
-  border-right: 1px solid var(--rule);
   border-top: 2px solid transparent;
+  transition:
+    color var(--d-tap) var(--e-standard),
+    border-color var(--d-tap) var(--e-standard);
 }
 
-.tabs__item[aria-selected='true'] {
+.tabs__item:hover {
   color: var(--ink);
-  border-top-color: var(--ink);
+}
+
+.tabs__item[aria-selected="true"] {
+  color: var(--ink);
+  border-top-color: var(--exposed);
   font-weight: 600;
-  background: var(--ledger);
 }
 
 /* Sources cited inline via the popover pattern (CLAUDE.md §10). */
 .cite {
-  font-size: var(--t-small-size);
-  color: var(--ink-mid);
-  border-bottom: 1px dotted var(--ink-faint);
+  font-size: inherit;
+  color: var(--ink);
+  border-bottom: 1px dashed var(--ink-faint);
+  transition:
+    color var(--d-tap) var(--e-standard),
+    border-color var(--d-tap) var(--e-standard);
+}
+
+.cite:hover,
+.cite[aria-expanded="true"] {
+  color: var(--exposed);
+  border-bottom-color: var(--exposed);
 }
 
 .cite__popover {
   position: absolute;
-  z-index: 30;
-  max-width: min(360px, calc(100vw - var(--s-4)));
-  padding: var(--s-2);
-  background: var(--ledger-panel);
+  z-index: 60;
+  left: 0;
+  top: calc(100% + 6px);
+  max-width: min(380px, calc(100vw - var(--s-4)));
+  width: max-content;
+  padding: var(--s-2) var(--s-3);
+  background: var(--ledger-raised);
   border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--lift-2);
   font-size: var(--t-small-size);
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--ink-mid);
+  animation: rise 180ms var(--e-out) both;
 }
 
 .citation {
@@ -467,14 +977,6 @@ input[type='range'] {
   border: 0;
 }
 
-/* 4.4 Mobile. Below 860 px the field keeps the top of the viewport at reduced height and
-   stays the hero; everything else stacks beneath it. */
-@media (max-width: 860px) {
-  .columns {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
 /* ------------------------------------------------------------------- the field */
 
 /* The field is always the largest element and always at the top. Everything else is a
@@ -487,38 +989,78 @@ input[type='range'] {
   overflow: hidden;
 }
 
+/* A vignette, so the marks nearest the edge do not read as cut off. Pointer-events off:
+   the canvas underneath owns every interaction. */
+.field::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 100% at 50% 45%,
+    transparent 55%,
+    color-mix(in srgb, var(--ledger-sunk) 55%, transparent) 100%
+  );
+}
+
 .field__canvas {
   display: block;
   touch-action: none;
+  cursor: crosshair;
 }
 
+/* The rail above the field. Values are monospaced and the changing ones are set in ink
+   against a muted label, so a glance costs nothing. */
 .field__readout {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-1) var(--s-4);
-  padding: var(--s-1) var(--s-3);
+  padding: var(--s-2) var(--gutter);
   border-bottom: 1px solid var(--rule);
   font-size: var(--t-small-size);
-  color: var(--ink-mid);
+  color: var(--ink-faint);
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  min-height: 28px;
+  min-height: 38px;
   align-items: center;
+  background: var(--ledger-panel);
+}
+
+.field__readout span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
 }
 
 .field__readout strong {
   color: var(--ink);
   font-weight: 600;
+  font-size: var(--t-data-size);
 }
 
 .field__readout--exposed strong {
   color: var(--exposed);
 }
 
+.field__controls {
+  display: flex;
+  gap: var(--s-3);
+  align-items: center;
+  padding: var(--s-2) var(--gutter);
+  border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap;
+  background: var(--ledger-panel);
+}
+
+.field__controls .control {
+  min-width: 240px;
+  flex: 0 1 320px;
+}
+
 /* ---------------------------------------------------------------- the linkage */
 
 .linkage {
-  padding: var(--s-3);
+  padding: var(--s-4) var(--gutter);
 }
 
 .linkage__scored {
@@ -531,7 +1073,7 @@ input[type='range'] {
 
 .linkage__tables {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 3rem minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 4rem minmax(0, 1fr);
   gap: var(--s-2);
   align-items: start;
 }
@@ -539,6 +1081,10 @@ input[type='range'] {
 .linkage__table caption {
   text-align: left;
   margin-bottom: var(--s-1);
+  font-size: var(--t-micro-size);
+  text-transform: uppercase;
+  letter-spacing: var(--track-label);
+  color: var(--ink-faint);
 }
 
 .linkage__table--auxiliary th {
@@ -552,12 +1098,15 @@ input[type='range'] {
 /* A row matching many fades its lines. A row matching exactly one resolves — both rows
    and their connecting line settle into plain matched ink (DESIGN §5.2). */
 .linkage__table tbody tr {
-  color: var(--ink-faint);
-  transition: color var(--d-join) var(--e-standard);
+  color: var(--ink-ghost);
+  transition:
+    color var(--d-join) var(--e-standard),
+    background-color var(--d-join) var(--e-standard);
 }
 
-.linkage__table tbody tr[data-state='matched'] {
+.linkage__table tbody tr[data-state="matched"] {
   color: var(--matched);
+  background: var(--exposed-wash);
 }
 
 .linkage__joins {
@@ -567,11 +1116,14 @@ input[type='range'] {
   display: flex;
   flex-direction: column;
   /* Aligns with the table body: caption plus header row. */
-  padding-top: calc(var(--t-small-size) * 1.35 + var(--s-1) + var(--t-small-size) * 1.35 + 9px);
+  padding-top: calc(
+    var(--t-micro-size) * 1.4 + var(--s-1) + var(--t-micro-size) * 1.4 +
+      var(--s-1) * 2 + 1px
+  );
 }
 
 .linkage__join {
-  height: calc(var(--t-data-size) * var(--t-data-line) + 6px + 1px);
+  height: calc(var(--t-data-size) * var(--t-data-line) + 8px + 1px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -579,102 +1131,82 @@ input[type='range'] {
 }
 
 .linkage__join::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   right: 0;
   height: 1px;
   background: var(--ink-faint);
   opacity: 0;
-  transition: opacity var(--d-join) var(--e-standard), background-color var(--d-join) var(--e-standard);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition:
+    opacity var(--d-join) var(--e-standard),
+    transform var(--d-join) var(--e-out),
+    background-color var(--d-join) var(--e-standard);
 }
 
-.linkage__join[data-state='ambiguous']::before {
+.linkage__join[data-state="ambiguous"]::before {
   opacity: 0.4;
+  transform: scaleX(1);
 }
 
-.linkage__join[data-state='resolved']::before {
+.linkage__join[data-state="resolved"]::before {
   opacity: 1;
-  background: var(--matched);
+  transform: scaleX(1);
+  background: var(--exposed);
 }
 
 .linkage__joinCount {
   position: relative;
   font-family: var(--font-mono);
-  font-size: var(--t-small-size);
+  font-size: var(--t-micro-size);
   background: var(--ledger);
-  padding: 0 4px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
   color: var(--ink-faint);
   opacity: 0;
-  transition: opacity var(--d-join) var(--e-standard);
+  transition:
+    opacity var(--d-join) var(--e-standard),
+    color var(--d-join) var(--e-standard),
+    border-color var(--d-join) var(--e-standard);
 }
 
-.linkage__join:not([data-state='pending']) .linkage__joinCount {
+.linkage__join:not([data-state="pending"]) .linkage__joinCount {
   opacity: 1;
 }
 
-.linkage__join[data-state='resolved'] .linkage__joinCount {
-  color: var(--matched);
+.linkage__join[data-state="resolved"] .linkage__joinCount {
+  color: var(--exposed);
+  border-color: var(--exposed);
   font-weight: 600;
 }
 
-@media (max-width: 860px) {
-  .linkage__tables {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .linkage__joins {
-    flex-direction: row;
-    padding-top: 0;
-    overflow-x: auto;
-  }
-
-  .linkage__join {
-    height: auto;
-    min-width: 2rem;
-  }
-
-  .linkage__join::before {
-    left: 0;
-    right: 0;
-    top: 50%;
-  }
-}
-
 .footer {
-  padding: var(--s-2) var(--s-3);
+  padding: var(--s-4) var(--gutter);
   border-top: 1px solid var(--rule);
   background: var(--ledger-panel);
-}
-
-.field__controls {
-  display: flex;
-  gap: var(--s-3);
-  align-items: center;
-  padding: var(--s-1) var(--s-3);
-  border-bottom: 1px solid var(--rule);
-  flex-wrap: wrap;
-}
-
-.field__controls .control {
-  min-width: 240px;
-  flex: 0 1 320px;
 }
 
 /* ------------------------------------------------------------ class inspector */
 
 .inspector {
-  margin: var(--s-3);
+  margin: 0 var(--gutter) var(--s-4);
   /* Discrete control: a timed transition (DESIGN §6.2, 180 ms). */
-  animation: inspector-open var(--d-inspector) var(--e-standard);
+  animation: inspector-open var(--d-inspector) var(--e-out) both;
+  box-shadow: var(--lift-2);
+  border-radius: var(--radius-lg);
 }
 
 @keyframes inspector-open {
   from {
     opacity: 0;
+    transform: translate3d(0, 8px, 0);
   }
   to {
     opacity: 1;
+    transform: none;
   }
 }
 
@@ -682,30 +1214,45 @@ input[type='range'] {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  gap: var(--s-2);
   margin-bottom: var(--s-2);
 }
 
 .inspector__chart {
   display: block;
   margin: var(--s-3) 0;
-  max-width: 420px;
+  max-width: 460px;
+  width: 100%;
 }
 
 .rule {
   border: none;
   border-top: 1px solid var(--rule);
-  margin: var(--s-2) 0;
+  margin: var(--s-3) 0;
 }
 
-.select {
+.select,
+.input {
   font: inherit;
   font-size: var(--t-data-size);
   font-family: var(--font-mono);
   background: var(--ledger);
   color: var(--ink);
   border: 1px solid var(--rule);
-  padding: 3px var(--s-1);
+  border-radius: var(--radius);
+  padding: 5px var(--s-1);
   width: 100%;
+  transition: border-color var(--d-tap) var(--e-standard);
+}
+
+.select:hover,
+.input:hover {
+  border-color: var(--rule-strong);
+}
+
+.input--num {
+  text-align: right;
+  min-width: 6rem;
 }
 
 .bench__controls {
@@ -717,16 +1264,17 @@ input[type='range'] {
 /* ------------------------------------------------------------- the budget meter */
 
 .meter {
-  height: 14px;
-  background: var(--ledger-deep);
+  height: 10px;
+  background: var(--ledger-sunk);
   border: 1px solid var(--rule);
+  border-radius: 999px;
   overflow: hidden;
 }
 
 .meter__fill {
   height: 100%;
-  background: var(--ink);
-  transition: width var(--d-budget) var(--e-standard);
+  background: linear-gradient(90deg, var(--ink), var(--exposed));
+  transition: width var(--d-budget) var(--e-out);
 }
 
 .lattice {
@@ -734,6 +1282,8 @@ input[type='range'] {
   margin: var(--s-3) 0;
   background: var(--ledger);
   border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  max-width: 100%;
 }
 
 .lattice rect:focus-visible {
@@ -753,19 +1303,21 @@ input[type='range'] {
   display: grid;
   grid-template-columns: repeat(16, 1fr);
   gap: 2px;
-  max-width: 520px;
+  max-width: 560px;
 }
 
 .nik__segment {
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: 2px;
-  margin-bottom: 4px;
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: 3px;
+  margin-bottom: 5px;
   min-width: 0;
 }
 
 .nik__segmentLabel {
   font-size: 9px;
-  color: var(--ink-mid);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -778,22 +1330,23 @@ input[type='range'] {
   line-height: var(--t-nik-line);
   letter-spacing: 0.02em;
   text-align: center;
-  padding: 6px 0;
+  padding: 8px 0;
   border: 1px solid var(--rule);
-  background: var(--ledger);
+  border-radius: var(--radius);
+  background: var(--ledger-raised);
   color: var(--ink);
   min-width: 0;
   /* NIK mask drag is continuous, no duration (DESIGN §6.2). */
 }
 
-.nik__digit[data-boundary='true'] {
+.nik__digit[data-boundary="true"] {
   border-left-color: var(--ink-mid);
 }
 
-.nik__digit[data-masked='true'] {
-  background: var(--ledger-deep);
-  color: var(--ink-faint);
-  border-color: var(--ledger-deep);
+.nik__digit[data-masked="true"] {
+  background: var(--ledger-sunk);
+  color: var(--ink-ghost);
+  border-color: var(--ledger-sunk);
 }
 
 .nik__presets {
@@ -805,6 +1358,7 @@ input[type='range'] {
 
 .nik__preset {
   border: 1px solid var(--rule);
+  border-radius: var(--radius);
   padding: var(--s-2);
   background: var(--ledger);
 }
@@ -812,7 +1366,7 @@ input[type='range'] {
 .nik__presetDigits {
   font-family: var(--font-mono);
   font-size: var(--t-data-size);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   margin-bottom: var(--s-1);
   overflow-wrap: anywhere;
 }
@@ -841,7 +1395,7 @@ input[type='range'] {
 
 /* Deliberately plainer than everything else: a form and a table (DESIGN §5.9). */
 .assessor {
-  margin: var(--s-3);
+  margin: 0 var(--gutter) var(--s-4);
 }
 
 .assessor__head {
@@ -856,26 +1410,48 @@ input[type='range'] {
   flex: 0 0 auto;
 }
 
-.input {
-  font: inherit;
-  font-family: var(--font-mono);
-  font-size: var(--t-data-size);
-  background: var(--ledger);
-  color: var(--ink);
-  border: 1px solid var(--rule);
-  padding: 3px var(--s-1);
-  width: 100%;
-  min-width: 6rem;
-}
-
-.input--num {
-  text-align: right;
-}
-
 /* ---------------------------------------------------------------------- mobile */
+
+/* 4.4 Mobile. Below 860 px the field keeps the top of the viewport at reduced height and
+   stays the hero; everything else stacks beneath it. */
+@media (max-width: 860px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .field,
+  .field__canvas {
+    max-height: 40vh;
+  }
+
+  .linkage__tables {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .linkage__joins {
+    flex-direction: row;
+    padding-top: 0;
+    overflow-x: auto;
+  }
+
+  .linkage__join {
+    height: auto;
+    min-width: 2.5rem;
+  }
+
+  .linkage__join::before {
+    left: 0;
+    right: 0;
+    top: 50%;
+  }
+}
 
 /* PRD §8.11: usable at 380 px, with the field legible. */
 @media (max-width: 520px) {
+  :root {
+    --gutter: var(--s-2);
+  }
+
   .header {
     gap: var(--s-1);
     padding: var(--s-1) var(--s-2);
@@ -892,26 +1468,21 @@ input[type='range'] {
     height: 0;
   }
 
-  .prose,
-  .field__readout,
-  .field__controls,
-  .linkage {
-    padding-left: var(--s-2);
-    padding-right: var(--s-2);
+  .cases {
+    top: 41px;
+    padding: 0 var(--s-1);
   }
 
-  .columns {
-    padding: var(--s-2);
-    gap: var(--s-2);
+  .cases__item {
+    padding: var(--s-1) var(--s-2);
+  }
+
+  .prose {
+    padding: var(--s-4) var(--s-2) var(--s-3);
   }
 
   .panel {
     padding: var(--s-2);
-  }
-
-  .inspector,
-  .assessor {
-    margin: var(--s-2);
   }
 
   .control {
@@ -922,6 +1493,7 @@ input[type='range'] {
 
   .control__value {
     justify-self: start;
+    text-align: left;
   }
 
   .field__controls .control {
@@ -933,26 +1505,27 @@ input[type='range'] {
      for it first (DESIGN §4.4). */
   .nik__digit {
     font-size: 13px;
-    padding: 8px 0;
+    padding: 9px 0;
   }
 
   .nik__segmentLabel {
     font-size: 7px;
   }
 
-  .display {
-    font-size: 28px;
-  }
-
   .readout {
-    gap: var(--s-2) var(--s-3);
+    gap: var(--s-1) var(--s-2);
   }
 }
 
-/* The field keeps the top of the viewport at reduced height and stays the hero. */
-@media (max-width: 860px) {
-  .field,
-  .field__canvas {
-    max-height: 40vh;
+/* 6.6 Reduced motion. The tokens already collapse the durations; these are the
+   decorative loops, which simply stop. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
