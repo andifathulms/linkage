@@ -1233,11 +1233,7 @@ input[type='range']:hover::-webkit-slider-thumb {
 }
 
 .linkage__scored {
-  display: flex;
-  align-items: baseline;
-  gap: var(--s-3);
-  flex-wrap: wrap;
-  margin-bottom: var(--s-3);
+  margin-bottom: var(--s-4);
 }
 
 .linkage__tables {
@@ -1359,9 +1355,22 @@ input[type='range']:hover::-webkit-slider-thumb {
 }
 
 .footer {
-  padding: var(--s-4) var(--gutter);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-3);
+  padding: var(--s-5) var(--gutter);
   border-top: 1px solid var(--rule);
   background: var(--ledger-panel);
+}
+
+.footer::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 5px;
+  height: 5px;
+  margin-top: 7px;
+  background: var(--safe);
+  border-radius: 50%;
 }
 
 /* ------------------------------------------------------------ class inspector */

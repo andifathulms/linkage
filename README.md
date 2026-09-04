@@ -13,6 +13,11 @@ defenses, and scores every attack against ground truth.
 
 No backend. No network at runtime. No file input, anywhere.
 
+It reads on either of two grounds — the ledger, which is daylight, and the plate, which
+is the same instrument under a darkroom lamp. The switch sits in the header, the choice
+is remembered locally, and it never reaches the URL: a shared link describes a population
+and a configuration, not how someone likes to read.
+
 ## The constraints, before the features
 
 **Synthetic data only. No file upload. Ever.** The application generates its populations
