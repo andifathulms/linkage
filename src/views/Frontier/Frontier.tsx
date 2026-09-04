@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react';
 import type { GeneralisationVector, PersonRecord } from '../../engine/types';
 import type { Taxonomy } from '../../engine/taxonomy';
 import { buildFrontier, frontierPath } from '../../engine/utility';
-import { Readout } from '../../ui/primitives';
+import { Readout, Slider } from '../../ui/primitives';
 import { toCsv, downloadCsv } from '../../ui/csv';
 
 export interface FrontierProps {
@@ -36,7 +36,9 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
   const y = (v: number) => H - PAD - v * (H - PAD * 2);
 
   const line = (series: (i: number) => number) =>
-    points.map((_, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(series(i)).toFixed(1)}`).join(' ');
+    points
+      .map((_, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(series(i)).toFixed(1)}`)
+      .join(' ');
 
   const current = points[Math.min(marker, points.length - 1)];
 
@@ -69,8 +71,18 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
         <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#c6cbc2" />
         <line x1={PAD} y1={PAD} x2={PAD} y2={H - PAD} stroke="#c6cbc2" />
 
-        <path d={line((i) => points[i].reidentificationRate)} fill="none" stroke="#a8452c" strokeWidth="1.5" />
-        <path d={line((i) => points[i].informationLoss)} fill="none" stroke="#191c18" strokeWidth="1.5" />
+        <path
+          d={line((i) => points[i].reidentificationRate)}
+          fill="none"
+          stroke="#a8452c"
+          strokeWidth="1.5"
+        />
+        <path
+          d={line((i) => points[i].informationLoss)}
+          fill="none"
+          stroke="#191c18"
+          strokeWidth="1.5"
+        />
         <path
           d={line((i) => points[i].queryError)}
           fill="none"
@@ -79,7 +91,14 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
           strokeDasharray="3 3"
         />
 
-        <line x1={x(marker)} y1={PAD} x2={x(marker)} y2={H - PAD} stroke="#191c18" strokeWidth="1" />
+        <line
+          x1={x(marker)}
+          y1={PAD}
+          x2={x(marker)}
+          y2={H - PAD}
+          stroke="#191c18"
+          strokeWidth="1"
+        />
         <circle cx={x(marker)} cy={y(current.reidentificationRate)} r="3.5" fill="#a8452c" />
         <circle cx={x(marker)} cy={y(current.informationLoss)} r="3.5" fill="#191c18" />
 
@@ -94,22 +113,14 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
         </text>
       </svg>
 
-      <div className="control">
-        <label className="control__label" htmlFor="frontier-marker">
-          Position
-        </label>
-        <input
-          id="frontier-marker"
-          type="range"
-          min={0}
-          max={points.length - 1}
-          value={marker}
-          onChange={(e) => setMarker(Number(e.target.value))}
-        />
-        <span className="control__value">
-          {marker + 1} of {points.length}
-        </span>
-      </div>
+      <Slider
+        label="Position"
+        value={marker}
+        min={0}
+        max={points.length - 1}
+        onChange={setMarker}
+        display={`${marker + 1} of ${points.length}`}
+      />
 
       <div className="readout" style={{ marginTop: 'var(--s-2)' }}>
         <Readout label="Achieved k" value={current.k.toLocaleString('en')} />
@@ -118,7 +129,10 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
           value={`${current.singletons.toLocaleString('en')} of ${records.length.toLocaleString('en')}`}
           exposed={current.singletons > 0}
         />
-        <Readout label="Information loss" value={`${(current.informationLoss * 100).toFixed(0)}%`} />
+        <Readout
+          label="Information loss"
+          value={`${(current.informationLoss * 100).toFixed(0)}%`}
+        />
         <Readout label="Mean query error" value={`${(current.queryError * 100).toFixed(1)}%`} />
         <Readout label="Classes" value={current.classCount.toLocaleString('en')} />
       </div>
@@ -145,9 +159,9 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
       </div>
 
       <p className="note" style={{ marginTop: 'var(--s-2)' }}>
-        Every defense buys privacy with accuracy. The two curves cross somewhere along this path, and
-        where they cross is not a recommendation this application can make for you — it depends on
-        what the release is for and who is harmed if it fails.
+        Every defense buys privacy with accuracy. The two curves cross somewhere along this path,
+        and where they cross is not a recommendation this application can make for you — it depends
+        on what the release is for and who is harmed if it fails.
       </p>
     </section>
   );

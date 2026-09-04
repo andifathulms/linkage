@@ -9,7 +9,7 @@ import type { CaseProps } from './shared';
 import { FieldPanel } from '../views/Field/FieldPanel';
 import { ClassInspector } from '../views/ClassInspector/ClassInspector';
 import { Generalisation } from '../views/Generalisation';
-import { Cite, Count, Eyebrow, Readout, ThreatModel } from '../ui/primitives';
+import { Cite, Count, Eyebrow, Readout, Slider, ThreatModel } from '../ui/primitives';
 import { generalisePopulation } from '../engine/generalise';
 import { buildClasses, entropyL } from '../engine/classes';
 import { runSkewness, diverseButSkewed, mostSkewedClasses } from '../engine/attacks/skewness';
@@ -126,20 +126,7 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
           />
           <section className="panel">
             <div className="panel__title">Diversity</div>
-            <div className="control">
-              <label className="control__label" htmlFor="target-l">
-                Target l
-              </label>
-              <input
-                id="target-l"
-                type="range"
-                min={1}
-                max={5}
-                value={targetL}
-                onChange={(e) => setTargetL(Number(e.target.value))}
-              />
-              <span className="control__value">{targetL}</span>
-            </div>
+            <Slider label="Target l" value={targetL} min={1} max={5} onChange={setTargetL} />
             <div className="readout" style={{ marginTop: 'var(--s-2)' }}>
               <Readout label="Achieved l, minimum" value={set.l} exposed={set.l < targetL} />
               <Readout label="Achieved k" value={set.k} />

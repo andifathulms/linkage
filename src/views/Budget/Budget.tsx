@@ -17,11 +17,17 @@ import {
   COMPOSITION_SCOPE,
   type Budget as BudgetState,
 } from '../../engine/dp/budget';
-import { countQuery, meanQuery, histogramQuery, sumQuery, type Query } from '../../engine/dp/sensitivity';
+import {
+  countQuery,
+  meanQuery,
+  histogramQuery,
+  sumQuery,
+  type Query,
+} from '../../engine/dp/sensitivity';
 import { laplaceMechanism } from '../../engine/dp/laplace';
 import { makeRng } from '../../engine/rng';
 import { answer, type AggregateQuery } from '../../engine/attacks/differencing';
-import { Readout, Cite } from '../../ui/primitives';
+import { Cite, Readout, Slider } from '../../ui/primitives';
 import { toCsv, downloadCsv } from '../../ui/csv';
 
 const INCOME_CLAMP = { low: 0, high: 20_000_000 };
@@ -37,7 +43,12 @@ export interface BudgetPanelProps {
 
 type QueryChoice = 'count' | 'count-province' | 'mean-income' | 'sum-income' | 'histogram';
 
-const CHOICES: Array<{ id: QueryChoice; label: string; build: (n: number) => Query; plan: AggregateQuery }> = [
+const CHOICES: Array<{
+  id: QueryChoice;
+  label: string;
+  build: (n: number) => Query;
+  plan: AggregateQuery;
+}> = [
   {
     id: 'count',
     label: 'How many records in total',
@@ -104,7 +115,17 @@ export function BudgetPanel({
 
   const exportLog = () => {
     const csv = toCsv(
-      ['index', 'query', 'kind', 'sensitivity', 'epsilon', 'noise_scale', 'released', 'remaining', 'derivation'],
+      [
+        'index',
+        'query',
+        'kind',
+        'sensitivity',
+        'epsilon',
+        'noise_scale',
+        'released',
+        'remaining',
+        'derivation',
+      ],
       budget.entries.map((e) => [
         e.index + 1,
         e.query.label ?? e.query.kind,
@@ -148,20 +169,16 @@ export function BudgetPanel({
         <Readout label="Queries left at this epsilon" value={queriesRemaining(budget, epsilon)} />
       </div>
 
-      <div className="control" style={{ marginTop: 'var(--s-2)' }}>
-        <label className="control__label" htmlFor="budget-epsilon">
-          Epsilon per query
-        </label>
-        <input
-          id="budget-epsilon"
-          type="range"
+      <div style={{ marginTop: 'var(--s-2)' }}>
+        <Slider
+          label="Epsilon per query"
+          value={epsilon}
           min={0.01}
           max={1}
           step={0.01}
-          value={epsilon}
-          onChange={(e) => onEpsilon(Number(e.target.value))}
+          onChange={onEpsilon}
+          display={epsilon.toFixed(2)}
         />
-        <span className="control__value">{epsilon.toFixed(2)}</span>
       </div>
 
       <div className="control">
@@ -184,7 +201,12 @@ export function BudgetPanel({
       </div>
 
       <div className="buttons" style={{ marginTop: 'var(--s-2)' }}>
-        <button type="button" className="button" onClick={ask} disabled={!canAfford(budget, epsilon)}>
+        <button
+          type="button"
+          className="button"
+          onClick={ask}
+          disabled={!canAfford(budget, epsilon)}
+        >
           Ask
         </button>
         <button

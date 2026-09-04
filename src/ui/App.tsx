@@ -46,42 +46,46 @@ export function App() {
 
   return (
     <div className="app">
-      <header className="header">
-        <span className="header__mark" aria-hidden="true" />
-        <span className="header__name">Linkage</span>
-        <span className="header__descriptor">Removing names does not anonymize anything</span>
-        <span className="header__spacer" />
-        <span className="header__case">
-          Case {definition.index} · {definition.title}
-        </span>
-        <GroundToggle />
-        {/* PRD §6.1: in the header of every case, not once at load. */}
-        <SyntheticMarker />
-      </header>
+      {/* Header and rail stick together, so the rail's offset is not a magic number that
+          a wrapped header would falsify. */}
+      <div className="topbar">
+        <header className="header">
+          <span className="header__mark" aria-hidden="true" />
+          <span className="header__name">Linkage</span>
+          <span className="header__descriptor">Removing names does not anonymize anything</span>
+          <span className="header__spacer" />
+          <span className="header__case">
+            Case {definition.index} · {definition.title}
+          </span>
+          <GroundToggle />
+          {/* PRD §6.1: in the header of every case, not once at load. */}
+          <SyntheticMarker />
+        </header>
 
-      <nav className="cases" aria-label="Cases">
-        {CASES.map((c) => {
-          const unlocked = isUnlocked(c.id, completed);
-          const done = completed.includes(c.id);
-          return (
-            <button
-              key={c.id}
-              type="button"
-              className="cases__item"
-              aria-current={c.id === current}
-              data-done={done}
-              disabled={!unlocked}
-              title={unlocked ? c.summary : 'Complete the previous case to unlock this one'}
-              onClick={() => unlocked && setCurrent(c.id)}
-            >
-              <span className="cases__index" aria-hidden="true">
-                {c.index === 6 ? '·' : done && c.id !== current ? '✓' : c.index}
-              </span>
-              <span className="cases__label">{c.title}</span>
-            </button>
-          );
-        })}
-      </nav>
+        <nav className="cases" aria-label="Cases">
+          {CASES.map((c) => {
+            const unlocked = isUnlocked(c.id, completed);
+            const done = completed.includes(c.id);
+            return (
+              <button
+                key={c.id}
+                type="button"
+                className="cases__item"
+                aria-current={c.id === current}
+                data-done={done}
+                disabled={!unlocked}
+                title={unlocked ? c.summary : 'Complete the previous case to unlock this one'}
+                onClick={() => unlocked && setCurrent(c.id)}
+              >
+                <span className="cases__index" aria-hidden="true">
+                  {c.index === 6 ? '·' : done && c.id !== current ? '✓' : c.index}
+                </span>
+                <span className="cases__label">{c.title}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
 
       {/* The case body is keyed, so switching cases replays the staggered entrance
           rather than swapping content in place. Discrete control, timed transition

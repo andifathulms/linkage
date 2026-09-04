@@ -170,18 +170,27 @@ strong {
   min-height: 100vh;
 }
 
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--ledger-panel);
+  backdrop-filter: saturate(1.2) blur(10px);
+}
+
+@supports (background: color-mix(in srgb, red 50%, transparent)) {
+  .topbar {
+    background: color-mix(in srgb, var(--ledger-panel) 90%, transparent);
+  }
+}
+
 .header {
   display: flex;
   align-items: center;
   gap: var(--s-3);
   padding: var(--s-2) var(--gutter);
   border-bottom: 1px solid var(--rule);
-  background: color-mix(in srgb, var(--ledger-panel) 88%, transparent);
-  backdrop-filter: saturate(1.2) blur(10px);
   flex-wrap: wrap;
-  position: sticky;
-  top: 0;
-  z-index: 40;
 }
 
 /* The mark: two squares, one grouped and one alone. The whole argument, at 14 px. */
@@ -335,13 +344,9 @@ strong {
   display: flex;
   gap: 0;
   border-bottom: 1px solid var(--rule);
-  background: var(--ledger-panel);
   overflow-x: auto;
   scrollbar-width: thin;
   padding: 0 var(--gutter);
-  position: sticky;
-  top: 45px;
-  z-index: 30;
 }
 
 .cases__item {
@@ -779,6 +784,11 @@ strong {
   padding: var(--s-1) var(--s-1) var(--s-1) 0;
   border-bottom: 1px solid var(--rule-strong);
   white-space: nowrap;
+}
+
+/* Sticky only where there is something to scroll within. A table header pinned to the
+   viewport would float over the case body under the topbar. */
+.table__scroll .table th {
   position: sticky;
   top: 0;
   background: var(--ledger-panel);
@@ -973,7 +983,7 @@ input[type='range']:hover::-webkit-slider-thumb {
 .tabs {
   display: flex;
   border-top: 1px solid var(--rule);
-  background: color-mix(in srgb, var(--ledger-panel) 92%, transparent);
+  background: var(--ledger-panel);
   backdrop-filter: blur(10px);
   overflow-x: auto;
   position: sticky;
@@ -1240,10 +1250,17 @@ input[type='range']:hover::-webkit-slider-thumb {
 .linkage__table caption {
   text-align: left;
   margin-bottom: var(--s-1);
+  /* The join column's offset is computed from these two line heights, so they are set
+     rather than inherited. */
+  line-height: 1.4;
   font-size: var(--t-micro-size);
   text-transform: uppercase;
   letter-spacing: var(--track-label);
   color: var(--ink-faint);
+}
+
+.linkage__table th {
+  line-height: 1.4;
 }
 
 .linkage__table--auxiliary th {
@@ -1627,7 +1644,6 @@ input[type='range']:hover::-webkit-slider-thumb {
   }
 
   .cases {
-    top: 41px;
     padding: 0 var(--s-1);
   }
 
