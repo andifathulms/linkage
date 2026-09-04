@@ -14,5 +14,11 @@ module.exports = {
       { object: 'Math', property: 'random', message: 'Use the seeded RNG in src/engine/rng.ts.' },
     ],
   },
+  overrides: [
+    {
+      files: ['scripts/**/*.mjs', 'vite.config.ts', 'tests/**/*.ts'],
+      env: { node: true },
+    },
+  ],
   ignorePatterns: ['dist', 'node_modules'],
 };

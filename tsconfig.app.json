@@ -16,6 +16,7 @@
     "noEmit": true,
     "composite": true,
     "resolveJsonModule": true,
+    "types": ["node"],
     "allowImportingTsExtensions": true
   },
   "include": ["src", "tests"]
