@@ -57,8 +57,11 @@ export function App() {
           <span className="header__name">Linkage</span>
           <span className="header__descriptor">Removing names does not anonymize anything</span>
           <span className="header__spacer" />
-          <span className="header__case">
-            Case {definition.index} · {definition.title}
+          {/* The rail below names the current case and marks it, so repeating the title
+              here spends the only remaining header slot on nothing. The summary is the
+              one line that tells a reader what the case is about. */}
+          <span className="header__case" title={definition.summary}>
+            Case {definition.index} · {definition.summary}
           </span>
           <GroundToggle />
           {/* PRD §6.1: in the header of every case, not once at load. */}

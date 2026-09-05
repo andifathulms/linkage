@@ -237,12 +237,15 @@ strong {
   border-left: 1px solid var(--rule);
 }
 
+/* The rail below already names the current case and marks it. This slot says what the
+   case is instead of repeating its title, and sets it as a sentence: DESIGN §3.2 rules
+   out all-caps, and a summary in caps is unreadable at this size anyway. */
 .header__case {
-  font-size: var(--t-micro-size);
+  font-size: var(--t-small-size);
   color: var(--ink-mid);
-  font-family: var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: var(--track-micro);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
