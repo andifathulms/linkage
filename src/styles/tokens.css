@@ -25,10 +25,17 @@
   --ledger-sunk: #d5dacf;
   --ink: #14170f;
   --ink-mid: #555c50;
-  --ink-faint: #949a8c;
+  --ink-faint: #62655c;
+  /* Graphic only: fills, hairlines, and the NIK mask. Never a text colour — it does
+     not clear 4.5:1 on any ground and it is not meant to be read. */
   --ink-ghost: #b9bfb0;
   --rule: #cdd2c5;
   --rule-strong: #b3b9a9;
+
+  /* The neutral text ramp is --ink, --ink-mid, --ink-faint, in that order, and every
+     step clears 4.5:1 against every surface that carries text, --ledger-deep included:
+     15.5 / 5.9 / 5.1 on the ledger, 15.2 / 7.3 / 5.4 on the plate. Anything recessive
+     enough to fail that floor is a graphic, not a word, and belongs in --ink-ghost. */
 
   /* 2.2 The primary distinction. Protected is the default and carries no colour. */
   --exposed: #a8452c;
@@ -83,6 +90,11 @@
   --t-h2-line: 1.24;
   --t-body-size: 15px;
   --t-body-line: 1.62;
+  /* Running copy only. DESIGN §3.1 sets the base at 15 px for dense registers, which is
+     the right size for a table of a hundred thousand entries and one step too small for
+     a paragraph someone is asked to read. Tables keep the base; prose gets this. */
+  --t-prose-size: 16px;
+  --t-prose-line: 1.6;
   --t-nik-size: 17px;
   --t-nik-line: 1.4;
   --t-data-size: 13px;
@@ -138,7 +150,7 @@
   --ledger-sunk: #0c0e06;
   --ink: #e9ece1;
   --ink-mid: #a0a695;
-  --ink-faint: #6f7566;
+  --ink-faint: #898e81;
   --ink-ghost: #4b5044;
   --rule: #333829;
   --rule-strong: #4a5040;
