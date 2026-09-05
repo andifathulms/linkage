@@ -1259,19 +1259,33 @@ input[type='range']:hover::-webkit-slider-thumb {
 }
 
 .exposure__key {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  padding-left: var(--s-1);
-  border-left: 2px solid var(--ink-ghost);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: var(--s-1);
+  row-gap: 1px;
+  align-items: center;
 }
 
-.exposure__key[data-band='alone'] {
-  border-left-color: var(--exposed);
+/* A swatch, not a rule. The bar above encodes exposure in three colours and this key is
+   the only thing on screen that says which is which, so it reads as a key rather than as
+   a decorative edge. */
+.exposure__key::before {
+  content: '';
+  grid-row: 1 / span 2;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--ink-ghost);
+  box-shadow: inset 0 0 0 1px var(--rule);
 }
 
-.exposure__key[data-band='narrow'] {
-  border-left-color: var(--narrow);
+.exposure__key[data-band='alone']::before {
+  background: var(--exposed);
+}
+
+.exposure__key[data-band='narrow']::before {
+  background: var(--narrow);
 }
 
 .exposure__count {
