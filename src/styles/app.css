@@ -580,7 +580,7 @@ caption.panel__title::after {
   font-size: var(--t-micro-size);
   text-transform: uppercase;
   letter-spacing: var(--track-micro);
-  color: var(--exposed);
+  color: var(--ink-mid);
   margin-bottom: var(--s-2);
 }
 
@@ -589,7 +589,7 @@ caption.panel__title::after {
   display: inline-block;
   width: var(--s-4);
   height: 1px;
-  background: var(--exposed);
+  background: var(--rule-strong);
   vertical-align: middle;
   margin-right: var(--s-1);
   transform-origin: left;
