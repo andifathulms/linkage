@@ -564,6 +564,9 @@ caption.panel__title::after {
 
 .prose p {
   color: var(--ink-mid);
+  font-size: var(--t-prose-size);
+  line-height: var(--t-prose-line);
+  max-width: var(--measure);
 }
 
 .prose p:first-of-type {
@@ -594,7 +597,7 @@ caption.panel__title::after {
 }
 
 .note {
-  font-size: var(--t-small-size);
+  font-size: var(--t-body-size);
   color: var(--ink-mid);
   line-height: 1.55;
   max-width: var(--measure);
