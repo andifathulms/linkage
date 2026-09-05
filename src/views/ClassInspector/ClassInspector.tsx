@@ -103,6 +103,16 @@ export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps
         role="img"
         aria-label={`Sensitive value distribution in this class of ${cls.members.length}, against the population distribution.`}
       >
+        {/* A baseline, so the bars and the population outlines stand on something
+            rather than floating in the panel. */}
+        <line
+          x1={0}
+          y1={height + 0.5}
+          x2={width}
+          y2={height + 0.5}
+          stroke="var(--rule-strong)"
+          strokeWidth="1"
+        />
         {bars.map((bar, i) => {
           const x = i * (barWidth + gap);
           const h = (bar.classShare / maxShare) * height;
