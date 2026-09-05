@@ -395,7 +395,7 @@ strong {
 }
 
 .cases__item[disabled] {
-  color: var(--ink-ghost);
+  color: var(--ink-faint);
   cursor: default;
 }
 
@@ -431,6 +431,15 @@ strong {
 
 .cases__item[data-done='true'][aria-current='true'] .cases__index {
   color: var(--ledger-panel);
+}
+
+/* A locked case is legible and visibly not yet available. The disc goes hollow against
+   the ruling rather than carrying a padlock, which DESIGN §2.5 rules out along with the
+   rest of the security-iconography register. */
+.cases__item[disabled] .cases__index {
+  background: transparent;
+  border-style: dashed;
+  color: var(--ink-faint);
 }
 
 .cases__label {
@@ -984,7 +993,7 @@ input[type='range']:hover::-webkit-slider-thumb {
 
 .button[disabled] {
   border-color: var(--rule);
-  color: var(--ink-ghost);
+  color: var(--ink-faint);
   cursor: default;
   background: var(--ledger-deep);
   box-shadow: none;
@@ -1328,7 +1337,7 @@ input[type='range']:hover::-webkit-slider-thumb {
 /* A row matching many fades its lines. A row matching exactly one resolves — both rows
    and their connecting line settle into plain matched ink (DESIGN §5.2). */
 .linkage__table tbody tr {
-  color: var(--ink-ghost);
+  color: var(--ink-faint);
   transition:
     color var(--d-join) var(--e-standard),
     background-color var(--d-join) var(--e-standard);
