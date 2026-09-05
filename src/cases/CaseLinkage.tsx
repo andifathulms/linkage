@@ -62,7 +62,23 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
         selectedClass={selectedClass}
         onSelectClass={setSelectedClass}
         seed={config.seed}
+        thesis="Removing names does not anonymize anything"
+        gloss="Every mark below is one generated record, sitting with the records it cannot be told apart from. The marks standing alone are the ones a join on three ordinary attributes can name."
       />
+
+      <div className="readout" style={{ padding: 'var(--s-3) var(--gutter)' }}>
+        <Readout
+          label="Uniquely identified"
+          value={<Count of={result.correct} total={result.attempted} label="" />}
+          exposed={result.correct > 0}
+        />
+        <Readout label="Not determined" value={result.failed.toLocaleString('en')} />
+        <Readout
+          label="Records standing alone in the population"
+          value={set.singletons.toLocaleString('en')}
+          exposed={set.singletons > 0}
+        />
+      </div>
 
       <div className="prose">
         <Eyebrow>Case 1 · two tables, one join</Eyebrow>
@@ -82,20 +98,6 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
           The join below is run against the generated population, and the count is measured, not
           claimed. The records it fails on are counted too, and can be inspected.
         </p>
-      </div>
-
-      <div className="readout" style={{ padding: 'var(--s-3) var(--gutter)' }}>
-        <Readout
-          label="Uniquely identified"
-          value={<Count of={result.correct} total={result.attempted} label="" />}
-          exposed={result.correct > 0}
-        />
-        <Readout label="Not determined" value={result.failed.toLocaleString('en')} />
-        <Readout
-          label="Records standing alone in the population"
-          value={set.singletons.toLocaleString('en')}
-          exposed={set.singletons > 0}
-        />
       </div>
 
       <Linkage

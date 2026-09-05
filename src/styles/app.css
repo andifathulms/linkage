@@ -1161,6 +1161,37 @@ input[type='range']:hover::-webkit-slider-thumb {
   cursor: crosshair;
 }
 
+/* The field's caption, carried above it rather than below because on first load it is
+   the only sentence on screen and the field is unreadable without it.
+   DESIGN §4.1 keeps the field the largest element and at the top; a caption is a reading
+   of the field, which is what §4.1 says everything else should be. */
+.field__lede {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-3) var(--gutter);
+  border-bottom: 1px solid var(--rule);
+  background: var(--ledger-panel);
+}
+
+.field__thesis {
+  font-size: var(--t-h2-size);
+  line-height: var(--t-h2-line);
+  letter-spacing: var(--track-h2);
+  font-weight: 600;
+  margin: 0;
+  max-width: 34ch;
+  text-wrap: balance;
+}
+
+.field__gloss {
+  margin: 0;
+  font-size: var(--t-prose-size);
+  line-height: var(--t-prose-line);
+  color: var(--ink-mid);
+  max-width: 62ch;
+}
+
 /* The rail above the field. Values are monospaced and the changing ones are set in ink
    against a muted label, so a glance costs nothing. */
 .field__readout {
@@ -1768,6 +1799,14 @@ input[type='range']:hover::-webkit-slider-thumb {
 
   .prose {
     padding: var(--s-4) var(--s-2) var(--s-3);
+  }
+
+  .field__lede {
+    padding: var(--s-2) var(--s-2);
+  }
+
+  .header__case {
+    display: none;
   }
 
   .panel {

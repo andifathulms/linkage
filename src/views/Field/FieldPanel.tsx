@@ -5,7 +5,7 @@
  * the fast reading; the table is the complete one, and both are always available rather
  * than one being an accessibility afterthought.
  */
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import type { ClassSet } from '../../engine/classes';
 import { exposureOf } from '../../engine/classes';
 import { Field, type FieldHover } from './Field';
@@ -19,6 +19,13 @@ export interface FieldPanelProps {
   selectedClass: number | null;
   onSelectClass: (index: number | null) => void;
   seed: number;
+  /**
+   * The field's caption, above it. Passed only by the case a reader lands on, because a
+   * first-time reader meets a canvas of marks before any sentence explains what a mark
+   * is; a case reached later does not need the thesis restated.
+   */
+  thesis?: ReactNode;
+  gloss?: ReactNode;
 }
 
 export function FieldPanel({
@@ -28,6 +35,8 @@ export function FieldPanel({
   selectedClass,
   onSelectClass,
   seed,
+  thesis,
+  gloss,
 }: FieldPanelProps) {
   const [zoom, setZoom] = useState(1);
   const [hover, setHover] = useState<FieldHover | null>(null);
@@ -78,6 +87,13 @@ export function FieldPanel({
 
   return (
     <section aria-label="The field">
+      {thesis && (
+        <div className="field__lede">
+          <h1 className="field__thesis">{thesis}</h1>
+          {gloss && <p className="field__gloss">{gloss}</p>}
+        </div>
+      )}
+
       <div className={`field__readout${set.singletons > 0 ? ' field__readout--exposed' : ''}`}>
         {hover ? (
           <>
