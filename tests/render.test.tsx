@@ -19,6 +19,11 @@ import { Nik } from '../src/views/Nik/Nik';
 import { Uniqueness } from '../src/views/Uniqueness/Uniqueness';
 import { Lattice } from '../src/views/Lattice/Lattice';
 import { Frontier } from '../src/views/Frontier/Frontier';
+import { Composition } from '../src/views/Composition/Composition';
+import { Roll } from '../src/views/Roll/Roll';
+import { Release } from '../src/views/Release/Release';
+import { Suppression } from '../src/views/Suppression/Suppression';
+import { Attribution } from '../src/views/Attribution/Attribution';
 import { generatePopulation, DEFAULT_PARAMS } from '../src/engine/generate/population';
 import { buildTaxonomyFor, DEFAULT_CONFIG, QUASI } from '../src/state/store';
 import { generalisePopulation } from '../src/engine/generalise';
@@ -84,6 +89,62 @@ describe('every instrument renders', () => {
         onSelect={() => {}}
       />,
     ],
+    [
+      'two releases',
+      <Composition
+        key="c"
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        seed={5}
+      />,
+    ],
+    [
+      'the attacker roll',
+      <Roll
+        key="r"
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        seed={5}
+      />,
+    ],
+    [
+      'the release against the population',
+      <Release
+        key="rel"
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        seed={5}
+      />,
+    ],
+    [
+      'who pays for k',
+      <Suppression
+        key="s"
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        targetK={5}
+        seed={5}
+      />,
+    ],
+    [
+      'the estimate against the population',
+      <Attribution
+        key="at"
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        seed={5}
+      />,
+    ],
   ] as const;
 
   for (const [label, element] of instruments) {
@@ -114,6 +175,55 @@ describe('the copy holds to its register', () => {
     renderToString(<Sandbox {...props} />),
     renderToString(<Nik records={population.records} />),
     renderToString(<Assessor />),
+    // The five instruments added for the qualifying readings. They carry the most
+    // argumentative copy in the app, so they belong under the register check rather
+    // than outside it.
+    renderToString(
+      <Composition
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        seed={5}
+      />,
+    ),
+    renderToString(
+      <Roll
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        seed={5}
+      />,
+    ),
+    renderToString(
+      <Release
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        seed={5}
+      />,
+    ),
+    renderToString(
+      <Suppression
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        targetK={5}
+        seed={5}
+      />,
+    ),
+    renderToString(
+      <Attribution
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={QUASI}
+        vector={DEFAULT_CONFIG.vector}
+        seed={5}
+      />,
+    ),
   ].join('\n'));
 
   it('uses no lurid vocabulary', () => {

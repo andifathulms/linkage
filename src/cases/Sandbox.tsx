@@ -19,13 +19,36 @@ import { Uniqueness } from '../views/Uniqueness/Uniqueness';
 import { Assessor } from '../views/Assessor/Assessor';
 import { Differencing } from '../views/Differencing/Differencing';
 import { BudgetPanel } from '../views/Budget/Budget';
+import { Composition } from '../views/Composition/Composition';
+import { Roll } from '../views/Roll/Roll';
+import { Release } from '../views/Release/Release';
+import { Suppression } from '../views/Suppression/Suppression';
+import { Attribution } from '../views/Attribution/Attribution';
 import { Slider } from '../ui/primitives';
 import { QUASI } from '../state/store';
 import { toCsv, downloadCsv } from '../ui/csv';
 
 type Instrument =
-  'lattice' | 'nik' | 'frontier' | 'uniqueness' | 'differencing' | 'budget' | 'assessor';
+  | 'lattice'
+  | 'nik'
+  | 'frontier'
+  | 'uniqueness'
+  | 'differencing'
+  | 'budget'
+  | 'assessor'
+  | 'composition'
+  | 'roll'
+  | 'release'
+  | 'suppression'
+  | 'attribution';
 
+/**
+ * Ordered so the five instruments that qualify a headline number sit together after the
+ * ones that produce it. Each of them exists because the app was making a claim it had
+ * not measured: that one release is the whole story, that the attacker's roll is
+ * perfect, that k on an extract describes the risk, that suppression is a count, and
+ * that the assessor's assumption is free.
+ */
 const INSTRUMENTS: Array<{ id: Instrument; label: string }> = [
   { id: 'frontier', label: 'Frontier' },
   { id: 'lattice', label: 'Lattice' },
@@ -33,6 +56,11 @@ const INSTRUMENTS: Array<{ id: Instrument; label: string }> = [
   { id: 'uniqueness', label: 'Uniqueness' },
   { id: 'differencing', label: 'Differencing' },
   { id: 'budget', label: 'Budget' },
+  { id: 'composition', label: 'Two releases' },
+  { id: 'roll', label: 'The roll' },
+  { id: 'release', label: 'Release and population' },
+  { id: 'suppression', label: 'Who pays' },
+  { id: 'attribution', label: 'Estimate against truth' },
   { id: 'assessor', label: 'Assessor' },
 ];
 
@@ -211,6 +239,52 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
               seed={config.seed}
               epsilon={config.epsilon}
               onEpsilon={(epsilon) => setConfig({ epsilon })}
+            />
+          )}
+          {instrument === 'composition' && (
+            <Composition
+              records={population.records}
+              taxonomy={taxonomy}
+              columns={QUASI}
+              vector={config.vector}
+              seed={config.seed}
+            />
+          )}
+          {instrument === 'roll' && (
+            <Roll
+              records={population.records}
+              taxonomy={taxonomy}
+              columns={QUASI}
+              vector={config.vector}
+              seed={config.seed}
+            />
+          )}
+          {instrument === 'release' && (
+            <Release
+              records={population.records}
+              taxonomy={taxonomy}
+              columns={QUASI}
+              vector={config.vector}
+              seed={config.seed}
+            />
+          )}
+          {instrument === 'suppression' && (
+            <Suppression
+              records={population.records}
+              taxonomy={taxonomy}
+              columns={QUASI}
+              vector={config.vector}
+              targetK={config.targetK}
+              seed={config.seed}
+            />
+          )}
+          {instrument === 'attribution' && (
+            <Attribution
+              records={population.records}
+              taxonomy={taxonomy}
+              columns={QUASI}
+              vector={config.vector}
+              seed={config.seed}
             />
           )}
           {instrument === 'assessor' && <Assessor />}
