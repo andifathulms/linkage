@@ -84,7 +84,7 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
         </p>
       </div>
 
-      <div className="readout" style={{ padding: '0 var(--s-3) var(--s-3)' }}>
+      <div className="readout" style={{ padding: 'var(--s-3) var(--gutter)' }}>
         <Readout
           label="Uniquely identified"
           value={<Count of={result.correct} total={result.attempted} label="" />}

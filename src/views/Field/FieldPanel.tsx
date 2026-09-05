@@ -202,7 +202,7 @@ export function FieldPanel({
                   <td className="num">{row.size}</td>
                   <td className="num">{row.l}</td>
                   <td className="num">{row.t.toFixed(3)}</td>
-                  <td>
+                  <td className="act">
                     <button
                       type="button"
                       className="button button--quiet"

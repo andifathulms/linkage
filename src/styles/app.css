@@ -506,6 +506,16 @@ strong {
   background: var(--rule);
 }
 
+/* A caption is a caption. The panel title's flex rule takes it out of the table's own
+   box order, and the browser then draws it after the header row instead of above it. */
+caption.panel__title {
+  display: table-caption;
+}
+
+caption.panel__title::after {
+  content: none;
+}
+
 .columns {
   display: grid;
   gap: var(--s-3);
@@ -654,7 +664,7 @@ strong {
 
 .readout__item:has(.readout__value--exposed) {
   border-left-color: var(--exposed);
-  background: linear-gradient(90deg, var(--exposed-wash), transparent 80%);
+  background: linear-gradient(90deg, var(--exposed-wash), transparent 60%);
 }
 
 .readout__label {
@@ -812,13 +822,36 @@ strong {
 .table td.num,
 .table th.num {
   text-align: right;
+  /* Shrink to content, so the numeric columns gather at the right edge instead of
+     drifting into the middle of a wide table, and separate on the left — adjacent
+     right-aligned columns with no gap read as one number. */
+  width: 1%;
+  white-space: nowrap;
+  padding-left: var(--s-3);
   padding-right: 0;
+}
+
+/* Row actions sit clear of the last figure. Marked explicitly rather than matched by
+   position, because the last cell of a data table is usually data. */
+.table td.act {
+  padding-left: var(--s-3);
+  padding-right: 0;
+  width: 1%;
+  text-align: right;
 }
 
 .table__scroll {
   overflow: auto;
   max-height: 340px;
   scrollbar-width: thin;
+  /* No padding above the sticky header: a scrolled row would show in the gap between
+     the container edge and where the header pins. */
+  padding-top: 0;
+}
+
+.table__scroll caption.panel__title {
+  padding: var(--s-3) 0 var(--s-2);
+  background: var(--ledger-panel);
 }
 
 .table tr[data-exposure='exposed'] td:first-child {
@@ -1267,8 +1300,13 @@ input[type='range']:hover::-webkit-slider-thumb {
   text-align: left;
   margin-bottom: var(--s-1);
   /* The join column's offset is computed from these two line heights, so they are set
-     rather than inherited. */
+     rather than inherited — and the caption is held to a single line, because a caption
+     that wrapped on one side would put the two tables' rows on different baselines and
+     the connecting lines would point at nothing. */
   line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: var(--t-micro-size);
   text-transform: uppercase;
   letter-spacing: var(--track-label);
@@ -1438,6 +1476,10 @@ input[type='range']:hover::-webkit-slider-thumb {
   to {
     transform: scaleY(1);
   }
+}
+
+.inspector .table {
+  max-width: 760px;
 }
 
 .inspector__chart {
