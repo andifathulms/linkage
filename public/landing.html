@@ -1,0 +1,1884 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Linkage. Removing names does not anonymize anything</title>
+    <meta
+      name="description"
+      content="An explainer on re-identification, with the attacks scored against ground truth. All records are generated. No real person's data is used or accepted."
+    />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23ECEEE7'/%3E%3Crect x='2' y='2' width='4' height='4' fill='%2314170F'/%3E%3Crect x='8' y='2' width='4' height='4' fill='%2314170F'/%3E%3Crect x='2' y='8' width='4' height='4' fill='%2314170F'/%3E%3Crect x='10' y='10' width='4' height='4' fill='%23A8452C'/%3E%3C/svg%3E" />
+
+    <!--
+      Standalone. No webfont request, no script from a CDN, no analytics. PRD §6.5 forbids
+      network at runtime and tests/no-file-input.test.ts greps everything that lands in
+      dist/, this file included. The typefaces name Fira first and fall back to system
+      faces, exactly as src/styles/tokens.css does.
+
+      The field in the hero is the real instrument at small scale: a seeded population,
+      real equivalence classes, real coalescence. Nothing here is a picture of the app.
+    -->
+    <style>
+      /* ---------------------------------------------------------------------
+         Tokens. Lifted from src/styles/tokens.css so the page and the app stay
+         one system. Roles only. No section names a hex value.
+         --------------------------------------------------------------------- */
+      :root {
+        color-scheme: light;
+
+        --ledger: #eceee7;
+        --ledger-panel: #f6f7f3;
+        --ledger-raised: #fbfbf8;
+        --ledger-deep: #dfe3da;
+        --ledger-sunk: #d5dacf;
+        --ink: #14170f;
+        --ink-mid: #555c50;
+        --ink-faint: #949a8c;
+        --ink-ghost: #b9bfb0;
+        --rule: #cdd2c5;
+        --rule-strong: #b3b9a9;
+
+        --exposed: #a8452c;
+        --narrow: #ad7a2b;
+        --safe: #3f6f52;
+
+        --released: #35606f;
+        --auxiliary: #5f5081;
+
+        --sensitive-1: #5a7d6e;
+        --sensitive-2: #7a6a8c;
+        --sensitive-3: #8c6f52;
+        --sensitive-4: #4e6e8c;
+        --sensitive-5: #7d6363;
+
+        --mark-protected: #22261c;
+        --mark-narrow: #b07f2e;
+        --mark-exposed: #ad4127;
+        --mark-ground: #dfe3da;
+
+        --font-sans:
+          'Fira Sans', 'Inter', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          system-ui, sans-serif;
+        --font-mono:
+          'Fira Mono', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', ui-monospace, monospace;
+
+        --t-hero-size: clamp(34px, 2.1rem + 2.4vw, 62px);
+        --t-display-size: clamp(28px, 1.6rem + 1.5vw, 44px);
+        --t-figure-size: clamp(20px, 1rem + 0.5vw, 24px);
+        --t-h2-size: clamp(19px, 1.05rem + 0.5vw, 26px);
+        --t-body-size: 15px;
+        --t-nik-size: 17px;
+        --t-data-size: 13px;
+        --t-small-size: 12px;
+
+        --track-hero: -0.03em;
+        --track-display: -0.022em;
+        --track-h2: -0.014em;
+
+        --s-0: 4px;
+        --s-1: 8px;
+        --s-2: 12px;
+        --s-3: 16px;
+        --s-4: 24px;
+        --s-5: 40px;
+        --s-6: 64px;
+        --s-7: 96px;
+
+        /* Shape lock: one radius for panels, controls and cells. */
+        --radius: 3px;
+        --gutter: clamp(20px, 4vw, 56px);
+        --measure: 62ch;
+
+        --d-coalesce: 620ms;
+        --e-coalesce: cubic-bezier(0.32, 0.72, 0, 1);
+        --e-standard: cubic-bezier(0.4, 0, 0.2, 1);
+        --d-tap: 120ms;
+      }
+
+      /* The plate. Same instrument, darkroom lamp. */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          color-scheme: dark;
+
+          --ledger: #14160f;
+          --ledger-panel: #1b1e16;
+          --ledger-raised: #22261d;
+          --ledger-deep: #101208;
+          --ledger-sunk: #0c0e06;
+          --ink: #e9ece1;
+          --ink-mid: #a0a695;
+          --ink-faint: #6f7566;
+          --ink-ghost: #4b5044;
+          --rule: #333829;
+          --rule-strong: #4a5040;
+
+          --exposed: #e0764f;
+          --narrow: #d9a545;
+          --safe: #74b58c;
+
+          --released: #6fb0c6;
+          --auxiliary: #a48fd0;
+
+          --sensitive-1: #7fb69f;
+          --sensitive-2: #a795bb;
+          --sensitive-3: #c19a72;
+          --sensitive-4: #7ba4c6;
+          --sensitive-5: #b08e8e;
+
+          --mark-protected: #cfd4c4;
+          --mark-narrow: #d9a545;
+          --mark-exposed: #e0764f;
+          --mark-ground: #101208;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        :root {
+          --d-coalesce: 0ms;
+          --d-tap: 0ms;
+        }
+      }
+
+      /* ---------------------------------------------------------------------
+         Base
+         --------------------------------------------------------------------- */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+
+      body {
+        margin: 0;
+        background: var(--ledger);
+        color: var(--ink);
+        font-family: var(--font-sans);
+        font-size: var(--t-body-size);
+        line-height: 1.62;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+
+      h1,
+      h2,
+      h3,
+      p,
+      figure,
+      ul,
+      ol {
+        margin: 0;
+      }
+
+      ul,
+      ol {
+        padding: 0;
+        list-style: none;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--ink);
+        outline-offset: 3px;
+      }
+
+      .shell {
+        width: 100%;
+        max-width: 1240px;
+        margin-inline: auto;
+        padding-inline: var(--gutter);
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      .skip {
+        position: absolute;
+        left: var(--gutter);
+        top: -100px;
+        z-index: 20;
+        padding: var(--s-1) var(--s-3);
+        background: var(--ink);
+        color: var(--ledger);
+        border-radius: var(--radius);
+        transition: top var(--d-tap) var(--e-standard);
+      }
+
+      .skip:focus-visible {
+        top: var(--s-2);
+      }
+
+      .num {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: 'tnum' 1;
+      }
+
+      /* ---------------------------------------------------------------------
+         Header. One line at desktop, 64px.
+         --------------------------------------------------------------------- */
+      .masthead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: color-mix(in srgb, var(--ledger) 88%, transparent);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--rule);
+      }
+
+      @supports not (backdrop-filter: blur(4px)) {
+        .masthead {
+          background: var(--ledger);
+        }
+      }
+
+      .masthead__row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--s-4);
+        height: 64px;
+      }
+
+      .wordmark {
+        display: inline-flex;
+        align-items: baseline;
+        gap: var(--s-2);
+        text-decoration: none;
+        letter-spacing: var(--track-h2);
+      }
+
+      .wordmark__name {
+        font-size: 17px;
+        font-weight: 600;
+      }
+
+      .wordmark__descriptor {
+        font-size: var(--t-small-size);
+        color: var(--ink-mid);
+      }
+
+      @media (max-width: 720px) {
+        .wordmark__descriptor {
+          display: none;
+        }
+      }
+
+      .masthead__links {
+        display: flex;
+        align-items: center;
+        gap: var(--s-4);
+        font-size: var(--t-data-size);
+      }
+
+      .masthead__links a {
+        color: var(--ink-mid);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: color var(--d-tap) var(--e-standard);
+      }
+
+      .masthead__links a:hover {
+        color: var(--ink);
+      }
+
+      @media (max-width: 640px) {
+        .masthead__links .is-secondary {
+          display: none;
+        }
+      }
+
+      /* ---------------------------------------------------------------------
+         Buttons. Ink on ledger, ledger on ink. Both grounds invert together, so
+         the contrast holds in each without a second rule.
+         --------------------------------------------------------------------- */
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--s-1);
+        height: 42px;
+        padding-inline: var(--s-4);
+        border: 1px solid var(--ink);
+        border-radius: var(--radius);
+        background: var(--ink);
+        color: var(--ledger);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+          transform var(--d-tap) var(--e-standard),
+          background var(--d-tap) var(--e-standard);
+      }
+
+      .button:active {
+        transform: translateY(1px);
+      }
+
+      .button--quiet {
+        background: transparent;
+        color: var(--ink);
+        border-color: var(--rule-strong);
+      }
+
+      .button--quiet:hover {
+        border-color: var(--ink);
+      }
+
+      .button--compact {
+        height: 34px;
+        padding-inline: var(--s-3);
+        font-size: var(--t-data-size);
+      }
+
+      /* ---------------------------------------------------------------------
+         Section rhythm
+         --------------------------------------------------------------------- */
+      section {
+        padding-block: clamp(var(--s-6), 9vw, 120px);
+        border-top: 1px solid var(--rule);
+      }
+
+      .section-head {
+        max-width: var(--measure);
+        margin-bottom: var(--s-5);
+      }
+
+      h2 {
+        font-size: var(--t-h2-size);
+        font-weight: 600;
+        line-height: 1.24;
+        letter-spacing: var(--track-h2);
+      }
+
+      .section-head p {
+        margin-top: var(--s-2);
+        color: var(--ink-mid);
+      }
+
+      .note {
+        color: var(--ink-mid);
+        font-size: var(--t-small-size);
+        line-height: 1.5;
+      }
+
+      /* ---------------------------------------------------------------------
+         Hero. Asymmetric split: copy left, the working field right.
+         --------------------------------------------------------------------- */
+      .hero {
+        border-top: 0;
+        padding-block: clamp(var(--s-5), 5vh, 88px) clamp(var(--s-6), 8vw, 104px);
+      }
+
+      .hero__grid {
+        display: grid;
+        gap: clamp(var(--s-5), 5vw, var(--s-7));
+        grid-template-columns: minmax(0, 1fr);
+        align-items: center;
+      }
+
+      @media (min-width: 1000px) {
+        .hero__grid {
+          grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+        }
+      }
+
+      .hero h1 {
+        font-size: var(--t-hero-size);
+        font-weight: 600;
+        line-height: 1.02;
+        letter-spacing: var(--track-hero);
+        max-width: 15ch;
+      }
+
+      .hero__lede {
+        margin-top: var(--s-4);
+        max-width: 46ch;
+        color: var(--ink-mid);
+        font-size: clamp(15px, 0.9rem + 0.25vw, 18px);
+        line-height: 1.55;
+      }
+
+      .hero__actions {
+        margin-top: var(--s-5);
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-2);
+      }
+
+      /* ---------------------------------------------------------------------
+         The field panel
+         --------------------------------------------------------------------- */
+      .panel {
+        background: var(--ledger-panel);
+        border: 1px solid var(--rule);
+        border-radius: var(--radius);
+      }
+
+      .field {
+        overflow: hidden;
+      }
+
+      .field__stage {
+        position: relative;
+        background: var(--ledger-deep);
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .field__stage canvas {
+        display: block;
+        width: 100%;
+        height: clamp(260px, 42vh, 380px);
+      }
+
+      .field__readout {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .field__readout div {
+        padding: var(--s-3);
+        border-left: 1px solid var(--rule);
+      }
+
+      .field__readout div:first-child {
+        border-left: 0;
+      }
+
+      .field__readout dt,
+      .stat dt {
+        font-size: var(--t-small-size);
+        color: var(--ink-mid);
+      }
+
+      .field__readout dd {
+        margin: 2px 0 0;
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: var(--t-figure-size);
+        font-weight: 600;
+        letter-spacing: var(--track-display);
+      }
+
+      .field__readout dd.is-exposed {
+        color: var(--exposed);
+      }
+
+      .field__readout dd.is-clear {
+        color: var(--safe);
+      }
+
+      .field__controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--s-2);
+        padding: var(--s-3);
+      }
+
+      .steps {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .step {
+        appearance: none;
+        border: 1px solid var(--rule-strong);
+        border-radius: var(--radius);
+        background: var(--ledger-raised);
+        color: var(--ink-mid);
+        font: inherit;
+        font-size: var(--t-data-size);
+        padding: 6px var(--s-2);
+        cursor: pointer;
+        transition:
+          background var(--d-tap) var(--e-standard),
+          color var(--d-tap) var(--e-standard),
+          border-color var(--d-tap) var(--e-standard);
+      }
+
+      .step:hover {
+        border-color: var(--ink);
+        color: var(--ink);
+      }
+
+      .step[aria-pressed='true'] {
+        background: var(--ink);
+        border-color: var(--ink);
+        color: var(--ledger);
+      }
+
+      .field__caption {
+        padding: var(--s-2) var(--s-3) var(--s-3);
+        border-top: 1px solid var(--rule);
+        color: var(--ink-mid);
+        font-size: var(--t-small-size);
+      }
+
+      /* ---------------------------------------------------------------------
+         The contested figures
+         --------------------------------------------------------------------- */
+      .figures {
+        display: grid;
+        gap: var(--s-5);
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      @media (min-width: 860px) {
+        .figures {
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 0;
+        }
+
+        .figures > * + * {
+          border-left: 1px solid var(--rule);
+          padding-left: var(--s-5);
+        }
+
+        .figures > *:first-child {
+          padding-right: var(--s-5);
+        }
+      }
+
+      .figure__value {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: var(--t-display-size);
+        font-weight: 600;
+        line-height: 1.04;
+        letter-spacing: var(--track-display);
+      }
+
+      .figure__who {
+        margin-top: var(--s-1);
+        font-size: var(--t-data-size);
+        color: var(--ink-mid);
+      }
+
+      .figure__body {
+        margin-top: var(--s-3);
+        max-width: 44ch;
+      }
+
+      .figure__rows {
+        margin-top: var(--s-4);
+        border-top: 1px solid var(--rule);
+      }
+
+      .figure__rows div {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--s-3);
+        padding: 7px 0;
+        font-size: var(--t-data-size);
+      }
+
+      .figure__rows dt {
+        color: var(--ink-mid);
+      }
+
+      .figure__rows dd {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .unresolved {
+        margin-top: var(--s-5);
+        padding-top: var(--s-4);
+        border-top: 1px solid var(--rule-strong);
+        max-width: var(--measure);
+      }
+
+      /* ---------------------------------------------------------------------
+         The NIK strip
+         --------------------------------------------------------------------- */
+      .nik {
+        display: grid;
+        gap: var(--s-5);
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      @media (min-width: 1000px) {
+        .nik {
+          grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+          gap: var(--s-6);
+          align-items: start;
+        }
+      }
+
+      .strip {
+        padding: var(--s-4) var(--s-3);
+      }
+
+      .strip__digits {
+        display: flex;
+        gap: 3px;
+        justify-content: flex-start;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: var(--s-1);
+      }
+
+      .digit {
+        flex: 0 0 auto;
+        width: clamp(20px, 5.4vw, 30px);
+        height: clamp(30px, 7.4vw, 40px);
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--rule);
+        border-radius: var(--radius);
+        background: var(--ledger-raised);
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: var(--t-nik-size);
+        transition:
+          background var(--d-tap) var(--e-standard),
+          color var(--d-tap) var(--e-standard),
+          border-color var(--d-tap) var(--e-standard);
+      }
+
+      .digit.is-masked {
+        background: var(--ledger-sunk);
+        border-color: var(--rule);
+        color: transparent;
+      }
+
+      .digit.is-boundary {
+        margin-left: var(--s-2);
+      }
+
+      .strip__legend {
+        display: flex;
+        gap: var(--s-2);
+        margin-top: var(--s-2);
+        font-size: var(--t-small-size);
+        color: var(--ink-mid);
+      }
+
+      .strip__legend span {
+        flex: 0 0 auto;
+      }
+
+      .presets {
+        display: grid;
+        gap: var(--s-2);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        margin-top: var(--s-4);
+      }
+
+      .preset {
+        appearance: none;
+        text-align: left;
+        border: 1px solid var(--rule-strong);
+        border-radius: var(--radius);
+        background: var(--ledger-raised);
+        color: inherit;
+        font: inherit;
+        padding: var(--s-3);
+        cursor: pointer;
+        transition: border-color var(--d-tap) var(--e-standard);
+      }
+
+      .preset:hover {
+        border-color: var(--ink);
+      }
+
+      .preset[aria-pressed='true'] {
+        border-color: var(--ink);
+        box-shadow: inset 0 0 0 1px var(--ink);
+      }
+
+      .preset__name {
+        font-size: var(--t-data-size);
+        font-weight: 500;
+      }
+
+      .preset__value {
+        margin-top: var(--s-1);
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: var(--t-figure-size);
+        font-weight: 600;
+        letter-spacing: var(--track-display);
+      }
+
+      .preset__value.is-exposed {
+        color: var(--exposed);
+      }
+
+      .preset__value.is-clear {
+        color: var(--safe);
+      }
+
+      .preset__note {
+        margin-top: 2px;
+        font-size: var(--t-small-size);
+        color: var(--ink-mid);
+      }
+
+      .known {
+        margin-top: var(--s-4);
+        border-top: 1px solid var(--rule);
+      }
+
+      .known div {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--s-3);
+        padding: 8px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: var(--t-data-size);
+      }
+
+      .known dt {
+        color: var(--ink-mid);
+      }
+
+      .known dd {
+        margin: 0;
+        font-family: var(--font-mono);
+      }
+
+      /* ---------------------------------------------------------------------
+         The cases. Six cells, six pieces of content.
+         --------------------------------------------------------------------- */
+      .cases {
+        display: grid;
+        gap: var(--s-2);
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      @media (min-width: 700px) {
+        .cases {
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+
+        .cases > li:nth-child(1) {
+          grid-column: span 3;
+        }
+        .cases > li:nth-child(2) {
+          grid-column: span 3;
+        }
+        .cases > li:nth-child(3) {
+          grid-column: span 2;
+        }
+        .cases > li:nth-child(4) {
+          grid-column: span 2;
+        }
+        .cases > li:nth-child(5) {
+          grid-column: span 2;
+        }
+        .cases > li:nth-child(6) {
+          grid-column: span 6;
+        }
+      }
+
+      .case {
+        display: flex;
+        flex-direction: column;
+        gap: var(--s-2);
+        height: 100%;
+        padding: var(--s-4);
+        border: 1px solid var(--rule);
+        border-radius: var(--radius);
+        background: var(--ledger-panel);
+      }
+
+      .case--deep {
+        background: var(--ledger-deep);
+      }
+
+      .case--raised {
+        background: var(--ledger-raised);
+      }
+
+      .case h3 {
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: var(--track-h2);
+      }
+
+      .case p {
+        color: var(--ink-mid);
+        font-size: var(--t-data-size);
+        line-height: 1.5;
+        max-width: 48ch;
+      }
+
+      .case--wide {
+        flex-direction: column;
+      }
+
+      @media (min-width: 700px) {
+        .case--wide {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: var(--s-4);
+        }
+
+        .case--wide > div:first-child {
+          max-width: 52ch;
+        }
+      }
+
+      /* A real class distribution, drawn from the same population as the field.
+         Homogeneity is a chart with one bar and it needs no label. */
+      .dist {
+        margin-top: auto;
+        padding-top: var(--s-3);
+        display: flex;
+        align-items: flex-end;
+        gap: 5px;
+        height: 54px;
+      }
+
+      .dist span {
+        flex: 1 1 0;
+        min-height: 2px;
+        border-radius: 1px 1px 0 0;
+        background: var(--ink-ghost);
+      }
+
+      .dist span.is-value {
+        background: var(--sensitive-2);
+      }
+
+      /* A real budget: twelve counts at 0.1 against an allotment of 1.0. */
+      .meter {
+        margin-top: auto;
+        padding-top: var(--s-3);
+      }
+
+      .meter__track {
+        height: 10px;
+        border: 1px solid var(--rule-strong);
+        border-radius: var(--radius);
+        background: var(--ledger-sunk);
+        overflow: hidden;
+      }
+
+      .meter__fill {
+        height: 100%;
+        width: 80%;
+        background: var(--ink);
+      }
+
+      .meter__figures {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 6px;
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        font-size: var(--t-small-size);
+        color: var(--ink-mid);
+      }
+
+      /* Two tables approaching each other, drawn with the linkage roles. */
+      .join {
+        margin-top: auto;
+        padding-top: var(--s-3);
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: var(--s-2);
+      }
+
+      .join__side {
+        display: grid;
+        gap: 4px;
+      }
+
+      .join__side i {
+        height: 6px;
+        border-radius: 1px;
+        background: var(--released);
+        opacity: 0.5;
+      }
+
+      .join__side--aux i {
+        background: var(--auxiliary);
+      }
+
+      .join__side i.is-matched {
+        background: var(--ink);
+        opacity: 1;
+      }
+
+      .join__link {
+        width: 26px;
+        height: 1px;
+        background: var(--ink);
+      }
+
+      /* ---------------------------------------------------------------------
+         The constraints
+         --------------------------------------------------------------------- */
+      .constraints {
+        border-top: 1px solid var(--rule-strong);
+      }
+
+      .constraints > li {
+        display: grid;
+        gap: var(--s-1) var(--s-5);
+        grid-template-columns: minmax(0, 1fr);
+        padding-block: var(--s-4);
+        border-bottom: 1px solid var(--rule);
+      }
+
+      @media (min-width: 860px) {
+        .constraints > li {
+          grid-template-columns: minmax(0, 22ch) minmax(0, 1fr);
+        }
+      }
+
+      .constraints h3 {
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .constraints p {
+        color: var(--ink-mid);
+        max-width: 68ch;
+      }
+
+      /* ---------------------------------------------------------------------
+         Close and footer
+         --------------------------------------------------------------------- */
+      .close__grid {
+        display: grid;
+        gap: var(--s-4);
+        align-items: end;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      @media (min-width: 860px) {
+        .close__grid {
+          grid-template-columns: minmax(0, 1fr) auto;
+        }
+      }
+
+      .close h2 {
+        font-size: var(--t-display-size);
+        line-height: 1.06;
+        letter-spacing: var(--track-display);
+        max-width: 20ch;
+      }
+
+      footer {
+        border-top: 1px solid var(--rule);
+        padding-block: var(--s-5);
+        font-size: var(--t-small-size);
+        color: var(--ink-mid);
+      }
+
+      .footer__row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--s-2) var(--s-4);
+        justify-content: space-between;
+      }
+
+      .footer__links {
+        display: flex;
+        gap: var(--s-4);
+      }
+
+      .footer__links a:hover {
+        color: var(--ink);
+      }
+    </style>
+  </head>
+
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="masthead">
+      <div class="shell masthead__row">
+        <a class="wordmark" href="./">
+          <span class="wordmark__name">Linkage</span>
+          <span class="wordmark__descriptor">Removing names does not anonymize anything</span>
+        </a>
+        <nav class="masthead__links" aria-label="Sections">
+          <a class="is-secondary" href="#contested">The contested number</a>
+          <a class="is-secondary" href="#nik">The NIK finding</a>
+          <a href="#cases">The cases</a>
+          <a class="button button--compact" href="./">Open Linkage</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- Hero. Copy left, the working field right. -->
+      <section class="hero">
+        <div class="shell hero__grid">
+          <div>
+            <h1>Removing names does not anonymize anything.</h1>
+            <p class="hero__lede">
+              The identifier was never the name. It is the combination of ordinary attributes
+              that look harmless alone.
+            </p>
+            <div class="hero__actions">
+              <a class="button" href="./">Open Linkage</a>
+              <a class="button button--quiet" href="#contested">The method</a>
+            </div>
+          </div>
+
+          <figure class="panel field">
+            <div class="field__stage">
+              <canvas
+                id="field"
+                role="img"
+                aria-label="A field of 1,400 generated records, one mark each, grouped by equivalence class. Records that cannot be told apart sit together. A record nobody can hide among sits alone."
+              ></canvas>
+            </div>
+
+            <dl class="field__readout" id="readout" aria-live="polite">
+              <div>
+                <dt>Records alone in their class</dt>
+                <dd class="num" id="r-singletons">0</dd>
+              </div>
+              <div>
+                <dt>Smallest class</dt>
+                <dd class="num" id="r-k">0</dd>
+              </div>
+              <div>
+                <dt>Classes</dt>
+                <dd class="num" id="r-classes">0</dd>
+              </div>
+            </dl>
+
+            <div class="field__controls">
+              <div class="steps" role="group" aria-label="Generalisation level">
+                <button class="step" type="button" data-level="0" aria-pressed="true">
+                  kelurahan, date
+                </button>
+                <button class="step" type="button" data-level="1" aria-pressed="false">
+                  kecamatan, month
+                </button>
+                <button class="step" type="button" data-level="2" aria-pressed="false">
+                  kabupaten, year
+                </button>
+                <button class="step" type="button" data-level="3" aria-pressed="false">
+                  kabupaten, 10 years
+                </button>
+              </div>
+            </div>
+
+            <figcaption class="field__caption">
+              All records are generated. No real person's data is used or accepted. Raise the
+              generalisation and the marks coalesce. The last isolated mark absorbed is
+              k-anonymity, arrived at without a number.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- The contested number. Two figures, ruled apart. -->
+      <section id="contested">
+        <div class="shell">
+          <div class="section-head">
+            <h2>The most-cited statistic in data privacy is one two researchers disagree about.</h2>
+            <p>
+              Both agree on the phenomenon. They disagree, by more than twenty-five percentage
+              points, on the sharpest case. It is unresolved.
+            </p>
+          </div>
+
+          <div class="figures">
+            <div>
+              <p class="figure__value">87%</p>
+              <p class="figure__who">Sweeney, 2000, on 1990 US Census data</p>
+              <p class="figure__body">
+                216 million of 248 million people had a combination of five-digit ZIP, gender and
+                full date of birth likely to be unique. She demonstrated the consequence by buying
+                Massachusetts voter registration records for twenty dollars and linking them to
+                hospital data released as anonymous.
+              </p>
+              <dl class="figure__rows">
+                <div><dt>City, gender, date of birth</dt><dd>~50%</dd></div>
+                <div><dt>County, gender, date of birth</dt><dd>18%</dd></div>
+              </dl>
+            </div>
+
+            <div>
+              <p class="figure__value">63%</p>
+              <p class="figure__who">Golle, 2006, on 2000 US Census data</p>
+              <p class="figure__body">
+                Re-running Sweeney's own 1990 data he obtained 61%, not 87%, and stated plainly
+                that he could not account for the discrepancy because he lacked detail on her
+                collection and analysis methods.
+              </p>
+              <dl class="figure__rows">
+                <div><dt>Sweeney's 1990 data, re-run</dt><dd>61%</dd></div>
+                <div><dt>County, gender, date of birth</dt><dd>18%</dd></div>
+              </dl>
+            </div>
+          </div>
+
+          <p class="note unresolved">
+            Linkage does not pick a winner. It settles what a simulator can settle: generate
+            populations where the truth is known, run both methodologies against them, and show
+            where they diverge and why. Every attack is scored against ground truth, so a reader
+            gets 340 of 500 targets identified, never 68% success.
+          </p>
+        </div>
+      </section>
+
+      <!-- The NIK finding. Digit cells, two masks, two figures. -->
+      <section id="nik">
+        <div class="shell">
+          <div class="section-head">
+            <h2>A NIK encodes the quasi-identifier by construction.</h2>
+            <p>
+              Sixteen digits with a published structure: province, kabupaten, kecamatan, date of
+              birth, sequence. Female records add 40 to the day. Region, date of birth and gender
+              are Sweeney's exact triple, and a NIK carries all three.
+            </p>
+          </div>
+
+          <div class="nik">
+            <figure class="panel strip">
+              <div class="strip__digits" id="digits" role="img" aria-label="A sixteen digit NIK, segmented into region, date of birth and sequence, with the current mask applied."></div>
+              <div class="strip__legend">
+                <span>Region</span>
+                <span>Date of birth and gender</span>
+                <span>Sequence</span>
+              </div>
+
+              <div class="presets" role="group" aria-label="Masking preset">
+                <button class="preset" type="button" data-mask="tail" aria-pressed="true">
+                  <span class="preset__name">Mask the last four</span>
+                  <span class="preset__value num is-exposed" id="p-tail">0</span>
+                  <span class="preset__note">of 1,400 uniquely identified</span>
+                </button>
+                <button class="preset" type="button" data-mask="head" aria-pressed="false">
+                  <span class="preset__name">Mask the first twelve</span>
+                  <span class="preset__value num is-clear" id="p-head">0</span>
+                  <span class="preset__note">of 1,400 uniquely identified</span>
+                </button>
+              </div>
+
+              <dl class="known" id="known" aria-live="polite">
+                <div><dt>Region granularity</dt><dd id="k-region">kelurahan</dd></div>
+                <div><dt>Date precision</dt><dd id="k-date">exact day</dd></div>
+                <div><dt>Gender</dt><dd id="k-sex">known</dd></div>
+              </dl>
+            </figure>
+
+            <div>
+              <p>
+                Masking a NIK the way a card is masked is backwards. Card practice keeps a short
+                tail and hides the rest. Applied here, the habit that keeps the head preserves
+                region, birthdate and gender, which is everything the join needs, while hiding
+                only the sequence number, which identifies almost nothing on its own.
+              </p>
+              <p style="margin-top: var(--s-3)">
+                The correct masking destroys the head and may safely keep the tail. The two
+                figures above are computed on the same generated population as the field, and the
+                gap between them is the whole argument.
+              </p>
+              <p class="note" style="margin-top: var(--s-4)">
+                Every technique in Linkage is textbook and published. The app contributes
+                explanation and measurement, not capability.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- The cases. Six cells, six pieces of content. -->
+      <section id="cases">
+        <div class="shell">
+          <div class="section-head">
+            <h2>Five cases, each one an attack, a defense, and the attack that beats it.</h2>
+            <p>
+              A defense is introduced with the threat model it assumes, then with the attack that
+              defeats it, in that order. The sandbox opens after the fifth.
+            </p>
+          </div>
+
+          <ul class="cases">
+            <li>
+              <div class="case case--raised">
+                <h3>The linkage</h3>
+                <p>
+                  A target and two tables. Neither identifies anyone alone. You join them, and one
+                  row resolves to plain ink while everything around it stays ambiguous.
+                </p>
+                <div class="join" aria-hidden="true">
+                  <div class="join__side">
+                    <i></i><i></i><i class="is-matched"></i><i></i><i></i>
+                  </div>
+                  <div class="join__link"></div>
+                  <div class="join__side join__side--aux">
+                    <i></i><i></i><i class="is-matched"></i><i></i><i></i>
+                  </div>
+                </div>
+              </div>
+            </li>
+
+            <li>
+              <div class="case case--deep">
+                <h3>k-anonymity, and homogeneity</h3>
+                <p>
+                  Generalise until every record is indistinguishable from at least k minus one
+                  others. Then find the class where all of them share one diagnosis, and learn it
+                  without identifying anyone.
+                </p>
+                <div class="dist" aria-hidden="true">
+                  <span style="height: 4%"></span>
+                  <span style="height: 4%"></span>
+                  <span class="is-value" style="height: 100%"></span>
+                  <span style="height: 4%"></span>
+                  <span style="height: 4%"></span>
+                </div>
+              </div>
+            </li>
+
+            <li>
+              <div class="case">
+                <h3>l-diversity, and skewness</h3>
+                <p>
+                  Enforce diversity, then find the class where it is technically satisfied and the
+                  distribution still gives near-certainty.
+                </p>
+              </div>
+            </li>
+
+            <li>
+              <div class="case">
+                <h3>The aggregates</h3>
+                <p>
+                  No record-level data at all. Two published averages, one subtraction, one person
+                  singled out.
+                </p>
+              </div>
+            </li>
+
+            <li>
+              <div class="case case--deep">
+                <h3>The budget</h3>
+                <p>
+                  Differential privacy holds regardless of auxiliary knowledge. Its price is noise,
+                  and a budget that composes and cannot be refilled.
+                </p>
+                <div class="meter" aria-hidden="true">
+                  <div class="meter__track"><div class="meter__fill"></div></div>
+                  <div class="meter__figures"><span>0.8 spent</span><span>1.0 allotted</span></div>
+                </div>
+              </div>
+            </li>
+
+            <li>
+              <div class="case case--raised case--wide">
+                <div>
+                  <h3>The sandbox, the frontier, and the schema assessor</h3>
+                  <p>
+                    Every control exposed, with the privacy and utility curves as a shape you move
+                    along rather than a sentence you read. The assessor is the one mode meant for a
+                    real dataset, and it takes column descriptions, never a row.
+                  </p>
+                </div>
+                <a class="button button--quiet button--compact" href="./">Open Linkage</a>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- The constraints. Stacked heading, ruled entries. -->
+      <section>
+        <div class="shell">
+          <div class="section-head">
+            <h2>What it will not do.</h2>
+            <p>These come first because they define the product rather than qualify it.</p>
+          </div>
+
+          <ul class="constraints">
+            <li>
+              <h3>It accepts no data</h3>
+              <p>
+                No file input, no drag-and-drop, no paste, and no code path that takes a record
+                from outside. An app that ingests a dataset and helps you re-identify the people in
+                it is a re-identification tool, whatever the surrounding copy says. A test greps
+                the built bundle and fails the deploy on a hit.
+              </p>
+            </li>
+            <li>
+              <h3>It keeps ground truth</h3>
+              <p>
+                Because the populations are generated, the app knows who every record actually is.
+                That is what lets an attack report 340 of 500 targets identified and let you
+                inspect the 160 that failed. Uploaded data could tell you nothing, which would make
+                it a worse teacher, not a better one.
+              </p>
+            </li>
+            <li>
+              <h3>Nothing leaves the device</h3>
+              <p>
+                No network at runtime, no analytics, no accounts. Given the subject this is not a
+                nicety. An app about data disclosure that phones home would be self-refuting.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="close">
+        <div class="shell close__grid">
+          <h2>The field is the argument. It takes about a minute.</h2>
+          <a class="button" href="./">Open Linkage</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell footer__row">
+        <p>
+          Linkage. All records are generated. No real person's data is used or accepted. Sweeney
+          2000, Golle 2006, Machanavajjhala et al. on l-diversity, Li et al. on t-closeness, Dwork
+          on differential privacy.
+        </p>
+        <nav class="footer__links" aria-label="Elsewhere">
+          <a href="./">Open Linkage</a>
+          <a href="https://github.com/andifathulms/linkage">Source</a>
+        </nav>
+      </div>
+    </footer>
+
+    <script>
+      /* ===================================================================
+         The population.
+
+         Seeded and pure, the way src/engine is. The same generated records
+         drive the field, the readouts, and the two NIK figures, so nothing on
+         this page is a number someone typed in.
+         =================================================================== */
+      'use strict';
+
+      function mulberry32(a) {
+        return function () {
+          a |= 0;
+          a = (a + 0x6d2b79f5) | 0;
+          var t = Math.imul(a ^ (a >>> 15), 1 | a);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      var SEED = 20260905;
+      var N = 1400;
+      var KAB = 3;
+      var KEC_PER_KAB = 4;
+      var KEL_PER_KEC = 5;
+      var KEL_TOTAL = KAB * KEC_PER_KAB * KEL_PER_KEC;
+
+      function buildPopulation() {
+        var rnd = mulberry32(SEED);
+
+        /* Population weights per kelurahan. Cardinality at each level drives every
+           result in the app, so the weights are uneven on purpose. */
+        var weights = [];
+        var total = 0;
+        for (var w = 0; w < KEL_TOTAL; w++) {
+          var v = 0.35 + rnd() * rnd() * 2.6;
+          weights.push(v);
+          total += v;
+        }
+        var cumulative = [];
+        var running = 0;
+        for (var c = 0; c < KEL_TOTAL; c++) {
+          running += weights[c] / total;
+          cumulative.push(running);
+        }
+
+        var records = [];
+        var sequenceByKel = new Int32Array(KEL_TOTAL);
+
+        for (var i = 0; i < N; i++) {
+          var pick = rnd();
+          var kel = 0;
+          while (kel < KEL_TOTAL - 1 && pick > cumulative[kel]) kel++;
+
+          var kec = Math.floor(kel / KEL_PER_KEC);
+          var kab = Math.floor(kec / KEC_PER_KAB);
+
+          /* Ages skewed toward the middle of the span, as a register is. */
+          var yearOffset = Math.floor(((rnd() + rnd() + rnd()) / 3) * 40);
+          var year = 1966 + yearOffset;
+          var month = 1 + Math.floor(rnd() * 12);
+          var day = 1 + Math.floor(rnd() * 28);
+          var female = rnd() < 0.503;
+
+          sequenceByKel[kel] += 1;
+
+          records.push({
+            kab: kab,
+            kec: kec,
+            kel: kel,
+            year: year,
+            month: month,
+            day: day,
+            female: female,
+            seq: sequenceByKel[kel],
+          });
+        }
+        return records;
+      }
+
+      var POPULATION = buildPopulation();
+
+      /* -------------------------------------------------------------------
+         Generalisation. One vector per level, over the taxonomy the app uses:
+         a kelurahan becomes a kecamatan becomes a kabupaten; a date becomes a
+         month becomes a year becomes a ten-year band.
+         ------------------------------------------------------------------- */
+      function pad(n, width) {
+        var s = String(n);
+        while (s.length < width) s = '0' + s;
+        return s;
+      }
+
+      function keyAt(record, level) {
+        var sex = record.female ? 'F' : 'M';
+        if (level === 0) {
+          return (
+            pad(record.kel, 2) +
+            '|' +
+            pad(record.day, 2) +
+            pad(record.month, 2) +
+            record.year +
+            '|' +
+            sex
+          );
+        }
+        if (level === 1) {
+          return pad(record.kec, 2) + '|' + pad(record.month, 2) + record.year + '|' + sex;
+        }
+        if (level === 2) {
+          return pad(record.kab, 2) + '|' + record.year + '|' + sex;
+        }
+        var band = Math.floor((record.year - 1966) / 10) * 10 + 1966;
+        return pad(record.kab, 2) + '|' + band + '-' + (band + 9) + '|' + sex;
+      }
+
+      function classify(level) {
+        var index = new Map();
+        for (var i = 0; i < POPULATION.length; i++) {
+          var k = keyAt(POPULATION[i], level);
+          var bucket = index.get(k);
+          if (bucket) bucket.push(i);
+          else index.set(k, [i]);
+        }
+        var classes = [];
+        index.forEach(function (members, key) {
+          classes.push({ key: key, members: members, size: members.length });
+        });
+        /* Deterministic order, derived from the class itself. A record must not
+           move because some unrelated class changed. */
+        classes.sort(function (a, b) {
+          if (b.size !== a.size) return b.size - a.size;
+          return a.key < b.key ? -1 : a.key > b.key ? 1 : 0;
+        });
+        return classes;
+      }
+
+      /* -------------------------------------------------------------------
+         Field layout. Ported from src/views/Field/layout.ts. Singletons get
+         deliberate padding: their isolation is the encoding, not a side effect.
+         ------------------------------------------------------------------- */
+      function paddingFor(size) {
+        if (size === 1) return 3.2;
+        if (size === 2) return 2.2;
+        if (size <= 4) return 1.5;
+        return 0.8;
+      }
+
+      var GAP = 0.55;
+
+      function layout(classes, aspect) {
+        var boxes = [];
+        var area = 0;
+        for (var i = 0; i < classes.length; i++) {
+          var size = classes[i].size;
+          var p = paddingFor(size);
+          var cols = Math.max(1, Math.ceil(Math.sqrt(size)));
+          var rows = Math.max(1, Math.ceil(size / cols));
+          var w = cols * (1 + GAP) - GAP + p * 2;
+          var h = rows * (1 + GAP) - GAP + p * 2;
+          boxes.push({ cols: cols, rows: rows, w: w, h: h, p: p });
+          area += w * h;
+        }
+
+        var targetWidth = Math.sqrt(area * aspect * 1.08);
+        var x = new Float32Array(POPULATION.length);
+        var y = new Float32Array(POPULATION.length);
+        var classOf = new Int32Array(POPULATION.length);
+
+        var cursorX = 0;
+        var cursorY = 0;
+        var shelfHeight = 0;
+        var maxX = 0;
+
+        for (var ci = 0; ci < classes.length; ci++) {
+          var box = boxes[ci];
+          if (cursorX > 0 && cursorX + box.w > targetWidth) {
+            cursorX = 0;
+            cursorY += shelfHeight;
+            shelfHeight = 0;
+          }
+          var members = classes[ci].members;
+          for (var m = 0; m < members.length; m++) {
+            var col = m % box.cols;
+            var row = Math.floor(m / box.cols);
+            var idx = members[m];
+            x[idx] = cursorX + box.p + col * (1 + GAP);
+            y[idx] = cursorY + box.p + row * (1 + GAP);
+            classOf[idx] = ci;
+          }
+          cursorX += box.w;
+          if (box.h > shelfHeight) shelfHeight = box.h;
+          if (cursorX > maxX) maxX = cursorX;
+        }
+
+        return { x: x, y: y, classOf: classOf, width: maxX, height: cursorY + shelfHeight };
+      }
+
+      /* -------------------------------------------------------------------
+         The canvas. One draw pass, one rAF loop, all marks tweened together.
+         ------------------------------------------------------------------- */
+      var canvas = document.getElementById('field');
+      var ctx = canvas.getContext('2d', { alpha: false });
+
+      var level = 0;
+      var classes = classify(0);
+      var current = null;
+      var from = null;
+      var to = null;
+      var animStart = 0;
+      var animating = false;
+      var raf = 0;
+      var palette = readPalette();
+      var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      function readPalette() {
+        var s = getComputedStyle(document.documentElement);
+        return {
+          ground: s.getPropertyValue('--mark-ground').trim() || '#dfe3da',
+          protectedMark: s.getPropertyValue('--mark-protected').trim() || '#22261c',
+          narrow: s.getPropertyValue('--mark-narrow').trim() || '#b07f2e',
+          exposed: s.getPropertyValue('--mark-exposed').trim() || '#ad4127',
+        };
+      }
+
+      function easeCoalesce(t) {
+        /* cubic-bezier(.32,.72,0,1), solved by bisection on x. */
+        var lo = 0;
+        var hi = 1;
+        var u = t;
+        for (var i = 0; i < 18; i++) {
+          var mt = 1 - u;
+          var xv = 3 * mt * mt * u * 0.32 + 3 * mt * u * u * 0 + u * u * u;
+          if (xv < t) lo = u;
+          else hi = u;
+          u = (lo + hi) / 2;
+        }
+        var m2 = 1 - u;
+        return 3 * m2 * m2 * u * 0.72 + 3 * m2 * u * u * 1 + u * u * u;
+      }
+
+      function sizeCanvas() {
+        var rect = canvas.getBoundingClientRect();
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.round(rect.width * dpr));
+        canvas.height = Math.max(1, Math.round(rect.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return rect;
+      }
+
+      var stageRect = { width: 0, height: 0 };
+
+      function project(state, rect) {
+        var margin = 10;
+        var scale = Math.min(
+          (rect.width - margin * 2) / Math.max(state.width, 1),
+          (rect.height - margin * 2) / Math.max(state.height, 1)
+        );
+        var offsetX = (rect.width - state.width * scale) / 2;
+        var offsetY = (rect.height - state.height * scale) / 2;
+        return { scale: scale, offsetX: offsetX, offsetY: offsetY };
+      }
+
+      function draw(progress) {
+        var rect = stageRect;
+        ctx.fillStyle = palette.ground;
+        ctx.fillRect(0, 0, rect.width, rect.height);
+
+        var target = to || current;
+        if (!target) return;
+
+        var pa = project(from || target, rect);
+        var pb = project(target, rect);
+        var mix = animating ? easeCoalesce(progress) : 1;
+
+        var scale = pa.scale + (pb.scale - pa.scale) * mix;
+        var mark = Math.max(1.6, Math.min(3.4, scale * 0.78));
+
+        for (var i = 0; i < POPULATION.length; i++) {
+          var ax = from ? from.x[i] * pa.scale + pa.offsetX : target.x[i] * pb.scale + pb.offsetX;
+          var ay = from ? from.y[i] * pa.scale + pa.offsetY : target.y[i] * pb.scale + pb.offsetY;
+          var bx = target.x[i] * pb.scale + pb.offsetX;
+          var by = target.y[i] * pb.scale + pb.offsetY;
+
+          var px = ax + (bx - ax) * mix;
+          var py = ay + (by - ay) * mix;
+
+          var sizeNow = target.sizes[target.classOf[i]];
+          ctx.fillStyle =
+            sizeNow === 1
+              ? palette.exposed
+              : sizeNow <= 4
+                ? palette.narrow
+                : palette.protectedMark;
+          ctx.fillRect(px, py, mark, mark);
+        }
+        void scale;
+      }
+
+      function withSizes(state, list) {
+        var sizes = new Int32Array(list.length);
+        for (var i = 0; i < list.length; i++) sizes[i] = list[i].size;
+        state.sizes = sizes;
+        return state;
+      }
+
+      function tick(now) {
+        if (!animStart) animStart = now;
+        var elapsed = now - animStart;
+        var duration = reduced.matches ? 0 : 620;
+        var progress = duration === 0 ? 1 : Math.min(1, elapsed / duration);
+        draw(progress);
+        if (progress < 1) {
+          raf = requestAnimationFrame(tick);
+        } else {
+          animating = false;
+          from = null;
+          current = to;
+          raf = 0;
+        }
+      }
+
+      function render() {
+        stageRect = sizeCanvas();
+        if (!current) return;
+        if (!animating) draw(1);
+      }
+
+      function summarise(list) {
+        var singles = 0;
+        var smallest = Infinity;
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].size === 1) singles++;
+          if (list[i].size < smallest) smallest = list[i].size;
+        }
+        return { singletons: singles, k: smallest === Infinity ? 0 : smallest, classes: list.length };
+      }
+
+      var elSingletons = document.getElementById('r-singletons');
+      var elK = document.getElementById('r-k');
+      var elClasses = document.getElementById('r-classes');
+
+      function formatCount(n) {
+        return n.toLocaleString('en-US');
+      }
+
+      function setLevel(next) {
+        level = next;
+        var list = classify(level);
+        var state = withSizes(layout(list, Math.max(stageRect.width, 1) / Math.max(stageRect.height, 1)), list);
+
+        from = current;
+        to = state;
+        classes = list;
+
+        if (raf) cancelAnimationFrame(raf);
+        animating = !!from && !reduced.matches;
+        animStart = 0;
+        if (animating) {
+          raf = requestAnimationFrame(tick);
+        } else {
+          current = state;
+          from = null;
+          draw(1);
+        }
+
+        var s = summarise(list);
+        elSingletons.textContent = formatCount(s.singletons);
+        elSingletons.className = 'num ' + (s.singletons === 0 ? 'is-clear' : 'is-exposed');
+        elK.textContent = formatCount(s.k);
+        elClasses.textContent = formatCount(s.classes);
+
+        var buttons = document.querySelectorAll('.step');
+        for (var i = 0; i < buttons.length; i++) {
+          buttons[i].setAttribute(
+            'aria-pressed',
+            String(Number(buttons[i].getAttribute('data-level')) === level)
+          );
+        }
+      }
+
+      document.querySelectorAll('.step').forEach(function (button) {
+        button.addEventListener('click', function () {
+          setLevel(Number(button.getAttribute('data-level')));
+        });
+      });
+
+      /* -------------------------------------------------------------------
+         The NIK strip. One record from the same population, and the two masks
+         scored across all 1,400.
+         ------------------------------------------------------------------- */
+      function nikOf(record) {
+        var province = '32';
+        var kab = pad(record.kab + 1, 2);
+        var kec = pad(record.kec + 1, 2);
+        var day = pad(record.female ? record.day + 40 : record.day, 2);
+        var month = pad(record.month, 2);
+        var year = pad(record.year % 100, 2);
+        var seq = pad(record.seq, 4);
+        return province + kab + kec + day + month + year + seq;
+      }
+
+      function uniqueUnderMask(keep) {
+        var counts = new Map();
+        var keys = [];
+        for (var i = 0; i < POPULATION.length; i++) {
+          var nik = nikOf(POPULATION[i]);
+          var visible = keep === 'head' ? nik.slice(0, 12) : nik.slice(12);
+          keys.push(visible);
+          counts.set(visible, (counts.get(visible) || 0) + 1);
+        }
+        var unique = 0;
+        for (var j = 0; j < keys.length; j++) if (counts.get(keys[j]) === 1) unique++;
+        return unique;
+      }
+
+      /* "Mask the last four" keeps the head: region, date of birth and gender.
+         "Mask the first twelve" keeps only the sequence. */
+      var uniqueKeepingHead = uniqueUnderMask('head');
+      var uniqueKeepingTail = uniqueUnderMask('tail');
+
+      document.getElementById('p-tail').textContent = formatCount(uniqueKeepingHead);
+      document.getElementById('p-head').textContent = formatCount(uniqueKeepingTail);
+
+      var sample = POPULATION[417];
+      var sampleNik = nikOf(sample);
+      var digitsEl = document.getElementById('digits');
+      var maskMode = 'tail';
+
+      function renderDigits() {
+        digitsEl.textContent = '';
+        for (var i = 0; i < 16; i++) {
+          var cell = document.createElement('span');
+          cell.className = 'digit';
+          if (i === 6 || i === 12) cell.className += ' is-boundary';
+          var masked = maskMode === 'tail' ? i >= 12 : i < 12;
+          if (masked) cell.className += ' is-masked';
+          cell.textContent = sampleNik.charAt(i);
+          digitsEl.appendChild(cell);
+        }
+        var keepsHead = maskMode === 'tail';
+        document.getElementById('k-region').textContent = keepsHead ? 'kecamatan' : 'none';
+        document.getElementById('k-date').textContent = keepsHead ? 'exact day' : 'none';
+        document.getElementById('k-sex').textContent = keepsHead ? 'known' : 'unknown';
+        digitsEl.setAttribute(
+          'aria-label',
+          'A sixteen digit NIK. ' +
+            (keepsHead
+              ? 'The last four digits are masked, so region, date of birth and gender remain readable.'
+              : 'The first twelve digits are masked, so only the sequence number remains.')
+        );
+      }
+
+      document.querySelectorAll('.preset').forEach(function (button) {
+        button.addEventListener('click', function () {
+          maskMode = button.getAttribute('data-mask') === 'head' ? 'head' : 'tail';
+          document.querySelectorAll('.preset').forEach(function (other) {
+            other.setAttribute(
+              'aria-pressed',
+              String(other.getAttribute('data-mask') === maskMode)
+            );
+          });
+          renderDigits();
+        });
+      });
+
+      renderDigits();
+
+      /* -------------------------------------------------------------------
+         Boot
+         ------------------------------------------------------------------- */
+      stageRect = sizeCanvas();
+      setLevel(0);
+
+      var resizeTimer = 0;
+      if (typeof ResizeObserver === 'function') {
+        var observer = new ResizeObserver(function () {
+          window.clearTimeout(resizeTimer);
+          resizeTimer = window.setTimeout(function () {
+            stageRect = sizeCanvas();
+            var list = classes;
+            var state = withSizes(
+              layout(list, Math.max(stageRect.width, 1) / Math.max(stageRect.height, 1)),
+              list
+            );
+            current = state;
+            to = state;
+            from = null;
+            draw(1);
+          }, 120);
+        });
+        observer.observe(canvas);
+      }
+
+      var scheme = window.matchMedia('(prefers-color-scheme: dark)');
+      var onScheme = function () {
+        palette = readPalette();
+        if (!animating) draw(1);
+      };
+      if (scheme.addEventListener) scheme.addEventListener('change', onScheme);
+      else if (scheme.addListener) scheme.addListener(onScheme);
+    </script>
+  </body>
+</html>
