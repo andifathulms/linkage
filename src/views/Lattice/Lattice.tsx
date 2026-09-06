@@ -11,7 +11,7 @@
  * Selecting a node applies its vector to the field above, so the lattice is a navigable
  * control on the field and not a separate illustration.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GeneralisationVector, PersonRecord } from '../../engine/types';
 import type { Taxonomy } from '../../engine/taxonomy';
 import { searchLattice, frontierNodes, type LatticeNode } from '../../engine/lattice';
@@ -101,6 +101,58 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
 
   const selectedKey = vectorKey(selected, columns);
 
+  /**
+   * A roving tab stop.
+   *
+   * Every node used to be tabbable, which put up to 125 stops between the lattice and
+   * whatever follows it and no way past except through all of them. The grid is one
+   * stop now, and the arrow keys move within it, which is the same contract the field
+   * canvas offers and the one a composite widget is supposed to have.
+   */
+  const nodeKeys = useMemo(
+    () => search.nodes.map((node) => vectorKey(node.vector, columns)),
+    [search, columns],
+  );
+  const [rovingKey, setRovingKey] = useState<string | null>(null);
+  const nodeRefs = useRef(new Map<string, SVGRectElement>());
+  const active = rovingKey ?? selectedKey ?? nodeKeys[0] ?? null;
+
+  const moveTo = (index: number) => {
+    const clamped = Math.max(0, Math.min(nodeKeys.length - 1, index));
+    const key = nodeKeys[clamped];
+    if (!key) return;
+    setRovingKey(key);
+    nodeRefs.current.get(key)?.focus();
+  };
+
+  const onNodeKeyDown = (event: React.KeyboardEvent<SVGRectElement>, node: LatticeNode) => {
+    const here = nodeKeys.indexOf(vectorKey(node.vector, columns));
+    switch (event.key) {
+      case 'Enter':
+      case ' ':
+        event.preventDefault();
+        onSelect(node.vector);
+        return;
+      case 'ArrowRight':
+      case 'ArrowDown':
+        moveTo(here + 1);
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        moveTo(here - 1);
+        break;
+      case 'Home':
+        moveTo(0);
+        break;
+      case 'End':
+        moveTo(nodeKeys.length - 1);
+        break;
+      default:
+        return;
+    }
+    event.preventDefault();
+  };
+
   return (
     <section className="panel">
       <h2 className="panel__title">
@@ -181,20 +233,22 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
                 stroke={stroke}
                 strokeWidth={onFrontier && known ? 1.5 : 1}
                 opacity={known ? 1 : 0.5}
-                tabIndex={0}
+                ref={(el) => {
+                  if (el) nodeRefs.current.set(key, el);
+                  else nodeRefs.current.delete(key);
+                }}
+                tabIndex={key === active ? 0 : -1}
                 role="button"
                 aria-label={`Vector ${key}. ${
                   node.k !== null ? `k is ${node.k}.` : 'Inferred.'
                 } ${node.satisfies ? 'Satisfies' : 'Does not satisfy'} k = ${targetK}.${
                   isMinimal ? ' Minimal.' : ''
                 }`}
-                onClick={() => onSelect(node.vector)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onSelect(node.vector);
-                  }
+                onClick={() => {
+                  setRovingKey(key);
+                  onSelect(node.vector);
                 }}
+                onKeyDown={(e) => onNodeKeyDown(e, node)}
                 style={{ cursor: 'pointer' }}
               />
               {isSelected && (

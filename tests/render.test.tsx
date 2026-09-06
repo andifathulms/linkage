@@ -173,6 +173,27 @@ function textOf(html: string): string {
     .replace(/\s+/g, ' ');
 }
 
+describe('the lattice is one tab stop, not a hundred', () => {
+  it('makes exactly one node tabbable', () => {
+    // Every node used to carry tabIndex 0, which put the whole product of the taxonomy
+    // between the lattice and the next control. WCAG 2.4.3.
+    const html = renderToString(
+      <Lattice
+        records={population.records}
+        taxonomy={taxonomy}
+        columns={['kelurahan', 'age', 'gender']}
+        targetK={5}
+        selected={DEFAULT_CONFIG.vector}
+        onSelect={() => {}}
+      />,
+    );
+    const tabbable = html.match(/tabindex="0"/g) ?? [];
+    const skipped = html.match(/tabindex="-1"/g) ?? [];
+    expect(tabbable).toHaveLength(1);
+    expect(skipped.length).toBeGreaterThan(10);
+  });
+});
+
 describe('the copy holds to its register', () => {
   const rendered = textOf([
     renderToString(<CaseLinkage {...props} />),
