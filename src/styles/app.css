@@ -60,9 +60,12 @@ body::before {
   z-index: 1;
 }
 
-/* Focus is visible everywhere, including field marks and lattice nodes (DESIGN §8). */
+/* Focus is visible everywhere, including field marks and lattice nodes (DESIGN §8).
+   In ink rather than the exposure colour: where the reader's keyboard happens to be is
+   not a finding about a record, and --exposed means one thing (DESIGN §2.2). Ink is the
+   highest contrast either ground has, so nothing is lost by the change. */
 :focus-visible {
-  outline: 2px solid var(--exposed);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -1063,7 +1066,7 @@ input[type='range']:hover::-webkit-slider-thumb {
 
 .tabs__item[aria-selected='true'] {
   color: var(--ink);
-  border-top-color: var(--exposed);
+  border-top-color: var(--ink);
   font-weight: 600;
 }
 
@@ -1079,8 +1082,9 @@ input[type='range']:hover::-webkit-slider-thumb {
 
 .cite:hover,
 .cite[aria-expanded='true'] {
-  color: var(--exposed);
-  border-bottom-color: var(--exposed);
+  color: var(--ink);
+  border-bottom-color: var(--ink);
+  border-bottom-style: solid;
 }
 
 .cite__popover {
@@ -1617,7 +1621,7 @@ input[type='range']:hover::-webkit-slider-thumb {
 }
 
 .lattice rect:focus-visible {
-  outline: 2px solid var(--exposed);
+  outline: 2px solid var(--ink);
 }
 
 /* -------------------------------------------------------------- NIK dissector */
