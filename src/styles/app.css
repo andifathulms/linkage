@@ -1450,10 +1450,15 @@ input[type='range']:hover::-webkit-slider-thumb {
   transform: scaleX(1);
 }
 
+/* DESIGN §5.2, in its own words: a row matching exactly one resolves, and both rows
+   and their single connecting line settle into plain --matched ink. The reason given
+   there is the whole register of the app. A unique match resolves to plain ink rather
+   than to a brighter colour, because the point is that it has become an ordinary
+   identified record, and nothing about it is special any more. */
 .linkage__join[data-state='resolved']::before {
   opacity: 1;
   transform: scaleX(1);
-  background: var(--exposed);
+  background: var(--matched);
 }
 
 .linkage__joinCount {
@@ -1477,8 +1482,8 @@ input[type='range']:hover::-webkit-slider-thumb {
 }
 
 .linkage__join[data-state='resolved'] .linkage__joinCount {
-  color: var(--exposed);
-  border-color: var(--exposed);
+  color: var(--matched);
+  border-color: var(--rule-strong);
   font-weight: 600;
 }
 
