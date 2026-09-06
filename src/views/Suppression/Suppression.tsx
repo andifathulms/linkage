@@ -118,24 +118,24 @@ export function Suppression({
             <thead>
               <tr>
                 <th scope="col">Column</th>
-                <th scope="col">Distance</th>
+                <th scope="col" className="num">Distance</th>
                 <th scope="col">Value most affected</th>
-                <th scope="col">Of those dropped</th>
-                <th scope="col">Of the population</th>
+                <th scope="col" className="num">Of those dropped</th>
+                <th scope="col" className="num">Of the population</th>
               </tr>
             </thead>
             <tbody>
               {result.ranked.map((c) => (
                 <tr key={c.column}>
                   <td>{taxonomy[c.column]?.label ?? c.column}</td>
-                  <td>{c.distance.toFixed(3)}</td>
+                  <td className="num">{c.distance.toFixed(3)}</td>
                   <td>{c.mostAffected ? String(c.mostAffected.value) : ''}</td>
-                  <td>
+                  <td className="num">
                     {c.mostAffected
                       ? `${c.mostAffected.suppressedCount.toLocaleString('en')} of ${result.suppressed.toLocaleString('en')}`
                       : ''}
                   </td>
-                  <td>
+                  <td className="num">
                     {c.mostAffected
                       ? `${c.mostAffected.populationCount.toLocaleString('en')} of ${result.population.toLocaleString('en')}`
                       : ''}

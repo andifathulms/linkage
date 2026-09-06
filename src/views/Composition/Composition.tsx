@@ -132,18 +132,18 @@ export function Composition({ records, taxonomy, columns, vector, seed }: Compos
             <thead>
               <tr>
                 <th scope="col">Record</th>
-                <th scope="col">In release A</th>
-                <th scope="col">In release B</th>
-                <th scope="col">Holding both</th>
+                <th scope="col" className="num">In release A</th>
+                <th scope="col" className="num">In release B</th>
+                <th scope="col" className="num">Holding both</th>
               </tr>
             </thead>
             <tbody>
               {result.narrowed.slice(0, 12).map((n) => (
                 <tr key={n.recordId}>
                   <td>{n.recordId}</td>
-                  <td>{n.sizeA.toLocaleString('en')}</td>
-                  <td>{n.sizeB.toLocaleString('en')}</td>
-                  <td>{n.sizeJoint.toLocaleString('en')}</td>
+                  <td className="num">{n.sizeA.toLocaleString('en')}</td>
+                  <td className="num">{n.sizeB.toLocaleString('en')}</td>
+                  <td className="num">{n.sizeJoint.toLocaleString('en')}</td>
                 </tr>
               ))}
             </tbody>

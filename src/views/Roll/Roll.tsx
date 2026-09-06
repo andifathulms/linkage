@@ -170,16 +170,16 @@ export function Roll({ records, taxonomy, columns, vector, seed }: RollProps) {
         <thead>
           <tr>
             <th scope="col">Coverage</th>
-            <th scope="col">Uniquely identified</th>
-            <th scope="col">Of targets</th>
+            <th scope="col" className="num">Uniquely identified</th>
+            <th scope="col" className="num">Of targets</th>
           </tr>
         </thead>
         <tbody>
           {curve.map((p) => (
             <tr key={p.coverage}>
               <td>{Math.round(p.coverage * 100)}%</td>
-              <td>{p.correct.toLocaleString('en')}</td>
-              <td>{targets.length.toLocaleString('en')}</td>
+              <td className="num">{p.correct.toLocaleString('en')}</td>
+              <td className="num">{targets.length.toLocaleString('en')}</td>
             </tr>
           ))}
         </tbody>

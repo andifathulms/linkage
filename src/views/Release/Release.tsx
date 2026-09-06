@@ -141,20 +141,20 @@ export function Release({ records, taxonomy, columns, vector, seed }: ReleasePro
         <thead>
           <tr>
             <th scope="col">Released</th>
-            <th scope="col">Rows</th>
-            <th scope="col">k</th>
-            <th scope="col">Alone</th>
-            <th scope="col">Nameable</th>
+            <th scope="col" className="num">Rows</th>
+            <th scope="col" className="num">k</th>
+            <th scope="col" className="num">Alone</th>
+            <th scope="col" className="num">Nameable</th>
           </tr>
         </thead>
         <tbody>
           {series.map((s) => (
             <tr key={s.fraction}>
               <td>{Math.round(s.fraction * 100)}%</td>
-              <td>{s.risk.released.toLocaleString('en')}</td>
-              <td>{s.risk.kRelease.toLocaleString('en')}</td>
-              <td>{s.risk.aloneInRelease.toLocaleString('en')}</td>
-              <td>{s.risk.nameableInPopulation.toLocaleString('en')}</td>
+              <td className="num">{s.risk.released.toLocaleString('en')}</td>
+              <td className="num">{s.risk.kRelease.toLocaleString('en')}</td>
+              <td className="num">{s.risk.aloneInRelease.toLocaleString('en')}</td>
+              <td className="num">{s.risk.nameableInPopulation.toLocaleString('en')}</td>
             </tr>
           ))}
         </tbody>

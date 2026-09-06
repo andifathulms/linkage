@@ -103,18 +103,18 @@ export function Attribution({ records, taxonomy, columns, vector, seed }: Attrib
         <thead>
           <tr>
             <th scope="col">Column</th>
-            <th scope="col">Distinct values</th>
-            <th scope="col">Measured</th>
-            <th scope="col">Estimated</th>
+            <th scope="col" className="num">Distinct values</th>
+            <th scope="col" className="num">Measured</th>
+            <th scope="col" className="num">Estimated</th>
           </tr>
         </thead>
         <tbody>
           {report.ranked.map((c) => (
             <tr key={c.column}>
               <td>{taxonomy[c.column]?.label ?? c.column}</td>
-              <td>{c.cardinality.toLocaleString('en')}</td>
-              <td>{pct(c.measuredContribution)}</td>
-              <td>{pct(c.estimatedContribution)}</td>
+              <td className="num">{c.cardinality.toLocaleString('en')}</td>
+              <td className="num">{pct(c.measuredContribution)}</td>
+              <td className="num">{pct(c.estimatedContribution)}</td>
             </tr>
           ))}
         </tbody>
