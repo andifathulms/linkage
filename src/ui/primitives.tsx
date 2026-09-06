@@ -292,10 +292,17 @@ export function Finding({
   const share = total > 0 ? (of / total) * 100 : 0;
   return (
     <div className={`finding${exposed ? ' finding--exposed' : ''}`}>
-      <div className="finding__figure">
+      {/* The figure counts up, so it holds a different number on every frame. Announcing
+          it would read sixty intermediate values a second, so the visible figure is
+          hidden from assistive technology and the settled result is announced once
+          instead (WCAG 4.1.3). `of` is the measurement; `shown` is the animation. */}
+      <div className="finding__figure" aria-hidden="true">
         <span className="display">{shown.toLocaleString('en')}</span>
         <span className="finding__denominator">{` of ${total.toLocaleString('en')}`}</span>
       </div>
+      <span className="visually-hidden" aria-live="polite" aria-atomic="true">
+        {`${of.toLocaleString('en')} of ${total.toLocaleString('en')} ${label}`}
+      </span>
       <div className="finding__body">
         <span className="finding__label">{label}</span>
         <span className="finding__track" role="img" aria-label={`${share.toFixed(1)} per cent`}>

@@ -10,7 +10,7 @@
  * the safe role; a locked one is ghosted and disabled.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useConfig, useDerived, QUASI } from '../state/store';
+import { useConfig, useDerived } from '../state/store';
 import { CASES, loadProgress, saveProgress, isUnlocked, type CaseId } from '../cases/definitions';
 import { SyntheticMarker, GroundToggle } from './primitives';
 import { CaseLinkage } from '../cases/CaseLinkage';
@@ -112,8 +112,11 @@ export function App() {
           do beyond your case progress.
         </span>
       </footer>
-      <span className="visually-hidden" aria-live="polite">
-        {QUASI.length} quasi-identifier columns. Smallest equivalence class {derived.classes.k}.
+      {/* Only what changed. The column count is a constant and was being re-announced on
+          every generalisation move, which is noise in the one channel a screen reader
+          user has for state. */}
+      <span className="visually-hidden" aria-live="polite" aria-atomic="true">
+        Smallest equivalence class {derived.classes.k}.
       </span>
     </div>
   );

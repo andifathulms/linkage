@@ -129,6 +129,17 @@ export function FieldPanel({
         onHover={setHover}
       />
 
+      {/* Walking the field with the arrow keys changes which class is selected and the
+          canvas cannot say so: its label is fixed at render. One announcement per
+          landing, which is the rate the keys move at (WCAG 4.1.3). */}
+      <span className="visually-hidden" aria-live="polite" aria-atomic="true">
+        {selectedClass !== null && set.classes[selectedClass]
+          ? `Class ${set.classes[selectedClass].key}, ${set.classes[selectedClass].members.length} ${
+              set.classes[selectedClass].members.length === 1 ? 'record, standing alone' : 'records'
+            }.`
+          : ''}
+      </span>
+
       <div className="exposure">
         <div
           className="exposure__bar"

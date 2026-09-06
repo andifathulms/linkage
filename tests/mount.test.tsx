@@ -191,6 +191,31 @@ describe('the application boots', () => {
     expect(params.get('v2')).toBe('3,1,0,2');
   });
 
+  it('announces the measured result rather than the animating figure', () => {
+    // The visible figure counts up, so it holds a different number every frame. What is
+    // announced has to be the settled measurement, once (WCAG 4.1.3).
+    const el = mount();
+    const live = [...el.querySelectorAll('[aria-live="polite"]')] as HTMLElement[];
+    expect(live.length).toBeGreaterThan(0);
+    const finding = live.find((n) => /\d+ of \d+ targets uniquely identified/.test(n.textContent ?? ''));
+    expect(finding).toBeDefined();
+    expect(finding!.getAttribute('aria-atomic')).toBe('true');
+    // And the counting figure is kept out of the accessibility tree entirely.
+    const figure = el.querySelector('.finding__figure');
+    expect(figure?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('announces the class the field lands on', () => {
+    const el = mount();
+    const button = [...el.querySelectorAll('button')].find((b) =>
+      b.textContent?.includes('Select the smallest class'),
+    );
+    expect(button).toBeDefined();
+    click(button!);
+    const live = [...el.querySelectorAll('[aria-live="polite"]')] as HTMLElement[];
+    expect(live.some((n) => /^Class .+ record/.test(n.textContent ?? ''))).toBe(true);
+  });
+
   it('makes the canvas keyboard reachable', () => {
     const el = mount();
     const canvas = el.querySelector('canvas') as HTMLCanvasElement;
