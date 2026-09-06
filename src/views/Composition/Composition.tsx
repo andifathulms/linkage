@@ -4,11 +4,12 @@
  * The threat model first, then the attack that defeats the defense (PRD §6.3). The
  * defense here is k-anonymity applied correctly, twice. The attack is holding both.
  *
- * The second vector is a control on this view rather than part of the shared
- * configuration, because it describes a hypothetical second release rather than the
- * population the URL is about (CLAUDE.md §9).
+ * The second vector is part of the shared configuration. It describes a hypothetical
+ * second release of the same population, which is a configuration rather than anyone's
+ * data, so it serialises safely and a composition someone finds can be sent to the
+ * person who needs to see it (CLAUDE.md §9).
  */
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { PersonRecord, GeneralisationVector } from '../../engine/types';
 import type { Taxonomy } from '../../engine/taxonomy';
 import { generalisePopulation } from '../../engine/generalise';
@@ -22,30 +23,26 @@ export interface CompositionProps {
   columns: readonly string[];
   /** The release already configured elsewhere in the sandbox. */
   vector: GeneralisationVector;
+  /** The second release. From the configuration, so it is linkable. */
+  vectorB: GeneralisationVector;
+  onVectorB: (vector: GeneralisationVector) => void;
   seed: number;
 }
 
-export function Composition({ records, taxonomy, columns, vector, seed }: CompositionProps) {
-  /**
-   * The second release starts one step coarser on region and one finer on date, which is
-   * the shape of the real mistake: a different analyst asked for a different cut, and
-   * nobody compared the two.
-   */
-  const [second, setSecond] = useState<GeneralisationVector>(() => {
-    const v: GeneralisationVector = {};
-    for (const c of columns) {
-      const height = (taxonomy[c]?.levels.length ?? 1) - 1;
-      const base = vector[c] ?? 0;
-      v[c] = c === 'kelurahan' ? Math.min(height, base + 1) : Math.max(0, base - 1);
-    }
-    return v;
-  });
-
+export function Composition({
+  records,
+  taxonomy,
+  columns,
+  vector,
+  vectorB,
+  onVectorB,
+  seed,
+}: CompositionProps) {
   const result = useMemo(() => {
     const keysA = generalisePopulation(records, taxonomy, vector, columns);
-    const keysB = generalisePopulation(records, taxonomy, second, columns);
+    const keysB = generalisePopulation(records, taxonomy, vectorB, columns);
     return composeReleases(records, keysA, keysB);
-  }, [records, taxonomy, vector, second, columns]);
+  }, [records, taxonomy, vector, vectorB, columns]);
 
   const exportNarrowed = () => {
     const csv = toCsv(
@@ -103,7 +100,7 @@ export function Composition({ records, taxonomy, columns, vector, seed }: Compos
         {columns.map((column) => {
           const t = taxonomy[column];
           if (!t) return null;
-          const level = second[column] ?? 0;
+          const level = vectorB[column] ?? 0;
           return (
             <Slider
               key={column}
@@ -111,7 +108,7 @@ export function Composition({ records, taxonomy, columns, vector, seed }: Compos
               value={level}
               min={0}
               max={t.levels.length - 1}
-              onChange={(next) => setSecond({ ...second, [column]: next })}
+              onChange={(next) => onVectorB({ ...vectorB, [column]: next })}
               display={t.levels[level].label}
             />
           );

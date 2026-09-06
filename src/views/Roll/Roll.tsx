@@ -8,7 +8,7 @@
  *
  * The curve is drawn in SVG. No charting library (CLAUDE.md, stack).
  */
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { PersonRecord, GeneralisationVector } from '../../engine/types';
 import type { Taxonomy } from '../../engine/taxonomy';
 import { generalisePopulation } from '../../engine/generalise';
@@ -23,6 +23,11 @@ export interface RollProps {
   columns: readonly string[];
   vector: GeneralisationVector;
   seed: number;
+  /** Both come from the configuration, so a roll is linkable and survives a refresh. */
+  coverage: number;
+  errorRate: number;
+  onCoverage: (value: number) => void;
+  onErrorRate: (value: number) => void;
 }
 
 /** Coverage steps the curve is drawn at. Ten points is enough to read a shape. */
@@ -32,9 +37,17 @@ const WIDTH = 320;
 const HEIGHT = 140;
 const PAD = 24;
 
-export function Roll({ records, taxonomy, columns, vector, seed }: RollProps) {
-  const [coverage, setCoverage] = useState(0.7);
-  const [errorRate, setErrorRate] = useState(0.1);
+export function Roll({
+  records,
+  taxonomy,
+  columns,
+  vector,
+  seed,
+  coverage,
+  errorRate,
+  onCoverage,
+  onErrorRate,
+}: RollProps) {
 
   const keys = useMemo(
     () => generalisePopulation(records, taxonomy, vector, columns),
@@ -115,7 +128,7 @@ export function Roll({ records, taxonomy, columns, vector, seed }: RollProps) {
         min={0}
         max={1}
         step={0.01}
-        onChange={setCoverage}
+        onChange={onCoverage}
         display={`${Math.round(coverage * 100)}%`}
       />
       <Slider
@@ -124,7 +137,7 @@ export function Roll({ records, taxonomy, columns, vector, seed }: RollProps) {
         min={0}
         max={1}
         step={0.01}
-        onChange={setErrorRate}
+        onChange={onErrorRate}
         display={`${Math.round(errorRate * 100)}%`}
       />
 

@@ -97,6 +97,8 @@ describe('every instrument renders', () => {
         taxonomy={taxonomy}
         columns={QUASI}
         vector={DEFAULT_CONFIG.vector}
+        vectorB={DEFAULT_CONFIG.vectorB}
+        onVectorB={() => {}}
         seed={5}
       />,
     ],
@@ -109,6 +111,10 @@ describe('every instrument renders', () => {
         columns={QUASI}
         vector={DEFAULT_CONFIG.vector}
         seed={5}
+        coverage={DEFAULT_CONFIG.rollCoverage}
+        errorRate={DEFAULT_CONFIG.rollError}
+        onCoverage={() => {}}
+        onErrorRate={() => {}}
       />,
     ],
     [
@@ -120,6 +126,8 @@ describe('every instrument renders', () => {
         columns={QUASI}
         vector={DEFAULT_CONFIG.vector}
         seed={5}
+        fraction={DEFAULT_CONFIG.releaseFraction}
+        onFraction={() => {}}
       />,
     ],
     [
@@ -184,6 +192,8 @@ describe('the copy holds to its register', () => {
         taxonomy={taxonomy}
         columns={QUASI}
         vector={DEFAULT_CONFIG.vector}
+        vectorB={DEFAULT_CONFIG.vectorB}
+        onVectorB={() => {}}
         seed={5}
       />,
     ),
@@ -194,6 +204,10 @@ describe('the copy holds to its register', () => {
         columns={QUASI}
         vector={DEFAULT_CONFIG.vector}
         seed={5}
+        coverage={DEFAULT_CONFIG.rollCoverage}
+        errorRate={DEFAULT_CONFIG.rollError}
+        onCoverage={() => {}}
+        onErrorRate={() => {}}
       />,
     ),
     renderToString(
@@ -203,6 +217,8 @@ describe('the copy holds to its register', () => {
         columns={QUASI}
         vector={DEFAULT_CONFIG.vector}
         seed={5}
+        fraction={DEFAULT_CONFIG.releaseFraction}
+        onFraction={() => {}}
       />,
     ),
     renderToString(

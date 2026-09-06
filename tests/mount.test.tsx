@@ -168,6 +168,29 @@ describe('the application boots', () => {
     expect(window.location.search).not.toContain('name');
   });
 
+  it('writes every instrument control into the URL', () => {
+    // The round-trip itself is covered in config-url.test.ts. What this adds is that a
+    // real mount actually writes them, so a reader who moves one of these sliders and
+    // then reloads or sends the link gets what they were looking at back.
+    mount();
+    const params = new URLSearchParams(window.location.search);
+    for (const key of ['rollCoverage', 'rollError', 'releaseFraction', 'v2']) {
+      expect(params.get(key)).not.toBeNull();
+    }
+  });
+
+  it('boots from a configuration in the URL rather than from the defaults', () => {
+    // A refresh is a fresh mount against whatever the address bar holds, so this is the
+    // refresh path and the shared-link path at once.
+    window.history.replaceState(null, '', '/?seed=777&size=1200&releaseFraction=0.5&v2=3,1,0,2');
+    const el = mount();
+    expect(el.textContent).toContain('seed 777');
+    const params = new URLSearchParams(window.location.search);
+    expect(params.get('seed')).toBe('777');
+    expect(params.get('releaseFraction')).toBe('0.5');
+    expect(params.get('v2')).toBe('3,1,0,2');
+  });
+
   it('makes the canvas keyboard reachable', () => {
     const el = mount();
     const canvas = el.querySelector('canvas') as HTMLCanvasElement;

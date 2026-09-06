@@ -9,7 +9,7 @@
  * The two coincide exactly when the release is the whole population, which is the case
  * every other view in this app is set up for. Move the fraction and they come apart.
  */
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { PersonRecord, GeneralisationVector } from '../../engine/types';
 import type { Taxonomy } from '../../engine/taxonomy';
 import { generalisePopulation } from '../../engine/generalise';
@@ -23,12 +23,22 @@ export interface ReleaseProps {
   columns: readonly string[];
   vector: GeneralisationVector;
   seed: number;
+  /** From the configuration, so a share is linkable and survives a refresh. */
+  fraction: number;
+  onFraction: (value: number) => void;
 }
 
 const FRACTIONS = [0.01, 0.02, 0.05, 0.1, 0.25, 0.5, 0.75, 1];
 
-export function Release({ records, taxonomy, columns, vector, seed }: ReleaseProps) {
-  const [fraction, setFraction] = useState(0.05);
+export function Release({
+  records,
+  taxonomy,
+  columns,
+  vector,
+  seed,
+  fraction,
+  onFraction,
+}: ReleaseProps) {
 
   const keys = useMemo(
     () => generalisePopulation(records, taxonomy, vector, columns),
@@ -94,7 +104,7 @@ export function Release({ records, taxonomy, columns, vector, seed }: ReleasePro
         min={0.01}
         max={1}
         step={0.01}
-        onChange={setFraction}
+        onChange={onFraction}
         display={`${Math.round(fraction * 100)}%`}
       />
 

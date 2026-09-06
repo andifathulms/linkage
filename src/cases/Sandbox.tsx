@@ -247,6 +247,8 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
               taxonomy={taxonomy}
               columns={QUASI}
               vector={config.vector}
+              vectorB={config.vectorB}
+              onVectorB={(vectorB) => setConfig({ vectorB })}
               seed={config.seed}
             />
           )}
@@ -257,6 +259,10 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
               columns={QUASI}
               vector={config.vector}
               seed={config.seed}
+              coverage={config.rollCoverage}
+              errorRate={config.rollError}
+              onCoverage={(rollCoverage) => setConfig({ rollCoverage })}
+              onErrorRate={(rollError) => setConfig({ rollError })}
             />
           )}
           {instrument === 'release' && (
@@ -266,6 +272,8 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
               columns={QUASI}
               vector={config.vector}
               seed={config.seed}
+              fraction={config.releaseFraction}
+              onFraction={(releaseFraction) => setConfig({ releaseFraction })}
             />
           )}
           {instrument === 'suppression' && (
