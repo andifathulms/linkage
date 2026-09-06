@@ -8,7 +8,7 @@
  * Homogeneity is a chart with one bar. Skewness is a distribution sitting visibly away
  * from the outline behind it. Neither needs a label, and neither gets one.
  */
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { ClassSet } from '../../engine/classes';
 import { entropyL } from '../../engine/classes';
 
@@ -32,6 +32,48 @@ export interface ClassInspectorProps {
 }
 
 export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps) {
+  const panel = useRef<HTMLElement | null>(null);
+  const returnTo = useRef<Element | null>(null);
+
+  /**
+   * The inspector renders near the end of the case, a long way from whatever opened it,
+   * so a keyboard user who selected a class had to tab forward blindly to find it. It
+   * takes focus on open and gives it back on close.
+   *
+   * Except when the field opened it. The canvas walks classes with the arrow keys and
+   * selects as it goes, so taking focus there would move the reader out of the field on
+   * their first keypress and end the walk. The field announces the class it lands on
+   * instead, which is what a walk needs.
+   *
+   * Not a dialog: the rest of the page stays operable behind it, so it does not trap
+   * focus and does not claim a role that would say it does.
+   */
+  useEffect(() => {
+    const active = document.activeElement;
+    const fromField = active instanceof HTMLElement && active.classList.contains('field__canvas');
+    returnTo.current = active;
+    if (!fromField) panel.current?.focus();
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.stopPropagation();
+      onClose();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      // Give focus back only if closing the panel is what lost it. Removing a focused
+      // element drops focus to the body, so that is the signal; if the reader has moved
+      // somewhere else, activeElement is that element and pulling them back would be a
+      // second theft rather than a repair.
+      const active = document.activeElement;
+      const focusWasLost = active === null || active === document.body;
+      if (focusWasLost && returnTo.current instanceof HTMLElement && returnTo.current.isConnected) {
+        returnTo.current.focus();
+      }
+    };
+  }, [onClose]);
+
   const cls = set.classes[classIndex];
 
   const bars = useMemo(() => {
@@ -60,7 +102,7 @@ export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps
   const maxShare = Math.max(0.001, ...bars.map((b) => Math.max(b.classShare, b.populationShare)));
 
   return (
-    <section className="panel inspector">
+    <section className="panel inspector" ref={panel} tabIndex={-1}>
       <div className="inspector__head">
         <h2 className="panel__title">Class inspector</h2>
         <button type="button" className="button button--quiet" onClick={onClose}>

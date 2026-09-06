@@ -216,6 +216,37 @@ describe('the application boots', () => {
     expect(live.some((n) => /^Class .+ record/.test(n.textContent ?? ''))).toBe(true);
   });
 
+  it('moves focus to the inspector when a button opens it, and gives it back', () => {
+    const el = mount();
+    const button = [...el.querySelectorAll('button')].find((b) =>
+      b.textContent?.includes('Select the smallest class'),
+    ) as HTMLButtonElement;
+    button.focus();
+    click(button);
+
+    const inspector = el.querySelector('.inspector') as HTMLElement;
+    expect(inspector).not.toBeNull();
+    expect(inspector.contains(document.activeElement)).toBe(true);
+
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    });
+    expect(el.querySelector('.inspector')).toBeNull();
+    expect(document.activeElement).toBe(button);
+  });
+
+  it('leaves focus in the field when the arrow keys open the inspector', () => {
+    // The field selects as it walks, so taking focus would end the walk on the first
+    // keypress. This is the case the focus rule exists to exclude.
+    const el = mount();
+    const canvas = el.querySelector('canvas') as HTMLCanvasElement;
+    canvas.focus();
+    act(() => {
+      canvas.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    });
+    expect(document.activeElement).toBe(canvas);
+  });
+
   it('makes the canvas keyboard reachable', () => {
     const el = mount();
     const canvas = el.querySelector('canvas') as HTMLCanvasElement;
