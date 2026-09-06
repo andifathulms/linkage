@@ -307,14 +307,20 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
         />
       )}
 
-      <div className="tabs" role="tablist" aria-label="Instruments">
+      {/* Buttons, not tabs. role="tab" promises the ARIA tab pattern: a tabpanel each
+          one controls, a roving tabindex, and arrow keys that move between them. None of
+          that was here, so a screen reader was told "tab, 1 of 12" and the arrow keys
+          did nothing. Pressed buttons describe what this actually is.
+
+          role="group" is the one addition: it gives the set a shared name, and there is
+          no native element that groups buttons without also implying a form control. */}
+      <div className="tabs" role="group" aria-label="Instruments">
         {INSTRUMENTS.map((entry) => (
           <button
             key={entry.id}
             type="button"
-            role="tab"
             className="tabs__item"
-            aria-selected={instrument === entry.id}
+            aria-pressed={instrument === entry.id}
             onClick={() => setInstrument(entry.id)}
           >
             {entry.label}

@@ -1054,7 +1054,7 @@ input[type='range']:hover::-webkit-slider-thumb {
   color: var(--ink);
 }
 
-.tabs__item[aria-selected='true'] {
+.tabs__item[aria-pressed='true'] {
   color: var(--ink);
   border-top-color: var(--ink);
   font-weight: 600;
