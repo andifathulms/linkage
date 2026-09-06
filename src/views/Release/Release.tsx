@@ -114,7 +114,7 @@ export function Release({ records, taxonomy, columns, vector, seed }: ReleasePro
         exposed={risk.nameableInPopulation > 0}
       />
 
-      <div className="readout" style={{ padding: 'var(--s-3) 0' }}>
+      <div className="readout readout--inset">
         <Readout
           label="Standing alone in the release"
           value={`${risk.aloneInRelease.toLocaleString('en')} of ${risk.released.toLocaleString('en')}`}

@@ -75,7 +75,7 @@ export function Composition({ records, taxonomy, columns, vector, seed }: Compos
         }
       />
 
-      <div className="readout" style={{ padding: 'var(--s-3) 0' }}>
+      <div className="readout readout--inset">
         <Readout label="Smallest class, release A" value={result.a.k.toLocaleString('en')} />
         <Readout label="Smallest class, release B" value={result.b.k.toLocaleString('en')} />
         <Readout

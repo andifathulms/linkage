@@ -101,7 +101,7 @@ export function Roll({ records, taxonomy, columns, vector, seed }: RollProps) {
         exposed={score.result.correct > 0}
       />
 
-      <div className="readout" style={{ padding: 'var(--s-3) 0' }}>
+      <div className="readout readout--inset">
         <Readout label="Not determined" value={score.result.failed.toLocaleString('en')} />
         <Readout
           label="Narrowed to a wrong single candidate"

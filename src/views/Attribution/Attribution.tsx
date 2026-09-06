@@ -74,7 +74,7 @@ export function Attribution({ records, taxonomy, columns, vector, seed }: Attrib
         estimator and its inputs are identical on both sides; only the assumption differs.
       </p>
 
-      <div className="readout" style={{ padding: 'var(--s-3) 0' }}>
+      <div className="readout readout--inset">
         <Readout label="Measured, by grouping the records" value={pct(report.measuredUniqueness)} />
         <Readout label="Estimated, under the assumption" value={pct(report.estimatedUniqueness)} />
         <Readout

@@ -96,7 +96,7 @@ export function Suppression({
         </p>
       ) : (
         <>
-          <div className="readout" style={{ padding: 'var(--s-3) 0' }}>
+          <div className="readout readout--inset">
             {result.ranked.slice(0, 3).map((c) => (
               <Readout
                 key={c.column}

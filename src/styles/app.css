@@ -662,6 +662,12 @@ caption.panel__title::after {
   gap: var(--s-2) var(--s-4);
 }
 
+/* A readout sitting inside a panel rather than spanning the page. Five instruments
+   were each restating this padding inline; the decision belongs here, once. */
+.readout--inset {
+  padding: var(--s-3) 0;
+}
+
 /* A readout is a tile: label above in tracked micro caps, figure below. Exposed tiles
    take a wash and a rule rather than a colour change alone, so the state survives
    greyscale (DESIGN §2.2). */
