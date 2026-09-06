@@ -67,8 +67,8 @@ export function Suppression({
   };
 
   return (
-    <section className="panel" aria-label="Who pays for k">
-      <div className="panel__title">Who pays for k</div>
+    <section className="panel">
+      <h2 className="panel__title">Who pays for k</h2>
 
       <p className="note">
         Reaching a target k by generalisation alone is often impossible without coarsening every

@@ -102,10 +102,10 @@ export function Lattice({ records, taxonomy, columns, targetK, onSelect, selecte
   const selectedKey = vectorKey(selected, columns);
 
   return (
-    <section className="panel" aria-label="Generalisation lattice">
-      <div className="panel__title">
-        Generalisation lattice — minimal vectors achieving k = {targetK}
-      </div>
+    <section className="panel">
+      <h2 className="panel__title">
+        Generalisation lattice, minimal vectors achieving k = {targetK}
+      </h2>
 
       <div className="readout">
         <Readout label="Nodes" value={search.nodes.length.toLocaleString('en')} />

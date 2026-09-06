@@ -66,7 +66,7 @@ export function CaseBudget({ derived, config, setConfig, onComplete }: CaseProps
         />
 
         <section className="panel">
-          <div className="panel__title">What the budget is</div>
+          <h2 className="panel__title">What the budget is</h2>
           <p className="note">
             Epsilon is not a setting with a right value. It is the total disclosure you are willing
             to permit, spread across every question anyone will ever ask of this data. Sequential

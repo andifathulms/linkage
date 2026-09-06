@@ -54,7 +54,7 @@ export function CaseAggregates({ derived, config, onComplete }: CaseProps) {
           onIsolated={handleIsolated}
         />
         <section className="panel">
-          <div className="panel__title">Why this one is different</div>
+          <h2 className="panel__title">Why this one is different</h2>
           <p className="note">
             The first three cases were defeated by an attacker who knew more than the defense
             assumed. Generalisation assumed the attacker had quasi-identifiers; l-diversity assumed

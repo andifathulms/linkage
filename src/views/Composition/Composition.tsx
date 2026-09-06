@@ -53,8 +53,8 @@ export function Composition({
   };
 
   return (
-    <section className="panel" aria-label="Composition of two releases">
-      <div className="panel__title">Two releases</div>
+    <section className="panel">
+      <h2 className="panel__title">Two releases</h2>
 
       <ThreatModel
         assumes={
@@ -96,7 +96,7 @@ export function Composition({
       />
 
       <div style={{ marginTop: 'var(--s-3)' }}>
-        <div className="panel__title">The second release</div>
+        <h2 className="panel__title">The second release</h2>
         {columns.map((column) => {
           const t = taxonomy[column];
           if (!t) return null;

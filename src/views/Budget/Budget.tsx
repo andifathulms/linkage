@@ -144,8 +144,8 @@ export function BudgetPanel({
   const fraction = budget.allotted === 0 ? 0 : budget.spent / budget.allotted;
 
   return (
-    <section className="panel" aria-label="Privacy budget">
-      <div className="panel__title">Budget</div>
+    <section className="panel">
+      <h2 className="panel__title">Budget</h2>
 
       <div
         className="meter"

@@ -60,9 +60,9 @@ export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps
   const maxShare = Math.max(0.001, ...bars.map((b) => Math.max(b.classShare, b.populationShare)));
 
   return (
-    <section className="panel inspector" aria-label="Equivalence class inspector">
+    <section className="panel inspector">
       <div className="inspector__head">
-        <span className="panel__title">Class inspector</span>
+        <h2 className="panel__title">Class inspector</h2>
         <button type="button" className="button button--quiet" onClick={onClose}>
           Close
         </button>

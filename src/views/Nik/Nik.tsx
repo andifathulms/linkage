@@ -78,8 +78,8 @@ export function Nik({ records }: NikProps) {
   };
 
   return (
-    <section className="panel" aria-label="NIK dissector">
-      <div className="panel__title">NIK dissector</div>
+    <section className="panel">
+      <h2 className="panel__title">NIK dissector</h2>
 
       <p className="note">
         A NIK is sixteen digits with a published structure. It does not merely identify: it encodes
@@ -152,7 +152,7 @@ export function Nik({ records }: NikProps) {
       {/* Two presets, side by side, permanently visible. The gap is the argument. */}
       <div className="nik__presets">
         <div className="nik__preset">
-          <div className="panel__title">Card-style masking</div>
+          <h2 className="panel__title">Card-style masking</h2>
           <div className="nik__presetDigits">{applyMask(record.nik, PRESET_CARD_MASK)}</div>
           <div className="display">{(cardUniqueness * 100).toFixed(1)}%</div>
           <p className="note">
@@ -162,7 +162,7 @@ export function Nik({ records }: NikProps) {
           </p>
         </div>
         <div className="nik__preset">
-          <div className="panel__title">Head destroyed</div>
+          <h2 className="panel__title">Head destroyed</h2>
           <div className="nik__presetDigits">{applyMask(record.nik, PRESET_HEAD_MASK)}</div>
           <div className="display">{(headUniqueness * 100).toFixed(1)}%</div>
           <p className="note">

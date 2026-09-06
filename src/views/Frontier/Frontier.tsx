@@ -58,8 +58,8 @@ export function Frontier({ records, taxonomy, columns, onSelect, seed }: Frontie
   };
 
   return (
-    <section className="panel" aria-label="Privacy–utility frontier">
-      <div className="panel__title">Privacy–utility frontier</div>
+    <section className="panel">
+      <h2 className="panel__title">Privacy–utility frontier</h2>
 
       <svg
         viewBox={`0 0 ${W} ${H}`}

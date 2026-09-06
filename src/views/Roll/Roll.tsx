@@ -90,8 +90,8 @@ export function Roll({
   };
 
   return (
-    <section className="panel" aria-label="The attacker's roll">
-      <div className="panel__title">The attacker's roll</div>
+    <section className="panel">
+      <h2 className="panel__title">The attacker's roll</h2>
 
       <p className="note">
         Everywhere else the join runs against a complete, current, error-free register of the same

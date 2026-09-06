@@ -86,8 +86,8 @@ export function Differencing({ records, seed, epsilon, onIsolated }: Differencin
   const record = chosen === null ? null : records.find((r) => r.id === chosen) ?? null;
 
   return (
-    <section className="panel" aria-label="Differencing bench">
-      <div className="panel__title">Differencing bench</div>
+    <section className="panel">
+      <h2 className="panel__title">Differencing bench</h2>
 
       <div className="bench__controls">
         <div className="control">
@@ -191,7 +191,7 @@ export function Differencing({ records, seed, epsilon, onIsolated }: Differencin
 
           {protectedPair && (
             <div className="panel" style={{ marginTop: 'var(--s-3)' }}>
-              <div className="panel__title">The same pair under the Laplace mechanism</div>
+              <h2 className="panel__title">The same pair under the Laplace mechanism</h2>
               <div className="readout">
                 <Readout label="Epsilon, split across two queries" value={epsilon.toFixed(2)} />
                 <Readout label="Sensitivity" value={format(protectedPair.query.sensitivity, kind)} />

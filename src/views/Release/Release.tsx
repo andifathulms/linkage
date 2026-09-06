@@ -86,8 +86,8 @@ export function Release({
   };
 
   return (
-    <section className="panel" aria-label="The release and the population">
-      <div className="panel__title">The release, and the population</div>
+    <section className="panel">
+      <h2 className="panel__title">The release, and the population</h2>
 
       <p className="note">
         A release is usually an extract: a year, a programme, a province. k is a property of the

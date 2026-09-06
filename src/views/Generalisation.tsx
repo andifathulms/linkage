@@ -26,8 +26,8 @@ export function Generalisation({
   onTargetK,
 }: GeneralisationProps) {
   return (
-    <section className="panel" aria-label="Generalisation">
-      <div className="panel__title">Generalisation</div>
+    <section className="panel">
+      <h2 className="panel__title">Generalisation</h2>
       {columns.map((column) => {
         const t = taxonomy[column];
         if (!t) return null;

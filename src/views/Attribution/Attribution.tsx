@@ -63,8 +63,8 @@ export function Attribution({ records, taxonomy, columns, vector, seed }: Attrib
   };
 
   return (
-    <section className="panel" aria-label="The estimate against the population">
-      <div className="panel__title">The estimate, against the population</div>
+    <section className="panel">
+      <h2 className="panel__title">The estimate, against the population</h2>
 
       <p className="note">
         The assessor cannot see a dataset, so it estimates uniqueness from declared cardinalities,

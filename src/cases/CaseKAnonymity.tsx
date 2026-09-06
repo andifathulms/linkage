@@ -117,7 +117,7 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
           />
 
           <section className="panel">
-            <div className="panel__title">Achieved</div>
+            <h2 className="panel__title">Achieved</h2>
             <div className="readout">
               <Readout
                 label="k"
@@ -147,7 +147,7 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
 
         <div className="stack">
           <section className="panel">
-            <div className="panel__title">Homogeneity</div>
+            <h2 className="panel__title">Homogeneity</h2>
             <p className="note">
               A class where every member holds the same sensitive value discloses that value about
               every member, without identifying any of them. k-anonymity does not see this coming,

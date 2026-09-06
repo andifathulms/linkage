@@ -110,8 +110,8 @@ export function Assessor() {
   const report = outcome.report;
 
   return (
-    <section className="panel assessor" aria-label="Schema assessor">
-      <div className="panel__title">Schema assessor</div>
+    <section className="panel assessor">
+      <h2 className="panel__title">Schema assessor</h2>
 
       <p className="note">
         Describe your columns. This tool takes a schema — a name, a role, a type, a cardinality and a

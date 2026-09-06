@@ -122,7 +122,7 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
       <div className="columns">
         <div className="stack">
           <section className="panel">
-            <div className="panel__title">Generator</div>
+            <h2 className="panel__title">Generator</h2>
             <Slider
               label="Population size"
               value={config.size}
@@ -191,7 +191,7 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
           />
 
           <section className="panel">
-            <div className="panel__title">Sharing</div>
+            <h2 className="panel__title">Sharing</h2>
             <p className="note">
               The seed, generator parameters, generalisation vector, target k and epsilon are in the
               URL. They describe a population and a configuration, not anyone's data, so the link is

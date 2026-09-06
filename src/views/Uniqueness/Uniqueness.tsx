@@ -86,8 +86,8 @@ export function Uniqueness({ records, seed }: UniquenessProps) {
   };
 
   return (
-    <section className="panel" aria-label="Uniqueness study">
-      <div className="panel__title">The uniqueness study</div>
+    <section className="panel">
+      <h2 className="panel__title">The uniqueness study</h2>
 
       <p>
         The most-cited statistic in data privacy is one two careful researchers disagree about by

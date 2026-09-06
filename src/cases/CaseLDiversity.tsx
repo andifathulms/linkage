@@ -125,7 +125,7 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
             onTargetK={(k) => setConfig({ targetK: k })}
           />
           <section className="panel">
-            <div className="panel__title">Diversity</div>
+            <h2 className="panel__title">Diversity</h2>
             <Slider label="Target l" value={targetL} min={1} max={5} onChange={setTargetL} />
             <div className="readout" style={{ marginTop: 'var(--s-2)' }}>
               <Readout label="Achieved l, minimum" value={set.l} exposed={set.l < targetL} />
@@ -147,7 +147,7 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
 
         <div className="stack">
           <section className="panel">
-            <div className="panel__title">Skewness</div>
+            <h2 className="panel__title">Skewness</h2>
             <p className="note">
               Classes below satisfy l = {targetL} and still concede near-certainty. The class
               inspector draws the population distribution behind the class as a hairline; where the
@@ -207,7 +207,7 @@ export function CaseLDiversity({ derived, config, setConfig, onComplete }: CaseP
 
           {ranked.length > 0 && (
             <section className="panel">
-              <div className="panel__title">Classes furthest from the population distribution</div>
+              <h2 className="panel__title">Classes furthest from the population distribution</h2>
               <div className="table__scroll">
                 <table className="table">
                   <thead>
