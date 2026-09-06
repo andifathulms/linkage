@@ -113,37 +113,39 @@ export function Suppression({
             representative slice of that column. Larger means it did not.
           </p>
 
-          <table className="table" style={{ marginTop: 'var(--s-3)' }}>
-            <caption className="panel__title">Where the cost concentrated</caption>
-            <thead>
-              <tr>
-                <th scope="col">Column</th>
-                <th scope="col" className="num">Distance</th>
-                <th scope="col">Value most affected</th>
-                <th scope="col" className="num">Of those dropped</th>
-                <th scope="col" className="num">Of the population</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.ranked.map((c) => (
-                <tr key={c.column}>
-                  <td>{taxonomy[c.column]?.label ?? c.column}</td>
-                  <td className="num">{c.distance.toFixed(3)}</td>
-                  <td>{c.mostAffected ? String(c.mostAffected.value) : ''}</td>
-                  <td className="num">
-                    {c.mostAffected
-                      ? `${c.mostAffected.suppressedCount.toLocaleString('en')} of ${result.suppressed.toLocaleString('en')}`
-                      : ''}
-                  </td>
-                  <td className="num">
-                    {c.mostAffected
-                      ? `${c.mostAffected.populationCount.toLocaleString('en')} of ${result.population.toLocaleString('en')}`
-                      : ''}
-                  </td>
+          <div className="table__scroll" style={{ marginTop: 'var(--s-3)' }}>
+            <table className="table">
+              <caption className="panel__title">Where the cost concentrated</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Column</th>
+                  <th scope="col" className="num">Distance</th>
+                  <th scope="col">Value most affected</th>
+                  <th scope="col" className="num">Of those dropped</th>
+                  <th scope="col" className="num">Of the population</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {result.ranked.map((c) => (
+                  <tr key={c.column}>
+                    <td>{taxonomy[c.column]?.label ?? c.column}</td>
+                    <td className="num">{c.distance.toFixed(3)}</td>
+                    <td>{c.mostAffected ? String(c.mostAffected.value) : ''}</td>
+                    <td className="num">
+                      {c.mostAffected
+                        ? `${c.mostAffected.suppressedCount.toLocaleString('en')} of ${result.suppressed.toLocaleString('en')}`
+                        : ''}
+                    </td>
+                    <td className="num">
+                      {c.mostAffected
+                        ? `${c.mostAffected.populationCount.toLocaleString('en')} of ${result.population.toLocaleString('en')}`
+                        : ''}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <div className="buttons" style={{ marginTop: 'var(--s-2)' }}>
             <button type="button" className="button button--quiet" onClick={exportSkew}>

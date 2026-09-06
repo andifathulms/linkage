@@ -127,27 +127,29 @@ export function Composition({ records, taxonomy, columns, vector, seed }: Compos
 
       {result.narrowed.length > 0 && (
         <>
-          <table className="table" style={{ marginTop: 'var(--s-3)' }}>
-            <caption className="panel__title">Records the second release cost the most</caption>
-            <thead>
-              <tr>
-                <th scope="col">Record</th>
-                <th scope="col" className="num">In release A</th>
-                <th scope="col" className="num">In release B</th>
-                <th scope="col" className="num">Holding both</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.narrowed.slice(0, 12).map((n) => (
-                <tr key={n.recordId}>
-                  <td>{n.recordId}</td>
-                  <td className="num">{n.sizeA.toLocaleString('en')}</td>
-                  <td className="num">{n.sizeB.toLocaleString('en')}</td>
-                  <td className="num">{n.sizeJoint.toLocaleString('en')}</td>
+          <div className="table__scroll" style={{ marginTop: 'var(--s-3)' }}>
+            <table className="table">
+              <caption className="panel__title">Records the second release cost the most</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Record</th>
+                  <th scope="col" className="num">In release A</th>
+                  <th scope="col" className="num">In release B</th>
+                  <th scope="col" className="num">Holding both</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {result.narrowed.slice(0, 12).map((n) => (
+                  <tr key={n.recordId}>
+                    <td>{n.recordId}</td>
+                    <td className="num">{n.sizeA.toLocaleString('en')}</td>
+                    <td className="num">{n.sizeB.toLocaleString('en')}</td>
+                    <td className="num">{n.sizeJoint.toLocaleString('en')}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div className="buttons" style={{ marginTop: 'var(--s-2)' }}>
             <button type="button" className="button button--quiet" onClick={exportNarrowed}>
               Export the narrowing as CSV

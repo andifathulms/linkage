@@ -136,29 +136,31 @@ export function Release({ records, taxonomy, columns, vector, seed }: ReleasePro
         k means what a steward takes it to mean.
       </p>
 
-      <table className="table" style={{ marginTop: 'var(--s-3)' }}>
-        <caption className="panel__title">The same population, released at different shares</caption>
-        <thead>
-          <tr>
-            <th scope="col">Released</th>
-            <th scope="col" className="num">Rows</th>
-            <th scope="col" className="num">k</th>
-            <th scope="col" className="num">Alone</th>
-            <th scope="col" className="num">Nameable</th>
-          </tr>
-        </thead>
-        <tbody>
-          {series.map((s) => (
-            <tr key={s.fraction}>
-              <td>{Math.round(s.fraction * 100)}%</td>
-              <td className="num">{s.risk.released.toLocaleString('en')}</td>
-              <td className="num">{s.risk.kRelease.toLocaleString('en')}</td>
-              <td className="num">{s.risk.aloneInRelease.toLocaleString('en')}</td>
-              <td className="num">{s.risk.nameableInPopulation.toLocaleString('en')}</td>
+      <div className="table__scroll" style={{ marginTop: 'var(--s-3)' }}>
+        <table className="table">
+          <caption className="panel__title">The same population, released at different shares</caption>
+          <thead>
+            <tr>
+              <th scope="col">Released</th>
+              <th scope="col" className="num">Rows</th>
+              <th scope="col" className="num">k</th>
+              <th scope="col" className="num">Alone</th>
+              <th scope="col" className="num">Nameable</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {series.map((s) => (
+              <tr key={s.fraction}>
+                <td>{Math.round(s.fraction * 100)}%</td>
+                <td className="num">{s.risk.released.toLocaleString('en')}</td>
+                <td className="num">{s.risk.kRelease.toLocaleString('en')}</td>
+                <td className="num">{s.risk.aloneInRelease.toLocaleString('en')}</td>
+                <td className="num">{s.risk.nameableInPopulation.toLocaleString('en')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <div className="buttons" style={{ marginTop: 'var(--s-2)' }}>
         <button type="button" className="button button--quiet" onClick={exportSeries}>

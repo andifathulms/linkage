@@ -96,29 +96,31 @@ export function Attribution({ records, taxonomy, columns, vector, seed }: Attrib
         assumption cannot be swept here.
       </p>
 
-      <table className="table" style={{ marginTop: 'var(--s-3)' }}>
-        <caption className="panel__title">
-          What each column adds beyond the others, both ways
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Column</th>
-            <th scope="col" className="num">Distinct values</th>
-            <th scope="col" className="num">Measured</th>
-            <th scope="col" className="num">Estimated</th>
-          </tr>
-        </thead>
-        <tbody>
-          {report.ranked.map((c) => (
-            <tr key={c.column}>
-              <td>{taxonomy[c.column]?.label ?? c.column}</td>
-              <td className="num">{c.cardinality.toLocaleString('en')}</td>
-              <td className="num">{pct(c.measuredContribution)}</td>
-              <td className="num">{pct(c.estimatedContribution)}</td>
+      <div className="table__scroll" style={{ marginTop: 'var(--s-3)' }}>
+        <table className="table">
+          <caption className="panel__title">
+            What each column adds beyond the others, both ways
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Column</th>
+              <th scope="col" className="num">Distinct values</th>
+              <th scope="col" className="num">Measured</th>
+              <th scope="col" className="num">Estimated</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {report.ranked.map((c) => (
+              <tr key={c.column}>
+                <td>{taxonomy[c.column]?.label ?? c.column}</td>
+                <td className="num">{c.cardinality.toLocaleString('en')}</td>
+                <td className="num">{pct(c.measuredContribution)}</td>
+                <td className="num">{pct(c.estimatedContribution)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <p className="note" style={{ marginTop: 'var(--s-3)' }}>
         {report.rankingAgrees

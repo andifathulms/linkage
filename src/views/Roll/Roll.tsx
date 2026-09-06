@@ -165,25 +165,27 @@ export function Roll({ records, taxonomy, columns, vector, seed }: RollProps) {
         </svg>
       </figure>
 
-      <table className="table" style={{ marginTop: 'var(--s-3)' }}>
-        <caption className="panel__title">The same attack across the coverage range</caption>
-        <thead>
-          <tr>
-            <th scope="col">Coverage</th>
-            <th scope="col" className="num">Uniquely identified</th>
-            <th scope="col" className="num">Of targets</th>
-          </tr>
-        </thead>
-        <tbody>
-          {curve.map((p) => (
-            <tr key={p.coverage}>
-              <td>{Math.round(p.coverage * 100)}%</td>
-              <td className="num">{p.correct.toLocaleString('en')}</td>
-              <td className="num">{targets.length.toLocaleString('en')}</td>
+      <div className="table__scroll" style={{ marginTop: 'var(--s-3)' }}>
+        <table className="table">
+          <caption className="panel__title">The same attack across the coverage range</caption>
+          <thead>
+            <tr>
+              <th scope="col">Coverage</th>
+              <th scope="col" className="num">Uniquely identified</th>
+              <th scope="col" className="num">Of targets</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {curve.map((p) => (
+              <tr key={p.coverage}>
+                <td>{Math.round(p.coverage * 100)}%</td>
+                <td className="num">{p.correct.toLocaleString('en')}</td>
+                <td className="num">{targets.length.toLocaleString('en')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <div className="buttons" style={{ marginTop: 'var(--s-2)' }}>
         <button type="button" className="button button--quiet" onClick={exportCurve}>
