@@ -192,6 +192,10 @@ export function Slider({
         /* The track paints its own fill from this, so the filled portion is the value
            and not a second element that could disagree with it. */
         style={{ '--fill': `${fill}%` } as CSSProperties}
+        /* The slider's value is a taxonomy level or a share; what the reader sees is
+           "Kabupaten/kota" or "70%". Without this a screen reader announces the bare
+           integer, which names nothing (WCAG 4.1.2). */
+        aria-valuetext={display}
         onChange={(e) => onChange(Number(e.target.value))}
       />
       <span className="control__value">{display ?? value}</span>
