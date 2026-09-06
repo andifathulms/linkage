@@ -98,14 +98,9 @@ export function Release({ records, taxonomy, columns, vector, seed }: ReleasePro
         display={`${Math.round(fraction * 100)}%`}
       />
 
-      <Finding
-        of={risk.aloneInRelease}
-        total={risk.released}
-        label="released rows standing alone in the release"
-        detail={<>This is what k measures. The release reads k = {risk.kRelease.toLocaleString('en')}.</>}
-        exposed={risk.aloneInRelease > 0}
-      />
-
+      {/* One finding, and it is the one a steward does not already have. What k
+          measures sits beside it as a reading, because showing both at display size
+          left neither of them reading as the finding. */}
       <Finding
         of={risk.nameableInPopulation}
         total={risk.released}
@@ -120,6 +115,12 @@ export function Release({ records, taxonomy, columns, vector, seed }: ReleasePro
       />
 
       <div className="readout" style={{ padding: 'var(--s-3) 0' }}>
+        <Readout
+          label="Standing alone in the release"
+          value={`${risk.aloneInRelease.toLocaleString('en')} of ${risk.released.toLocaleString('en')}`}
+          exposed={risk.aloneInRelease > 0}
+        />
+        <Readout label="The release reads k" value={risk.kRelease.toLocaleString('en')} />
         <Readout
           label="Alone in the release, yet not nameable"
           value={risk.aloneButNotNameable.toLocaleString('en')}
