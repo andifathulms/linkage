@@ -503,9 +503,7 @@ strong {
 }
 
 .panel__title {
-  font-size: var(--t-micro-size);
-  text-transform: uppercase;
-  letter-spacing: var(--track-micro);
+  font-size: var(--t-small-size);
   color: var(--ink-faint);
   margin-bottom: var(--s-2);
   font-weight: 600;
@@ -583,9 +581,7 @@ caption.panel__title::after {
 .eyebrow {
   display: block;
   font-family: var(--font-mono);
-  font-size: var(--t-micro-size);
-  text-transform: uppercase;
-  letter-spacing: var(--track-micro);
+  font-size: var(--t-small-size);
   color: var(--ink-mid);
   margin-bottom: var(--s-2);
 }
@@ -626,9 +622,7 @@ caption.panel__title::after {
   font-weight: 600;
   color: var(--ink);
   margin-top: var(--s-2);
-  font-size: var(--t-micro-size);
-  text-transform: uppercase;
-  letter-spacing: var(--track-label);
+  font-size: var(--t-small-size);
 }
 
 .assumption dt:first-child {
@@ -692,9 +686,7 @@ caption.panel__title::after {
 }
 
 .readout__label {
-  font-size: var(--t-micro-size);
-  text-transform: uppercase;
-  letter-spacing: var(--track-label);
+  font-size: var(--t-small-size);
   color: var(--ink-faint);
   text-wrap: balance;
 }
@@ -812,9 +804,7 @@ caption.panel__title::after {
   font-weight: 600;
   color: var(--ink-faint);
   font-family: var(--font-sans);
-  font-size: var(--t-micro-size);
-  text-transform: uppercase;
-  letter-spacing: var(--track-label);
+  font-size: var(--t-small-size);
   padding: var(--s-1) var(--s-1) var(--s-1) 0;
   border-bottom: 1px solid var(--rule-strong);
   white-space: nowrap;
@@ -1378,8 +1368,6 @@ input[type='range']:hover::-webkit-slider-thumb {
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: var(--t-micro-size);
-  text-transform: uppercase;
-  letter-spacing: var(--track-label);
   color: var(--ink-faint);
 }
 
@@ -1653,9 +1641,7 @@ input[type='range']:hover::-webkit-slider-thumb {
 }
 
 .nik__segmentLabel {
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: 10px;
   color: var(--ink-faint);
   display: block;
   overflow: hidden;
@@ -1855,7 +1841,7 @@ input[type='range']:hover::-webkit-slider-thumb {
   }
 
   .nik__segmentLabel {
-    font-size: 7px;
+    font-size: 9px;
   }
 
   .readout {

@@ -107,8 +107,8 @@
   --track-hero: -0.03em;
   --track-display: -0.022em;
   --track-h2: -0.012em;
-  --track-label: 0.08em;
-  --track-micro: 0.14em;
+  /* --track-label and --track-micro are gone with the all-caps labels they existed to
+     open up. DESIGN §3.2 rules out both, and a sentence-case label needs no tracking. */
 
   /* 4.3 Grid and rhythm. 8 px base. */
   --s-0: 4px;
