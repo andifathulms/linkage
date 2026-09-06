@@ -58,9 +58,9 @@ const INSTRUMENTS: Array<{ id: Instrument; label: string }> = [
   { id: 'budget', label: 'Budget' },
   { id: 'composition', label: 'Two releases' },
   { id: 'roll', label: 'The roll' },
-  { id: 'release', label: 'Release and population' },
+  { id: 'release', label: 'Sampling' },
   { id: 'suppression', label: 'Who pays' },
-  { id: 'attribution', label: 'Estimate against truth' },
+  { id: 'attribution', label: 'The estimate' },
   { id: 'assessor', label: 'Assessor' },
 ];
 
