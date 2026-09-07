@@ -10,7 +10,12 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { GeneralisationVector, Population } from '../engine/types';
-import { generatePopulation, DEFAULT_PARAMS } from '../engine/generate/population';
+import {
+  generatePopulation,
+  DEFAULT_PARAMS,
+  DEFAULT_SENSITIVE_WEIGHTS,
+  skewedWeights,
+} from '../engine/generate/population';
 import { buildTaxonomy, type Taxonomy } from '../engine/taxonomy';
 import { hierarchyCardinalities } from '../engine/generate/hierarchy';
 import { generalisePopulation } from '../engine/generalise';
@@ -39,6 +44,11 @@ export interface AppConfig {
   rollError: number;
   /** Share of the population a release contains, 0 to 1. */
   releaseFraction: number;
+  /**
+   * Shape of the sensitive distribution. 0 spreads the values evenly, 1 concentrates
+   * almost everything on one, and 0.5 is the published weights (PRD §4.1).
+   */
+  sensitiveSkew: number;
 }
 
 export const DEFAULT_CONFIG: AppConfig = {
@@ -58,6 +68,7 @@ export const DEFAULT_CONFIG: AppConfig = {
   rollCoverage: 0.7,
   rollError: 0.1,
   releaseFraction: 0.05,
+  sensitiveSkew: 0.5,
 };
 
 /* ------------------------------------------------------------------------- URL */
@@ -74,6 +85,7 @@ const NUMBER_KEYS = [
   'rollCoverage',
   'rollError',
   'releaseFraction',
+  'sensitiveSkew',
 ] as const;
 
 export function serialiseConfig(config: AppConfig): string {
@@ -109,6 +121,7 @@ export function parseConfig(search: string, base: AppConfig = DEFAULT_CONFIG): A
   out.rollCoverage = clampShare(out.rollCoverage);
   out.rollError = clampShare(out.rollError);
   out.releaseFraction = clampShare(out.releaseFraction);
+  out.sensitiveSkew = clampShare(out.sensitiveSkew);
   return out;
 }
 
@@ -205,8 +218,17 @@ export function useDerived(config: AppConfig): Derived {
         meanAge: config.meanAge,
         ageSpread: config.ageSpread,
         correlation: config.correlation,
+        sensitiveWeights: skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, config.sensitiveSkew),
       }),
-    [config.seed, config.size, config.provinsiCount, config.meanAge, config.ageSpread, config.correlation],
+    [
+      config.seed,
+      config.size,
+      config.provinsiCount,
+      config.meanAge,
+      config.ageSpread,
+      config.correlation,
+      config.sensitiveSkew,
+    ],
   );
 
   const taxonomy = useMemo(() => buildTaxonomyFor(population), [population]);

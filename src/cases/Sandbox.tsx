@@ -169,6 +169,27 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
               onChange={(correlation) => setConfig({ correlation })}
               display={config.correlation.toFixed(2)}
             />
+            <Slider
+              label="Sensitive distribution"
+              value={config.sensitiveSkew}
+              min={0}
+              max={1}
+              step={0.01}
+              onChange={(sensitiveSkew) => setConfig({ sensitiveSkew })}
+              display={
+                config.sensitiveSkew < 0.45
+                  ? 'Toward even'
+                  : config.sensitiveSkew > 0.55
+                    ? 'Toward one value'
+                    : 'As published'
+              }
+            />
+            <p className="note" style={{ marginTop: 'var(--s-2)' }}>
+              The sensitive distribution is the shape cases 2 and 3 turn on. Spread the values
+              evenly and no class can be homogeneous by accident; concentrate them on one and
+              homogeneity stops being something to hunt for. At the midpoint the weights are the
+              ones the generator publishes.
+            </p>
             <p className="note" style={{ marginTop: 'var(--s-2)' }}>
               Correlation ties the sensitive value to region and age band. At 0 it is drawn from the
               population distribution; at 1 the stratum determines it, and homogeneous classes

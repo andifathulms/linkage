@@ -3,7 +3,13 @@
  * by the engine matches a direct independent count.
  */
 import { describe, expect, it } from 'vitest';
-import { generatePopulation, DEFAULT_PARAMS, REFERENCE_YEAR } from '../src/engine/generate/population';
+import {
+  generatePopulation,
+  DEFAULT_PARAMS,
+  REFERENCE_YEAR,
+  DEFAULT_SENSITIVE_WEIGHTS,
+  skewedWeights,
+} from '../src/engine/generate/population';
 import { buildHierarchy, hierarchyCardinalities } from '../src/engine/generate/hierarchy';
 import { dissectNik, buildNik, FEMALE_DAY_OFFSET } from '../src/engine/generate/nik';
 import { makeRng } from '../src/engine/rng';
@@ -121,6 +127,67 @@ describe('nik', () => {
     expect(Number(female.slice(6, 8)) - Number(male.slice(6, 8))).toBe(FEMALE_DAY_OFFSET);
     expect(female.slice(0, 6)).toBe(male.slice(0, 6));
     expect(female.slice(8)).toBe(male.slice(8));
+  });
+});
+
+describe('the sensitive distribution dial', () => {
+  it('is the published weights at the midpoint', () => {
+    // The identity that keeps every existing figure in the application where it was.
+    expect(skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, 0.5)).toEqual([...DEFAULT_SENSITIVE_WEIGHTS]);
+  });
+
+  it('spreads the values evenly at zero', () => {
+    const flat = skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, 0);
+    for (const w of flat) expect(w).toBeCloseTo(flat[0], 10);
+  });
+
+  it('concentrates on one value at one', () => {
+    const peaked = skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, 1);
+    const top = Math.max(...peaked);
+    const rest = peaked.filter((w) => w !== top);
+    expect(top).toBeGreaterThan(rest.reduce((a, b) => a + b, 0));
+  });
+
+  it('holds the total constant, so the dial changes shape and not size', () => {
+    const total = DEFAULT_SENSITIVE_WEIGHTS.reduce((a, b) => a + b, 0);
+    for (const skew of [0, 0.25, 0.5, 0.75, 1]) {
+      const sum = skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, skew).reduce((a, b) => a + b, 0);
+      expect(sum).toBeCloseTo(total, 6);
+    }
+  });
+
+  it('clamps a value from outside the unit interval', () => {
+    expect(skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, -5)).toEqual(
+      skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, 0),
+    );
+    expect(skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, 9)).toEqual(
+      skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, 1),
+    );
+  });
+
+  it('makes homogeneous classes ordinary when it is turned up', () => {
+    // The reason the dial exists: cases 2 and 3 are about this shape.
+    const spread = generatePopulation({
+      ...DEFAULT_PARAMS,
+      size: 3000,
+      seed: 77,
+      sensitiveWeights: skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, 0),
+    });
+    const peaked = generatePopulation({
+      ...DEFAULT_PARAMS,
+      size: 3000,
+      seed: 77,
+      sensitiveWeights: skewedWeights(DEFAULT_SENSITIVE_WEIGHTS, 1),
+    });
+    const share = (pop: ReturnType<typeof generatePopulation>) => {
+      const counts = new Map<string, number>();
+      for (const r of pop.records) {
+        const v = String(r.sensitive.diagnosis);
+        counts.set(v, (counts.get(v) ?? 0) + 1);
+      }
+      return Math.max(...counts.values()) / pop.records.length;
+    };
+    expect(share(peaked)).toBeGreaterThan(share(spread));
   });
 });
 

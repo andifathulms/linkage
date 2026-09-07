@@ -34,6 +34,7 @@ const MOVED: AppConfig = {
   rollCoverage: 0.42,
   rollError: 0.17,
   releaseFraction: 0.08,
+  sensitiveSkew: 0.23,
 };
 
 describe('the configuration round-trips through the URL', () => {
@@ -53,6 +54,7 @@ describe('the configuration round-trips through the URL', () => {
     expect(params.get('rollCoverage')).toBe('0.42');
     expect(params.get('rollError')).toBe('0.17');
     expect(params.get('releaseFraction')).toBe('0.08');
+    expect(params.get('sensitiveSkew')).toBe('0.23');
     expect(params.get('v2')).toBe('4,1,0,3');
   });
 
@@ -134,6 +136,7 @@ describe('the URL carries a configuration and nothing else', () => {
       'rollCoverage',
       'rollError',
       'releaseFraction',
+      'sensitiveSkew',
       'v',
       'v2',
     ]);

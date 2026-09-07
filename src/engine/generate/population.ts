@@ -42,6 +42,37 @@ export const DEFAULT_SENSITIVE_VALUES = [
 
 export const DEFAULT_SENSITIVE_WEIGHTS = [22, 26, 24, 16, 12] as const;
 
+/**
+ * Reshape the population's sensitive distribution along one dial.
+ *
+ * At 0 the values are evenly spread and no class can be homogeneous by accident. At 1
+ * one value holds almost everything, and homogeneity stops being something to hunt for
+ * and becomes the ordinary case. The published weights sit in the middle at 0.5.
+ *
+ * This is the shape cases 2 and 3 turn on, so it is a dial rather than five numbers: a
+ * reader asking "what if this diagnosis were rarer" wants to sweep it, not specify it.
+ * Pure, and the identity at 0.5 is asserted in the tests.
+ */
+export function skewedWeights(
+  weights: readonly number[] = DEFAULT_SENSITIVE_WEIGHTS,
+  skew = 0.5,
+): number[] {
+  const s = !Number.isFinite(skew) ? 0.5 : Math.max(0, Math.min(1, skew));
+  const total = weights.reduce((a, b) => a + b, 0) || 1;
+  const even = total / weights.length;
+  const dominant = weights.indexOf(Math.max(...weights));
+  // Below the midpoint, interpolate toward flat; above it, toward all-but-one-empty.
+  if (s <= 0.5) {
+    const t = s / 0.5;
+    return weights.map((w) => even + (w - even) * t);
+  }
+  const t = (s - 0.5) / 0.5;
+  const floor = 1;
+  return weights.map((w, i) =>
+    i === dominant ? w + (total - floor * (weights.length - 1) - w) * t : w + (floor - w) * t,
+  );
+}
+
 export const DEFAULT_PARAMS: GeneratorParams = {
   seed: 20260101,
   size: 5000,
