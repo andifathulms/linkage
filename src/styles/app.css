@@ -577,6 +577,28 @@ caption.panel__title::after {
   color: var(--ink);
 }
 
+/* The generalisation control's worked example: one real value, and what the rung the
+   slider is on does to it. Set in mono because both halves are data. */
+.generalisation__example {
+  margin: 2px 0 var(--s-3);
+  font-family: var(--font-mono);
+  font-size: var(--t-data-size);
+  color: var(--ink-faint);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  align-items: baseline;
+}
+
+.generalisation__from {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.generalisation__to {
+  color: var(--ink);
+}
+
 /* A short tracked line above the heading, naming what the case is. */
 .eyebrow {
   display: block;

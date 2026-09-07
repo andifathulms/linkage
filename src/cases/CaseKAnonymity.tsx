@@ -108,6 +108,7 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
       <div className="columns">
         <div className="stack">
           <Generalisation
+            sample={population.records[0]?.quasi}
             taxonomy={taxonomy}
             vector={vector}
             columns={COLUMNS}

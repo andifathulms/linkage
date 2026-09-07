@@ -182,6 +182,7 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
           </section>
 
           <Generalisation
+            sample={population.records[0]?.quasi}
             taxonomy={taxonomy}
             vector={config.vector}
             columns={QUASI}

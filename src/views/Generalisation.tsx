@@ -4,8 +4,10 @@
  * Continuous control, direct mapping, zero easing: the slider is the level. The field
  * coalesces because the class set changed, not because the slider animated.
  */
-import type { GeneralisationVector } from '../engine/types';
+import type { GeneralisationVector, Value } from '../engine/types';
 import type { Taxonomy } from '../engine/taxonomy';
+import { generaliseValue } from '../engine/generalise';
+import { SUPPRESSED } from '../engine/taxonomy';
 import { Slider } from '../ui/primitives';
 
 export interface GeneralisationProps {
@@ -15,6 +17,12 @@ export interface GeneralisationProps {
   onChange: (vector: GeneralisationVector) => void;
   targetK?: number;
   onTargetK?: (k: number) => void;
+  /**
+   * One record's raw quasi-identifier values. The control names the rung it is on;
+   * these let it also show what that rung does to a value, which is the operation
+   * itself and the thing the label alone cannot convey.
+   */
+  sample?: Record<string, Value>;
 }
 
 export function Generalisation({
@@ -24,6 +32,7 @@ export function Generalisation({
   onChange,
   targetK,
   onTargetK,
+  sample,
 }: GeneralisationProps) {
   return (
     <section className="panel">
@@ -32,16 +41,33 @@ export function Generalisation({
         const t = taxonomy[column];
         if (!t) return null;
         const level = vector[column] ?? 0;
+        const raw = sample?.[column];
+        const generalised = raw === undefined ? undefined : generaliseValue(taxonomy, column, level, raw);
         return (
-          <Slider
-            key={column}
-            label={t.label}
-            value={level}
-            min={0}
-            max={t.levels.length - 1}
-            onChange={(next) => onChange({ ...vector, [column]: next })}
-            display={t.levels[level].label}
-          />
+          <div key={column}>
+            <Slider
+              label={t.label}
+              value={level}
+              min={0}
+              max={t.levels.length - 1}
+              onChange={(next) => onChange({ ...vector, [column]: next })}
+              display={t.levels[level].label}
+            />
+            {/* What the rung does, on a real value from this population. The label says
+                which rung; this says what the rung is. Both change as the slider moves,
+                so the operation is legible from the control rather than only from the
+                field's reaction to it. */}
+            {raw !== undefined && (
+              <p className="generalisation__example">
+                <span className="generalisation__from">{String(raw)}</span>
+                <span aria-hidden="true"> becomes </span>
+                <span className="visually-hidden"> becomes </span>
+                <span className="generalisation__to">
+                  {generalised === SUPPRESSED ? 'nothing, the column is dropped' : String(generalised)}
+                </span>
+              </p>
+            )}
+          </div>
         );
       })}
       {onTargetK && targetK !== undefined && (
