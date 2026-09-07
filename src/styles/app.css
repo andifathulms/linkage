@@ -599,6 +599,31 @@ caption.panel__title::after {
   color: var(--ink);
 }
 
+/* A measure, its arithmetic and the reason for it. Term and definition, because that is
+   what this is: the figure names itself and the body says how it was reached. */
+.working {
+  margin: var(--s-3) 0 0;
+  border-top: 1px solid var(--rule);
+}
+
+.working dt {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-data-size);
+  font-weight: 600;
+  margin-top: var(--s-3);
+}
+
+.working dd {
+  margin: var(--s-1) 0 0;
+  font-size: var(--t-small-size);
+  line-height: 1.55;
+  color: var(--ink-mid);
+  max-width: var(--measure);
+  padding-bottom: var(--s-3);
+  border-bottom: 1px solid var(--rule);
+}
+
 /* A short tracked line above the heading, naming what the case is. */
 .eyebrow {
   display: block;

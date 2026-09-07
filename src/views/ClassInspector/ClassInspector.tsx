@@ -14,6 +14,7 @@ import { entropyL } from '../../engine/classes';
 import type { GeneralisationVector, PersonRecord } from '../../engine/types';
 import type { Taxonomy } from '../../engine/taxonomy';
 import { generaliseValue, KEY_SEPARATOR } from '../../engine/generalise';
+import { Cite } from '../../ui/primitives';
 
 /**
  * Named as custom properties rather than as values, so the chart follows the ground.
@@ -227,6 +228,42 @@ export function ClassInspector({
         this class has different values in the second column and the same ones in the fourth,
         and that is what puts them here: producing this key is what membership is.
       </p>
+
+      <p className="note">
+        The chart below holds the inputs to all three measures. Filled bars are this class;
+        the hairline outline behind them is the whole population.
+      </p>
+
+      {/* The three measures, with their arithmetic and the reason for it, beside the chart
+          that holds their inputs. Each is cited where it is applied rather than in a list
+          at the end. */}
+      <dl className="working">
+        <dt>l, distinct = {cls.l}</dt>
+        <dd>
+          Count the bars with anything in them. It is the weakest of the l-diversity family
+          and this application says so where it matters: three values in 98 to 1 to 1
+          proportion counts as 3 and protects almost nobody. <Cite source="ldiversity" />
+        </dd>
+
+        <dt>l, entropy = {entropyL(cls.sensitiveDistribution).toFixed(2)}</dt>
+        <dd>
+          The exponential of the Shannon entropy of the bars, which is the number of values
+          this class would have if they were evenly spread. Reported beside the distinct
+          count because the two disagree usefully: where they diverge, the class is diverse
+          by the letter and lopsided in fact.
+        </dd>
+
+        <dt>t, from the population = {cls.t.toFixed(3)}</dt>
+        <dd>
+          The earth mover's distance from the filled bars to the outline: how much
+          probability has to be moved, and how far, to turn one into the other. Zero means
+          this class looks like the population and learning someone is in it tells an
+          attacker nothing new. Earth mover's rather than a simpler difference because it
+          respects the distance between values, which is what makes it right for an ordered
+          attribute like income and is the whole content of t-closeness.{' '}
+          <Cite source="tcloseness" />
+        </dd>
+      </dl>
 
       <svg
         className="inspector__chart"
