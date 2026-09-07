@@ -83,10 +83,17 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
         <Eyebrow>Case 2 · the first defense, and what it misses</Eyebrow>
         <h2>k-anonymity</h2>
         <p>
-          Every record indistinguishable from at least k−1 others on the quasi-identifiers. Raise
-          the levels below and watch the field: marks travel from their old class into their new
-          one, and the count of records standing alone falls. When no mark is left alone, k is at
-          least 2.
+          Case 1 joined on region, date of birth and gender. Those are the{' '}
+          <strong>quasi-identifiers</strong>: columns that identify nobody on their own and, taken
+          together, single somebody out. Records sharing one combination form an{' '}
+          <strong>equivalence class</strong>, and everyone inside a class looks identical to
+          anybody working from those columns.
+        </p>
+        <p>
+          k-anonymity asks that every class hold at least k people, so every record is
+          indistinguishable from at least k−1 others. Raise the levels below and watch the field:
+          marks travel from their old class into their new one, and the count of records standing
+          alone falls. When no mark is left alone, k is at least 2.
         </p>
         <ThreatModel
           assumes={
