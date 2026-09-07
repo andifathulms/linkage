@@ -44,13 +44,26 @@ export function Linkage({
 }: LinkageProps) {
   const reducedMotion = usePrefersReducedMotion();
 
+  /**
+   * PRD §6.2 promises that a reader who identifies 340 of 500 targets can inspect the 160
+   * that failed, and they are the instructive ones: a resolved row shows that the join
+   * works, and an unresolved one shows what protection actually looks like.
+   */
+  const [showing, setShowing] = useState<'first' | 'failed'>('first');
+
   const result = useMemo(
     () => runLinkage(records, releasedKeys, auxiliaryKeys, { columns, targetIds }),
     [records, releasedKeys, auxiliaryKeys, columns, targetIds],
   );
 
+  const failedIds = useMemo(
+    () => result.perTarget.filter((t) => !t.correct).map((t) => t.targetId),
+    [result],
+  );
+
   const visible = useMemo<DrawnRow[]>(() => {
-    const ids = targetIds.slice(0, visibleCount);
+    const pool = showing === 'failed' ? failedIds : targetIds;
+    const ids = pool.slice(0, visibleCount);
     const roll = buildAuxiliaryRoll(records, auxiliaryKeys, columns, ids);
     const byId = new Map(result.rows.map((r) => [r.recordId, r]));
     return roll.map((row) => {
@@ -63,7 +76,7 @@ export function Linkage({
         resolved: (detail?.matches.length ?? 0) === 1,
       };
     });
-  }, [records, auxiliaryKeys, columns, targetIds, visibleCount, result]);
+  }, [records, auxiliaryKeys, columns, targetIds, failedIds, showing, visibleCount, result]);
 
   // Rows resolve one after another, in order, over the join duration. Discrete control
   // — the attack was executed — so a timed transition (DESIGN §6.1).
@@ -124,6 +137,35 @@ export function Linkage({
           }
         />
       </div>
+
+      <div className="linkage__switch" role="group" aria-label="Which targets to show">
+        <button
+          type="button"
+          className="button button--quiet"
+          aria-pressed={showing === 'first'}
+          onClick={() => setShowing('first')}
+        >
+          First {visibleCount}
+        </button>
+        <button
+          type="button"
+          className="button button--quiet"
+          aria-pressed={showing === 'failed'}
+          onClick={() => setShowing('failed')}
+          disabled={failedIds.length === 0}
+        >
+          The {failedIds.length.toLocaleString('en')} that failed
+        </button>
+      </div>
+
+      {showing === 'failed' && (
+        <p className="note">
+          These targets were not placed. Read along a row: the attacker holds these attributes
+          and the released table has either several rows matching them or none, so the count in
+          the middle is not 1. That is what protection looks like from the attacker's side, and
+          it is the same join that resolved the others.
+        </p>
+      )}
 
       <div className="linkage__tables">
         <table className="table linkage__table linkage__table--auxiliary">

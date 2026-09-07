@@ -643,6 +643,20 @@ caption.panel__title::after {
   max-width: none;
 }
 
+/* Which targets the join is showing. Two buttons rather than a filter control: there
+   are two readings and both are named. */
+.linkage__switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  margin-bottom: var(--s-3);
+}
+
+.linkage__switch .button[aria-pressed='true'] {
+  border-color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--ink);
+}
+
 /* A short tracked line above the heading, naming what the case is. */
 .eyebrow {
   display: block;

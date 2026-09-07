@@ -247,6 +247,21 @@ describe('the application boots', () => {
     expect(document.activeElement).toBe(canvas);
   });
 
+  it('lets a reader inspect the targets the join failed on', () => {
+    // PRD §6.2 promises exactly this, and the failures are where a reader learns what
+    // protection looks like.
+    const el = mount();
+    const failed = [...el.querySelectorAll('button')].find((b) =>
+      /that failed/.test(b.textContent ?? ''),
+    ) as HTMLButtonElement;
+    expect(failed).toBeDefined();
+    if (!failed.disabled) {
+      click(failed);
+      expect(failed.getAttribute('aria-pressed')).toBe('true');
+      expect(el.textContent).toContain('These targets were not placed');
+    }
+  });
+
   it('makes the canvas keyboard reachable', () => {
     const el = mount();
     const canvas = el.querySelector('canvas') as HTMLCanvasElement;
