@@ -11,6 +11,9 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { ClassSet } from '../../engine/classes';
 import { entropyL } from '../../engine/classes';
+import type { GeneralisationVector, PersonRecord } from '../../engine/types';
+import type { Taxonomy } from '../../engine/taxonomy';
+import { generaliseValue, KEY_SEPARATOR } from '../../engine/generalise';
 
 /**
  * Named as custom properties rather than as values, so the chart follows the ground.
@@ -29,9 +32,29 @@ export interface ClassInspectorProps {
   set: ClassSet;
   classIndex: number;
   onClose: () => void;
+  /**
+   * What built this class. The key alone says what the class is; these say how a person
+   * became a member of it, which is the step the rest of the application never shows.
+   *
+   * The vector and columns are the ones that produced this particular class set, not the
+   * application's current configuration — case 1 groups on Sweeney's triple at raw
+   * precision regardless of what the sliders say.
+   */
+  records: readonly PersonRecord[];
+  taxonomy: Taxonomy;
+  vector: GeneralisationVector;
+  columns: readonly string[];
 }
 
-export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps) {
+export function ClassInspector({
+  set,
+  classIndex,
+  onClose,
+  records,
+  taxonomy,
+  vector,
+  columns,
+}: ClassInspectorProps) {
   const panel = useRef<HTMLElement | null>(null);
   const returnTo = useRef<Element | null>(null);
 
@@ -93,6 +116,40 @@ export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps
     }));
   }, [cls, set]);
 
+  /**
+   * How one member became a member.
+   *
+   * The key says what the class is. This says how somebody got into it: their real
+   * values, the rung each column is on, and the component that rung produced. Read down
+   * the last column and you have the key.
+   *
+   * One member stands for all of them, and that is not a shortcut. Producing this same
+   * key is exactly what membership means, so any member would show the same right-hand
+   * column and a different left-hand one.
+   */
+  const trace = useMemo(() => {
+    if (!cls) return null;
+    const id = cls.members[0];
+    const record = records.find((r) => r.id === id);
+    if (!record) return null;
+    return {
+      id,
+      rows: columns.map((column) => {
+        const level = vector[column] ?? 0;
+        const raw = record.quasi[column];
+        const t = taxonomy[column];
+        const rungs = t?.levels.length ?? 1;
+        return {
+          column,
+          label: t?.label ?? column,
+          rung: t?.levels[Math.min(level, rungs - 1)]?.label ?? 'As recorded',
+          raw: String(raw),
+          generalised: String(generaliseValue(taxonomy, column, level, raw)),
+        };
+      }),
+    };
+  }, [cls, records, taxonomy, vector, columns]);
+
   if (!cls) return null;
 
   const height = 96;
@@ -136,6 +193,40 @@ export function ClassInspector({ set, classIndex, onClose }: ClassInspectorProps
           <span className="readout__value">{cls.t.toFixed(3)}</span>
         </div>
       </div>
+
+      {trace && (
+        <div className="table__scroll">
+          <table className="table">
+            <caption className="panel__title">
+              How record {trace.id} came to be in this class
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Column</th>
+                <th scope="col">As recorded</th>
+                <th scope="col">Generalised to</th>
+                <th scope="col">Becomes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trace.rows.map((row) => (
+                <tr key={row.column}>
+                  <td>{row.label}</td>
+                  <td>{row.raw}</td>
+                  <td>{row.rung}</td>
+                  <td>{row.generalised}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <p className="note">
+        The last column, joined with {KEY_SEPARATOR}, is the key above. Every other member of
+        this class has different values in the second column and the same ones in the fourth,
+        and that is what puts them here: producing this key is what membership is.
+      </p>
 
       <svg
         className="inspector__chart"

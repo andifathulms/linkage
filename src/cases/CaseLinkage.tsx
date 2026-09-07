@@ -114,6 +114,10 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
           set={set}
           classIndex={selectedClass}
           onClose={() => setSelectedClass(null)}
+          records={population.records}
+          taxonomy={taxonomy}
+          vector={{ kelurahan: 0, birthdate: 0, gender: 0 }}
+          columns={TRIPLE}
         />
       )}
 

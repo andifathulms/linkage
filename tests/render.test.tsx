@@ -19,6 +19,7 @@ import { Nik } from '../src/views/Nik/Nik';
 import { Uniqueness } from '../src/views/Uniqueness/Uniqueness';
 import { Lattice } from '../src/views/Lattice/Lattice';
 import { Frontier } from '../src/views/Frontier/Frontier';
+import { ClassInspector } from '../src/views/ClassInspector/ClassInspector';
 import { Composition } from '../src/views/Composition/Composition';
 import { Roll } from '../src/views/Roll/Roll';
 import { Release } from '../src/views/Release/Release';
@@ -172,6 +173,30 @@ function textOf(html: string): string {
     .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ');
 }
+
+describe('the inspector shows how a record joined its class', () => {
+  it('traces one member from raw values to the key', () => {
+    const html = renderToString(
+      <ClassInspector
+        set={classes}
+        classIndex={0}
+        onClose={() => {}}
+        records={population.records}
+        taxonomy={taxonomy}
+        vector={DEFAULT_CONFIG.vector}
+        columns={QUASI}
+      />,
+    );
+    const text = textOf(html);
+    expect(text).toContain('came to be in this class');
+    expect(text).toContain('As recorded');
+    expect(text).toContain('Generalised to');
+    // The raw value of the first member has to actually appear, or the trace is a
+    // template rather than a derivation.
+    const first = population.records.find((r) => r.id === classes.classes[0].members[0])!;
+    expect(text).toContain(String(first.quasi.kelurahan));
+  });
+});
 
 describe('the lattice is one tab stop, not a hundred', () => {
   it('makes exactly one node tabbable', () => {

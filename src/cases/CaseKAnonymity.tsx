@@ -9,6 +9,7 @@
  */
 import { useMemo, useState } from 'react';
 import type { CaseProps } from './shared';
+import { QUASI } from '../state/store';
 import { FieldPanel } from '../views/Field/FieldPanel';
 import { ClassInspector } from '../views/ClassInspector/ClassInspector';
 import { Generalisation } from '../views/Generalisation';
@@ -203,6 +204,10 @@ export function CaseKAnonymity({ derived, config, setConfig, onComplete }: CaseP
           set={set}
           classIndex={selectedClass}
           onClose={() => setSelectedClass(null)}
+          records={population.records}
+          taxonomy={taxonomy}
+          vector={config.vector}
+          columns={QUASI}
         />
       )}
     </>

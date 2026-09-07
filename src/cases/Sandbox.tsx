@@ -305,6 +305,10 @@ export function Sandbox({ derived, config, setConfig }: CaseProps) {
           set={classes}
           classIndex={selectedClass}
           onClose={() => setSelectedClass(null)}
+          records={population.records}
+          taxonomy={taxonomy}
+          vector={config.vector}
+          columns={QUASI}
         />
       )}
 
