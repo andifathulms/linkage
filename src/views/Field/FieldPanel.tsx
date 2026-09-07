@@ -140,6 +140,13 @@ export function FieldPanel({
           : ''}
       </span>
 
+      <p className="note field__reading">
+        Position is not a measurement. Marks are packed by class, so records that cannot be
+        told apart sit together, and the packing gives a class of one deliberate space around
+        it. A mark with room around it is a person nobody can hide among, and that empty
+        space is the finding rather than a gap in the layout.
+      </p>
+
       <div className="exposure">
         <div
           className="exposure__bar"

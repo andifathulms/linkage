@@ -634,6 +634,15 @@ caption.panel__title::after {
   max-width: 40ch;
 }
 
+/* The field's reading, between the canvas and the exposure bar: what the spacing means
+   before the colours are keyed. */
+.field__reading {
+  padding: var(--s-2) var(--gutter);
+  border-bottom: 1px solid var(--rule);
+  background: var(--ledger-panel);
+  max-width: none;
+}
+
 /* A short tracked line above the heading, naming what the case is. */
 .eyebrow {
   display: block;
