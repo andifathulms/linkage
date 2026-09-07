@@ -98,6 +98,12 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
           The join below is run against the generated population, and the count is measured, not
           claimed. The records it fails on are counted too, and can be inspected.
         </p>
+        <p className="note">
+          The twelve people in the tables are the first twelve targets, and they are in the field
+          above: each is one mark, sitting with whoever shares their region, birth date and
+          gender. At this precision almost nobody shares all three, which is why almost every mark
+          stands alone and almost every row resolves to exactly one match.
+        </p>
       </div>
 
       <Linkage
