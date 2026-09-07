@@ -232,6 +232,7 @@ export function BudgetPanel({
             <thead>
               <tr>
                 <th>Query</th>
+                <th>Why that sensitivity</th>
                 <th className="num">Sensitivity</th>
                 <th className="num">Epsilon</th>
                 <th className="num">Noise scale</th>
@@ -243,7 +244,12 @@ export function BudgetPanel({
             <tbody>
               {budget.entries.map((e) => (
                 <tr key={e.index}>
-                  <td title={e.query.derivation}>{e.query.label ?? e.query.kind}</td>
+                  <td>{e.query.label ?? e.query.kind}</td>
+                  {/* The derivation was a title attribute, which is invisible on touch,
+                      unsearchable, and unreachable for every row but the last. It is the
+                      justification for the one number the whole mechanism rests on, so it
+                      is a column. */}
+                  <td className="derivation">{e.query.derivation}</td>
                   <td className="num">{formatNumber(e.query.sensitivity)}</td>
                   <td className="num">{e.epsilon.toFixed(2)}</td>
                   <td className="num">{formatNumber(e.answer.scale)}</td>
@@ -257,11 +263,13 @@ export function BudgetPanel({
         </div>
       )}
 
-      {budget.entries.length > 0 && (
-        <p className="note" style={{ marginTop: 'var(--s-2)' }}>
-          {budget.entries[budget.entries.length - 1].query.derivation}
-        </p>
-      )}
+      <p className="note" style={{ marginTop: 'var(--s-2)' }}>
+        Sensitivity is how much one person's presence can move the answer, and it sets the
+        noise: the scale is the sensitivity divided by epsilon. It is derived per query type
+        rather than assumed, which is why it has a column of its own. Assuming 1 everywhere
+        is the ordinary way to build something that looks like differential privacy and is
+        not. <Cite source="dwork" />
+      </p>
 
       <p className="note" style={{ marginTop: 'var(--s-2)' }}>
         {COMPOSITION_SCOPE} <Cite source="dwork" />

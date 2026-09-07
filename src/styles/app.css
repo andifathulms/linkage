@@ -624,6 +624,16 @@ caption.panel__title::after {
   border-bottom: 1px solid var(--rule);
 }
 
+/* A derivation reads as a sentence, so it wraps rather than joining the nowrap columns
+   that surround it. */
+.table td.derivation {
+  white-space: normal;
+  font-family: var(--font-sans);
+  color: var(--ink-mid);
+  min-width: 22ch;
+  max-width: 40ch;
+}
+
 /* A short tracked line above the heading, naming what the case is. */
 .eyebrow {
   display: block;
