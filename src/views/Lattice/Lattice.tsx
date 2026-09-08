@@ -14,7 +14,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { GeneralisationVector, PersonRecord } from '../../engine/types';
 import type { Taxonomy } from '../../engine/taxonomy';
-import { searchLattice, frontierNodes, type LatticeNode } from '../../engine/lattice';
+import {
+  searchLattice,
+  prepareLattice,
+  frontierNodes,
+  type LatticeNode,
+} from '../../engine/lattice';
 import { vectorKey } from '../../engine/generalise';
 import { usePrefersReducedMotion } from '../../ui/useReducedMotion';
 import { Readout } from '../../ui/primitives';
@@ -33,9 +38,16 @@ const NODE = 9;
 
 export function Lattice({ records, taxonomy, columns, targetK, onSelect, selected }: LatticeProps) {
   const reducedMotion = usePrefersReducedMotion();
+  /* The expensive half depends on the population, not on the target. Prepared here so
+     that moving the target k slider re-runs the pruning against a memo instead of
+     generalising every column at every rung again. */
+  const probe = useMemo(
+    () => prepareLattice(records, taxonomy, columns),
+    [records, taxonomy, columns],
+  );
   const search = useMemo(
-    () => searchLattice(records, taxonomy, targetK, { columns }),
-    [records, taxonomy, targetK, columns],
+    () => searchLattice(records, taxonomy, targetK, { columns, probe }),
+    [records, taxonomy, targetK, columns, probe],
   );
   const frontier = useMemo(
     () => new Set(frontierNodes(search).map((n) => vectorKey(n.vector, columns))),
