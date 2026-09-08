@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { generatePopulation, DEFAULT_PARAMS } from '../src/engine/generate/population';
 import { buildTaxonomy, type Taxonomy } from '../src/engine/taxonomy';
 import { generalisePopulation, vectorKey } from '../src/engine/generalise';
-import { buildClasses } from '../src/engine/classes';
+import { buildClasses, minimumClassSize } from '../src/engine/classes';
 import { hierarchyCardinalities } from '../src/engine/generate/hierarchy';
 import {
   searchLattice,
@@ -48,6 +48,29 @@ describe('information loss', () => {
     expect(b).toBeGreaterThan(a);
     // kelurahan height 4, so level 2 is half of one third of the total.
     expect(b).toBeCloseTo((2 / 4) / 3, 12);
+  });
+});
+
+describe('the k the search computes', () => {
+  it('agrees with the k a full class set reports, at every rung', () => {
+    // The search stopped building class sets to read k off them. This is the assertion
+    // that the cheaper path is the same arithmetic: for every vector the search visits,
+    // counting keys must give what buildClasses would have given.
+    const search = searchLattice(pop.records, tax, 5, { columns: COLUMNS, exhaustive: true });
+    for (const node of search.nodes) {
+      const keys = generalisePopulation(pop.records, tax, node.vector, COLUMNS);
+      expect(node.k).toBe(buildClasses(pop.records, keys).k);
+      expect(node.k).toBe(minimumClassSize(keys));
+    }
+  });
+
+  it('counts the same whether the codes pack into a number or not', () => {
+    // The packed path is an encoding rather than an approximation, and the guard that
+    // chooses it is what keeps that true. Both paths group by the same thing.
+    const keys = ['a', 'a', 'b', 'c', 'c', 'c'];
+    expect(minimumClassSize(keys)).toBe(1);
+    expect(minimumClassSize([])).toBe(0);
+    expect(minimumClassSize(['x', 'x'])).toBe(2);
   });
 });
 

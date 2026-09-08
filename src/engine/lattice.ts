@@ -14,8 +14,7 @@
  */
 import type { GeneralisationVector, PersonRecord } from './types';
 import type { Taxonomy } from './taxonomy';
-import { generalisePopulation, vectorKey, QUASI_COLUMNS } from './generalise';
-import { buildClasses } from './classes';
+import { generaliseValue, vectorKey, QUASI_COLUMNS } from './generalise';
 
 export interface LatticeNode {
   vector: GeneralisationVector;
@@ -145,6 +144,88 @@ export function searchLattice(
     return ka < kb ? -1 : ka > kb ? 1 : 0;
   });
 
+  /**
+   * Every column at every level, generalised once.
+   *
+   * The search tests up to a few hundred vectors, and each test used to generalise the
+   * whole population from scratch: for every record, a taxonomy lookup, a mapping call
+   * and a string conversion per column. But a column at a given level produces the same
+   * value for a record no matter which vector asked for it, and there are only as many
+   * column-and-level pairs as the taxonomy has rungs — seventeen, against the hundreds
+   * of full passes the search was doing.
+   *
+   * So each pair is computed once and interned to a small integer. A node's test then
+   * reads four integers per record instead of mapping four values, and counts on those.
+   * The k it arrives at is identical; this is the same arithmetic with the repetition
+   * taken out.
+   */
+  interface Lane {
+    ids: Int32Array;
+    /** Distinct values this column takes at this level. */
+    cardinality: number;
+  }
+  const codes = new Map<string, Lane[]>();
+  for (const column of columns) {
+    const rungs = taxonomy[column]?.levels.length ?? 1;
+    const perLevel: Lane[] = [];
+    for (let level = 0; level < rungs; level++) {
+      const ids = new Int32Array(records.length);
+      const seen = new Map<string, number>();
+      for (let i = 0; i < records.length; i++) {
+        const value = String(generaliseValue(taxonomy, column, level, records[i].quasi[column]));
+        let id = seen.get(value);
+        if (id === undefined) {
+          id = seen.size;
+          seen.set(value, id);
+        }
+        ids[i] = id;
+      }
+      perLevel.push({ ids, cardinality: Math.max(1, seen.size) });
+    }
+    codes.set(column, perLevel);
+  }
+
+  /**
+   * The smallest class a vector produces, counted from the interned codes.
+   *
+   * Where the product of the columns' cardinalities fits in an exact integer, the four
+   * ids pack into one number and the count runs on numeric keys. Where it does not, the
+   * same count runs on a string key. Both paths group by exactly the same thing and
+   * return the same k; the packing is an encoding, not an approximation, and the guard
+   * is what keeps it exact.
+   */
+  const kOf = (vector: GeneralisationVector): number => {
+    if (records.length === 0) return 0;
+    const lanes: Lane[] = columns.map((c) => {
+      const perLevel = codes.get(c)!;
+      return perLevel[Math.min(vector[c] ?? 0, perLevel.length - 1)];
+    });
+
+    let product = 1;
+    for (const lane of lanes) product *= lane.cardinality;
+    const packable = Number.isSafeInteger(product);
+
+    let smallest = Infinity;
+    if (packable) {
+      const counts = new Map<number, number>();
+      for (let i = 0; i < records.length; i++) {
+        let code = 0;
+        for (const lane of lanes) code = code * lane.cardinality + lane.ids[i];
+        counts.set(code, (counts.get(code) ?? 0) + 1);
+      }
+      for (const count of counts.values()) if (count < smallest) smallest = count;
+    } else {
+      const counts = new Map<string, number>();
+      for (let i = 0; i < records.length; i++) {
+        let key = String(lanes[0].ids[i]);
+        for (let j = 1; j < lanes.length; j++) key += ',' + lanes[j].ids[i];
+        counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      for (const count of counts.values()) if (count < smallest) smallest = count;
+    }
+    return smallest === Infinity ? 0 : smallest;
+  };
+
   const order: string[] = [];
   let testedCount = 0;
   let prunedCount = 0;
@@ -153,10 +234,9 @@ export function searchLattice(
     const key = vectorKey(node.vector, columns);
     if (!options.exhaustive && node.satisfies !== null) continue;
 
-    const keys = generalisePopulation(records, taxonomy, node.vector, columns);
-    const set = buildClasses(records, keys);
-    node.k = set.k;
-    node.satisfies = set.k >= targetK;
+    const k = kOf(node.vector);
+    node.k = k;
+    node.satisfies = k >= targetK;
     node.tested = true;
     testedCount++;
     order.push(key);

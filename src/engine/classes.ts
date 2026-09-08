@@ -197,6 +197,27 @@ export function buildClasses(
   };
 }
 
+/**
+ * The size of the smallest class, without building the classes.
+ *
+ * `buildClasses` is the right function when a caller needs the classes: their members,
+ * their sensitive distributions, l, entropy-l and the earth mover's distance to the
+ * population. The lattice search needs none of that. It tests a vector, reads k, and
+ * throws the rest away, once per node, over a hundred times per search.
+ *
+ * This counts keys and returns the minimum. Identical result, and the work it skips is
+ * the expensive part: a map of distributions per class and a distance computation per
+ * class, neither of which the search ever looks at.
+ */
+export function minimumClassSize(keys: readonly string[]): number {
+  if (keys.length === 0) return 0;
+  const counts = new Map<string, number>();
+  for (const key of keys) counts.set(key, (counts.get(key) ?? 0) + 1);
+  let smallest = Infinity;
+  for (const count of counts.values()) if (count < smallest) smallest = count;
+  return smallest === Infinity ? 0 : smallest;
+}
+
 /** Records that stand alone. The field's whole argument is that these are visible. */
 export function singletonRecordIds(set: ClassSet): number[] {
   const out: number[] = [];
