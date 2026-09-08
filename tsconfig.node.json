@@ -10,5 +10,6 @@
     "composite": true,
     "types": ["node"]
   },
-  "include": ["vite.config.ts"]
+  "//": "src/meta.ts is the one source for the page metadata, read by the build and imported by the application, so it belongs to both projects.",
+  "include": ["vite.config.ts", "src/meta.ts"]
 }

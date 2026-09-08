@@ -10,6 +10,7 @@
  */
 import { useCallback, useMemo, useState } from 'react';
 import type { CaseProps } from './shared';
+import { THESIS } from '../meta';
 import { Linkage } from '../views/Linkage/Linkage';
 import { FieldPanel } from '../views/Field/FieldPanel';
 import { ClassInspector } from '../views/ClassInspector/ClassInspector';
@@ -62,7 +63,7 @@ export function CaseLinkage({ derived, onComplete, config }: CaseProps) {
         selectedClass={selectedClass}
         onSelectClass={setSelectedClass}
         seed={config.seed}
-        thesis="Removing names does not anonymize anything"
+        thesis={THESIS}
         gloss="Every mark below is one generated record, sitting with the records it cannot be told apart from. The marks standing alone are the ones a join on three ordinary attributes can name."
       />
 
