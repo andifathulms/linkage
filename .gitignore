@@ -3,3 +3,8 @@ dist/
 .vite/
 *.tsbuildinfo
 .DS_Store
+
+# Brand export from the design tool. The source of truth for the mark lives here, but the
+# repository ships only the handful of files the site and the README actually reference,
+# copied into public/brand/ where the build can reach them.
+exports/
