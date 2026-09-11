@@ -19,6 +19,7 @@ import { Nik } from '../src/views/Nik/Nik';
 import { Uniqueness } from '../src/views/Uniqueness/Uniqueness';
 import { Lattice } from '../src/views/Lattice/Lattice';
 import { Frontier } from '../src/views/Frontier/Frontier';
+import { App } from '../src/ui/App';
 import { ClassInspector } from '../src/views/ClassInspector/ClassInspector';
 import { Composition } from '../src/views/Composition/Composition';
 import { Roll } from '../src/views/Roll/Roll';
@@ -216,6 +217,22 @@ describe('the lattice is one tab stop, not a hundred', () => {
     const skipped = html.match(/tabindex="-1"/g) ?? [];
     expect(tabbable).toHaveLength(1);
     expect(skipped.length).toBeGreaterThan(10);
+  });
+});
+
+describe('the mark', () => {
+  it('draws the three records the brand mark is, in the interface tokens', () => {
+    const html = renderToString(<App />);
+    // The name column struck on every row, the crowd, and one row that is not in it.
+    expect(html).toContain('class="header__mark"');
+    expect((html.match(/var\(--ink\)/g) ?? []).length).toBeGreaterThanOrEqual(3);
+    expect((html.match(/var\(--ink-faint\)/g) ?? []).length).toBeGreaterThanOrEqual(6);
+    expect((html.match(/var\(--exposed\)/g) ?? []).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('is hidden from assistive technology, because the wordmark names it', () => {
+    const html = renderToString(<App />);
+    expect(html).toMatch(/class="header__mark"[^>]*aria-hidden="true"/);
   });
 });
 

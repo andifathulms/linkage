@@ -313,3 +313,50 @@ export function Finding({
     </div>
   );
 }
+
+/**
+ * The mark. "Satu Baris", from the brand export.
+ *
+ * A table of three records. The name column is struck out on every row, and one row is
+ * still identified. That is the application's argument drawn at sixteen pixels, and it
+ * is why the mark is worth rendering rather than decorating with.
+ *
+ * Redrawn here in the interface's own tokens rather than loaded as the export's PNG: the
+ * header sits on either ground, and ink, the crowd and the exposed row all have to follow
+ * it. The geometry is the export's, unchanged. The export's coral is reserved for exactly
+ * what --exposed means here, so the two agree even though the values differ.
+ *
+ * No pulse. The old mark animated its exposed square on a loop, which DESIGN §6.5 rules
+ * out along with the rest of the register's fidgeting.
+ */
+export function Mark() {
+  return (
+    <svg
+      className="header__mark"
+      viewBox="10 16 80 68"
+      width="17"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {/* The name column, struck out on every row. Identical bars: they carry no
+          information, so they cannot protect anyone. */}
+      <rect x="10" y="16" width="22" height="18" fill="var(--ink)" />
+      <rect x="10" y="41" width="22" height="18" fill="var(--ink)" />
+      <rect x="10" y="66" width="22" height="18" fill="var(--ink)" />
+
+      {/* The quasi-identifiers. Two rows still in a crowd. */}
+      <rect x="39" y="16" width="13" height="18" fill="var(--ink-faint)" />
+      <rect x="56" y="16" width="13" height="18" fill="var(--ink-faint)" />
+      <rect x="73" y="16" width="17" height="18" fill="var(--ink-faint)" />
+      <rect x="39" y="66" width="13" height="18" fill="var(--ink-faint)" />
+      <rect x="56" y="66" width="13" height="18" fill="var(--ink-faint)" />
+      <rect x="73" y="66" width="17" height="18" fill="var(--ink-faint)" />
+
+      {/* And one that is not. */}
+      <rect x="39" y="41" width="13" height="18" fill="var(--exposed)" />
+      <rect x="56" y="41" width="13" height="18" fill="var(--exposed)" />
+      <rect x="73" y="41" width="17" height="18" fill="var(--exposed)" />
+    </svg>
+  );
+}

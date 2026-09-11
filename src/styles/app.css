@@ -60,6 +60,11 @@ body::before {
   z-index: 1;
 }
 
+.header__mark {
+  flex: 0 0 auto;
+  display: block;
+}
+
 /* Focus is visible everywhere, including field marks and lattice nodes (DESIGN §8).
    In ink rather than the exposure colour: where the reader's keyboard happens to be is
    not a finding about a record, and --exposed means one thing (DESIGN §2.2). Ink is the
@@ -136,18 +141,6 @@ strong {
   }
 }
 
-@keyframes tick {
-  0% {
-    opacity: 0.25;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.25;
-  }
-}
-
 /* The one alarm in the system, and it is quiet: a count that has just moved off zero
    breathes once rather than flashing. */
 @keyframes settle {
@@ -197,36 +190,6 @@ strong {
 }
 
 /* The mark: two squares, one grouped and one alone. The whole argument, at 14 px. */
-.header__mark {
-  width: 15px;
-  height: 15px;
-  flex: 0 0 auto;
-  display: block;
-  position: relative;
-}
-
-.header__mark::before,
-.header__mark::after {
-  content: '';
-  position: absolute;
-  width: 5px;
-  height: 5px;
-}
-
-.header__mark::before {
-  inset: 0 auto auto 0;
-  background: var(--ink);
-  box-shadow:
-    7px 0 0 var(--ink),
-    0 7px 0 var(--ink);
-}
-
-.header__mark::after {
-  inset: auto 0 0 auto;
-  background: var(--exposed);
-  animation: tick 3.6s var(--e-standard) infinite;
-}
-
 .header__name {
   font-size: var(--t-h2-size);
   font-weight: 600;

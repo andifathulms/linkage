@@ -12,7 +12,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useConfig, useDerived } from '../state/store';
 import { CASES, loadProgress, saveProgress, isUnlocked, type CaseId } from '../cases/definitions';
-import { SyntheticMarker, GroundToggle } from './primitives';
+import { SyntheticMarker, GroundToggle, Mark } from './primitives';
 import { CaseLinkage } from '../cases/CaseLinkage';
 import { CaseKAnonymity } from '../cases/CaseKAnonymity';
 import { CaseLDiversity } from '../cases/CaseLDiversity';
@@ -53,7 +53,7 @@ export function App() {
           a wrapped header would falsify. */}
       <div className="topbar">
         <header className="header">
-          <span className="header__mark" aria-hidden="true" />
+          <Mark />
           <span className="header__name">Linkage</span>
           <span className="header__descriptor">Removing names does not anonymize anything</span>
           <span className="header__spacer" />
