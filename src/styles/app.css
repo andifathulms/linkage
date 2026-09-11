@@ -1521,10 +1521,85 @@ input[type='range']:hover::-webkit-slider-thumb {
 .footer {
   display: flex;
   align-items: flex-start;
-  gap: var(--s-3);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--s-3) var(--s-5);
   padding: var(--s-5) var(--gutter);
   border-top: 1px solid var(--rule);
   background: var(--ledger-panel);
+}
+
+/* The maker's mark. Opposite the notice on a wide screen, under it on a narrow one,
+   sharing the footer's existing seam rather than drawing a second. */
+.maker {
+  margin-left: auto;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-1);
+}
+
+.maker__line {
+  margin: 0;
+  font-size: var(--t-small-size);
+  line-height: 1.5;
+  color: var(--ink-mid);
+}
+
+/* Brighter than the line it sits in, and underlined in the ruling until it is hovered.
+   Deliberately not --exposed: that colour means one record can be singled out, and the
+   application spends five cases establishing it. A credit does not get to borrow it. */
+.maker__name {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 2px;
+  transition: text-decoration-color var(--d-tap) var(--e-standard);
+}
+
+.maker__name:hover {
+  text-decoration-color: var(--ink);
+}
+
+.maker__year {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.maker__links {
+  display: flex;
+  gap: var(--s-0);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* 28 px of target around an 18 px glyph: the icon is the size the design wants and the
+   tap area is the size a thumb needs (WCAG 2.5.8). */
+.maker__link {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius);
+  color: var(--ink-faint);
+  transition:
+    color var(--d-tap) var(--e-standard),
+    background-color var(--d-tap) var(--e-standard);
+}
+
+.maker__link:hover {
+  color: var(--ink);
+  background: var(--ledger-deep);
+}
+
+@media (max-width: 640px) {
+  .maker {
+    margin-left: 0;
+    text-align: left;
+    align-items: flex-start;
+  }
 }
 
 .footer::before {

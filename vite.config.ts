@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
-import { NAME, THESIS, DESCRIPTION, APP_TITLE, LANDING_TITLE, BRAND } from './src/meta';
+import { NAME, THESIS, DESCRIPTION, APP_TITLE, LANDING_TITLE, BRAND, MAKER } from './src/meta';
 
 const BASE = process.env.VITE_BASE ?? '/linkage/';
 
@@ -49,6 +49,54 @@ function tagsFor(title: string, url: string): string {
     .join('\n');
 }
 
+/**
+ * The maker's mark for the landing page.
+ *
+ * The application renders it as a component; the landing page is a static file, so the
+ * build writes the same thing from the same array. Hand-copying it would be two places to
+ * change a handle, and this is the same arrangement the metadata already uses.
+ */
+const GLYPHS: Record<string, string> = {
+  globe:
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9.25"/><path d="M2.75 12h18.5"/><path d="M12 2.75c2.4 2.5 3.6 5.6 3.6 9.25s-1.2 6.75-3.6 9.25c-2.4-2.5-3.6-5.6-3.6-9.25S9.6 5.25 12 2.75Z"/></svg>',
+  github:
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.7 4.7 18.7 5 18.7 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .3Z"/></svg>',
+  linkedin:
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.2 1.4-2.2 2.9v5.7H9.4V9h3.4v1.6h.05c.5-.9 1.6-1.9 3.4-1.9 3.6 0 4.3 2.4 4.3 5.5v6.3ZM5.3 7.4a2.1 2.1 0 1 1 0-4.1 2.1 2.1 0 0 1 0 4.1Zm1.8 13.1H3.6V9h3.5v11.5ZM22.2 0H1.8C.8 0 0 .8 0 1.7v20.5C0 23.2.8 24 1.8 24h20.4c1 0 1.8-.8 1.8-1.7V1.7C24 .8 23.2 0 22.2 0Z"/></svg>',
+  instagram:
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><rect x="2.75" y="2.75" width="18.5" height="18.5" rx="5"/><circle cx="12" cy="12" r="4.25"/><circle cx="17.4" cy="6.6" r="1.15" fill="currentColor" stroke="none"/></svg>',
+};
+
+function makerMarkup(year: number): string {
+  const links = MAKER.links
+    .map(
+      (link) =>
+        `<li><a class="maker__link" href="${link.href}" target="_blank" rel="noopener noreferrer" aria-label="${link.label}">${GLYPHS[link.icon]}</a></li>`,
+    )
+    .join('');
+  return `<div class="maker">
+          <p class="maker__line">
+            Designed &amp; built by
+            <a class="maker__name" href="${MAKER.portfolio}" target="_blank" rel="noopener noreferrer">${MAKER.name}</a>
+            <span aria-hidden="true">·</span> © <span class="maker__year">${year}</span>
+          </p>
+          <ul class="maker__links">${links}</ul>
+        </div>`;
+}
+
+/** The same rules as the application's, in the landing page's own token names. */
+const MAKER_CSS = `
+      .maker { margin-left: auto; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: var(--s-1); }
+      .maker__line { margin: 0; font-size: var(--t-small-size); line-height: 1.5; color: var(--ink-mid); }
+      .maker__name { color: var(--ink); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 2px; transition: text-decoration-color var(--d-tap) var(--e-standard); }
+      .maker__name:hover { text-decoration-color: var(--ink); }
+      .maker__year { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+      .maker__links { display: flex; gap: var(--s-0); list-style: none; margin: 0; padding: 0; }
+      .maker__link { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius); color: var(--ink-faint); transition: color var(--d-tap) var(--e-standard), background-color var(--d-tap) var(--e-standard); }
+      .maker__link:hover { color: var(--ink); background: var(--ledger-deep); }
+      @media (max-width: 640px) { .maker { margin-left: 0; text-align: left; align-items: flex-start; } }
+`;
+
 function metadata(): Plugin {
   return {
     name: 'linkage-metadata',
@@ -89,12 +137,21 @@ function metadata(): Plugin {
       const out = resolve(__dirname, 'dist');
       const landing = resolve(out, 'landing.html');
       try {
-        const html = readFileSync(landing, 'utf8');
+        // Read the pristine source, never the output. Vite copies public/ into dist
+        // before this runs, but a second build against an existing dist would otherwise
+        // annotate an already-annotated file and the tags would accumulate. Reading the
+        // source makes the result the same however many times it runs.
+        const html = readFileSync(resolve(__dirname, 'public', 'landing.html'), 'utf8');
         writeFileSync(
           landing,
           html
             .replace(/<title>[^<]*<\/title>/, `<title>${LANDING_TITLE}</title>`)
-            .replace('</head>', `${tagsFor(LANDING_TITLE, LANDING_URL)}\n  </head>`),
+            .replace('</head>', `${tagsFor(LANDING_TITLE, LANDING_URL)}\n  </head>`)
+            .replace('    </style>', `${MAKER_CSS}    </style>`)
+            .replace(
+              '      </div>\n    </footer>',
+              `        ${makerMarkup(new Date().getFullYear())}\n      </div>\n    </footer>`,
+            ),
         );
       } catch {
         // No landing page in this build. Nothing to annotate.

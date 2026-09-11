@@ -11,7 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, it, beforeAll } from 'vitest';
-import { NAME, THESIS, DESCRIPTION, APP_TITLE, LANDING_TITLE, BRAND } from '../src/meta';
+import { NAME, THESIS, DESCRIPTION, APP_TITLE, LANDING_TITLE, BRAND, MAKER } from '../src/meta';
 
 const ROOT = resolve(__dirname, '..');
 const DIST = join(ROOT, 'dist');
@@ -143,6 +143,41 @@ describe('the web app manifest', () => {
     const manifest = JSON.parse(readFileSync(join(DIST, 'site.webmanifest'), 'utf8'));
     expect(manifest.theme_color.toUpperCase()).not.toBe(BRAND.coral);
     expect(manifest.background_color.toUpperCase()).not.toBe(BRAND.coral);
+  });
+});
+
+describe("the maker's mark on the landing page", () => {
+  // The landing page is a static file, so its copy of the credit is written by the build
+  // from the same array the component reads. The component itself is covered in
+  // render.test.tsx, against a render rather than against the shell dist/index.html is.
+  it('carries the name and the portfolio link', () => {
+    expect(landing).toContain('maker__name');
+    expect(landing).toContain(MAKER.name);
+    expect(landing).toContain(MAKER.portfolio);
+  });
+
+  it('links every destination, in a new tab, without handing over the opener', () => {
+    const anchors = landing.match(/<a[^>]*class="maker__(?:name|link)"[^>]*>/g) ?? [];
+    expect(anchors.length).toBe(MAKER.links.length + 1);
+    for (const a of anchors) {
+      expect(a).toContain('target="_blank"');
+      expect(a).toContain('rel="noopener noreferrer"');
+    }
+    for (const link of MAKER.links) expect(landing).toContain(`href="${link.href}"`);
+  });
+
+  it('names each icon link for a screen reader', () => {
+    for (const link of MAKER.links) expect(landing).toContain(`aria-label="${link.label}"`);
+  });
+
+  it('sets the year from the clock rather than from a literal', () => {
+    expect(landing).toContain(`maker__year">${new Date().getFullYear()}`);
+  });
+
+  it('keeps the credit out of the attribution beside it', () => {
+    // The attribution names the literature the application rests on. The credit is a
+    // name. Merging them would let one borrow the other's weight.
+    expect(landing).not.toMatch(/Dwork[^<]*Andi/);
   });
 });
 

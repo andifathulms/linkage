@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useConfig, useDerived } from '../state/store';
 import { CASES, loadProgress, saveProgress, isUnlocked, type CaseId } from '../cases/definitions';
 import { SyntheticMarker, GroundToggle, Mark } from './primitives';
+import { MakerSignature } from './MakerSignature';
 import { CaseLinkage } from '../cases/CaseLinkage';
 import { CaseKAnonymity } from '../cases/CaseKAnonymity';
 import { CaseLDiversity } from '../cases/CaseLDiversity';
@@ -105,12 +106,16 @@ export function App() {
         {current === 'sandbox' && <Sandbox {...shared} />}
       </main>
 
+      {/* One bar, one seam. The notice on the left is the only thing here a reader
+          might rely on; the credit on the right is a name. They share the footer and
+          nothing else. */}
       <footer className="footer">
         <span className="note">
           Population of {config.size.toLocaleString('en')} generated from seed {config.seed}.
           Nothing leaves this device: no network requests, no analytics, no storage of anything you
           do beyond your case progress.
         </span>
+        <MakerSignature />
       </footer>
       {/* Only what changed. The column count is a constant and was being re-announced on
           every generalisation move, which is noise in the one channel a screen reader

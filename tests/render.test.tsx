@@ -20,6 +20,7 @@ import { Uniqueness } from '../src/views/Uniqueness/Uniqueness';
 import { Lattice } from '../src/views/Lattice/Lattice';
 import { Frontier } from '../src/views/Frontier/Frontier';
 import { App } from '../src/ui/App';
+import { MAKER } from '../src/meta';
 import { ClassInspector } from '../src/views/ClassInspector/ClassInspector';
 import { Composition } from '../src/views/Composition/Composition';
 import { Roll } from '../src/views/Roll/Roll';
@@ -233,6 +234,50 @@ describe('the mark', () => {
   it('is hidden from assistive technology, because the wordmark names it', () => {
     const html = renderToString(<App />);
     expect(html).toMatch(/class="header__mark"[^>]*aria-hidden="true"/);
+  });
+});
+
+describe("the maker's mark", () => {
+  const footer = renderToString(<App />);
+
+  it('credits the maker, with the portfolio behind the name', () => {
+    expect(footer).toContain('Designed &amp; built by');
+    expect(footer).toContain(MAKER.name);
+    expect(footer).toContain(`href="${MAKER.portfolio}"`);
+  });
+
+  it('opens every destination in a new tab without handing over the opener', () => {
+    const anchors = footer.match(/<a[^>]*class="maker__(?:name|link)"[^>]*>/g) ?? [];
+    expect(anchors.length).toBe(MAKER.links.length + 1);
+    for (const a of anchors) {
+      expect(a).toContain('target="_blank"');
+      expect(a).toContain('rel="noopener noreferrer"');
+    }
+  });
+
+  it('names each icon link, since a glyph has no text to read', () => {
+    for (const link of MAKER.links) {
+      expect(footer).toContain(`href="${link.href}"`);
+      expect(footer).toContain(`aria-label="${link.label}"`);
+    }
+  });
+
+  it('hides the glyphs themselves from assistive technology', () => {
+    // The label on the link is the name; the drawing inside it would be a second one.
+    const glyphs = footer.match(/<svg[^>]*width="18"[^>]*>/g) ?? [];
+    expect(glyphs.length).toBe(MAKER.links.length);
+    for (const g of glyphs) expect(g).toContain('aria-hidden="true"');
+  });
+
+  it('takes the year from the clock', () => {
+    expect(footer).toContain(`class="maker__year">${new Date().getFullYear()}`);
+  });
+
+  it('shares the footer with the data notice without joining it', () => {
+    // Two children of one bar. The notice is what a reader might rely on; the credit is
+    // a name, and it never sits inside the sentence that makes a promise.
+    expect(footer).toContain('no storage of anything you');
+    expect(footer).not.toMatch(/no analytics[^<]*Andi/);
   });
 });
 

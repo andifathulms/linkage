@@ -51,3 +51,23 @@ export const BRAND = {
   /** The crowd: records still at k greater than one. */
   slate: '#5C6B73',
 } as const;
+
+/**
+ * Who made this.
+ *
+ * Here rather than inside the component because two surfaces render it: the application's
+ * footer, and the landing page, which is a static file the build annotates. One array, so
+ * a changed handle is changed once.
+ */
+export const MAKER = {
+  name: 'Andi Fathul Mukminin',
+  portfolio: 'https://andifathulms.github.io/en/',
+  links: [
+    { label: 'Portfolio', href: 'https://andifathulms.github.io/en/', icon: 'globe' },
+    { label: 'GitHub', href: 'https://github.com/andifathulms', icon: 'github' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/andifathulmukminin/', icon: 'linkedin' },
+    { label: 'Instagram', href: 'https://www.instagram.com/andifathulms/', icon: 'instagram' },
+  ],
+} as const;
+
+export type MakerIcon = (typeof MAKER.links)[number]['icon'];
