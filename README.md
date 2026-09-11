@@ -1,17 +1,31 @@
-# Linkage
+<div align="center">
 
-**Removing names does not anonymize anything.**
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/brand/lockup-dark.png" />
+  <img alt="Linkage — removing names does not anonymize anything" src="docs/brand/lockup-light.png" width="440" />
+</picture>
 
-[**andifathulms.github.io/linkage**](https://andifathulms.github.io/linkage/)
+<br />
+
+**[Open the application &rarr;](https://andifathulms.github.io/linkage/)** &nbsp;·&nbsp;
+[What it does](https://andifathulms.github.io/linkage/landing.html)
 
 [![CI](https://github.com/andifathulms/linkage/actions/workflows/ci.yml/badge.svg)](https://github.com/andifathulms/linkage/actions/workflows/ci.yml)
 [![Deploy](https://github.com/andifathulms/linkage/actions/workflows/deploy.yml/badge.svg)](https://github.com/andifathulms/linkage/actions/workflows/deploy.yml)
+
+</div>
+
+---
 
 A static single-page application about re-identification. It generates synthetic
 populations in the browser, runs published attacks against them, applies the standard
 defenses, and scores every attack against ground truth.
 
 No backend. No network at runtime. No file input, anywhere.
+
+> **The mark** is a table of three records. The name column is struck out on every row —
+> the bars are identical because they carry no information and therefore protect nobody —
+> and one row is still identified. That is the whole argument, and it is also the favicon.
 
 It reads on either of two grounds — the ledger, which is daylight, and the plate, which
 is the same instrument under a darkroom lamp. The switch sits in the header, the choice
@@ -107,10 +121,14 @@ src/
     attacks/    linkage, homogeneity, background, skewness, differencing
     dp/         sensitivity, Laplace, Gaussian, budget
     taxonomy, generalise, classes, lattice, utility, uniqueness
+    composition, release, suppression, attribution
   assessor/     metadata-only schema and estimator
   views/        one directory per instrument
   cases/        one file per case
   state/        configuration, URL serialisation
+  meta.ts       name, thesis and description — the page and its metadata, one source
+public/brand/   the mark, as the browser, iOS and Android ask for it
+docs/brand/     the lockup this README shows
 tests/          see below
 ```
 
@@ -120,7 +138,7 @@ in the URL.
 
 ## Correctness
 
-`npm test` runs 212 tests. The ones that matter:
+`npm test` runs 316 tests across 20 files. The ones that matter:
 
 | Test | What it holds |
 |---|---|
@@ -134,7 +152,14 @@ in the URL.
 | `field-layout` | Singletons are more isolated; a record does not move when an unrelated class changes |
 | `performance` | 200,000 records re-cluster and re-lay-out inside one coalescence transition |
 | `render` | Every case and instrument renders; the copy holds to its register |
-| `mount` | The application boots in a DOM, the progression gates, and no file input exists in the mounted tree |
+| `mount` | The application boots in a DOM, the progression gates, focus moves and returns, and no file input exists in the mounted tree |
+| `composition` | Two releases of one population intersect to the same classes a brute-force intersection finds |
+| `auxiliary` | A perfect roll reproduces the undegraded result exactly; identification falls as coverage and accuracy do |
+| `release` | A row alone in a sample is not a row that can be named, and the two coincide only at full release |
+| `suppression` | Exactly the records below the target are dropped, and a planted skew is found |
+| `attribution` | The assessor's estimator, measured against the population it estimates |
+| `config-url` | Every control round-trips through the query string; the URL carries no record, identity or result |
+| `metadata` | Titles, descriptions and the manifest match the module the page renders from |
 
 ## Known deviations from the specification
 
