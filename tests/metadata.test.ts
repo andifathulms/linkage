@@ -86,6 +86,17 @@ describe('the landing page', () => {
   });
 });
 
+describe('the build is the same however often it runs', () => {
+  it('annotates the landing page exactly once', () => {
+    // The annotation used to read its own output, so a second build against an existing
+    // dist appended a second set of tags. It reads public/landing.html now.
+    expect((landing.match(/rel="canonical"/g) ?? [])).toHaveLength(1);
+    expect((landing.match(/property="og:title"/g) ?? [])).toHaveLength(1);
+    expect((landing.match(/class="maker"/g) ?? [])).toHaveLength(1);
+    expect((landing.match(/<title>/g) ?? [])).toHaveLength(1);
+  });
+});
+
 describe('the site can be found', () => {
   it('publishes a robots file naming the sitemap', () => {
     const robots = readFileSync(join(DIST, 'robots.txt'), 'utf8');
