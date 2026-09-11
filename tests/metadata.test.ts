@@ -11,7 +11,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, it, beforeAll } from 'vitest';
-import { NAME, THESIS, DESCRIPTION, APP_TITLE, LANDING_TITLE } from '../src/meta';
+import { NAME, THESIS, DESCRIPTION, APP_TITLE, LANDING_TITLE, BRAND } from '../src/meta';
 
 const ROOT = resolve(__dirname, '..');
 const DIST = join(ROOT, 'dist');
@@ -45,11 +45,20 @@ describe('the application document', () => {
     for (const tag of ['og:type', 'og:site_name', 'og:title', 'og:description', 'og:url']) {
       expect(app).toContain(`property="${tag}"`);
     }
-    expect(app).toContain('name="twitter:card" content="summary"');
-    // summary rather than summary_large_image: the project ships no raster assets, and a
-    // card claiming an image that does not exist renders worse than one that does not.
-    expect(app).not.toContain('summary_large_image');
-    expect(app).not.toContain('og:image');
+    expect(app).toContain('name="twitter:card" content="summary_large_image"');
+    // The brand export ships a 1200x630 card. An earlier pass used the small card
+    // because there was no image to point at; there is one, and its dimensions are
+    // declared so a preview reserves the right space before it loads.
+    expect(app).toContain('property="og:image"');
+    expect(app).toContain('content="1200"');
+    expect(app).toContain('content="630"');
+    expect(app).toContain('property="og:image:alt"');
+  });
+
+  it('asks for the mark in the three places something will look for it', () => {
+    expect(app).toContain('rel="icon" href="brand/favicon.svg"');
+    expect(app).toContain('rel="apple-touch-icon" href="brand/icon-180.png"');
+    expect(app).toContain('rel="manifest"');
   });
 
   it('says something to a reader that does not run scripts', () => {
@@ -91,6 +100,49 @@ describe('the site can be found', () => {
     // Two entries: the application and the page that explains it. If a third document
     // is ever published, it belongs here too.
     expect(sitemap.match(/<loc>/g) ?? []).toHaveLength(2);
+  });
+});
+
+describe('the web app manifest', () => {
+  it('describes the application from the same source as the page', () => {
+    const manifest = JSON.parse(readFileSync(join(DIST, 'site.webmanifest'), 'utf8'));
+    expect(manifest.name).toBe(APP_TITLE);
+    expect(manifest.short_name).toBe(NAME);
+    expect(manifest.description).toBe(DESCRIPTION);
+  });
+
+  it('starts inside its own scope, so an install opens the application', () => {
+    const manifest = JSON.parse(readFileSync(join(DIST, 'site.webmanifest'), 'utf8'));
+    expect(manifest.start_url).toBe(manifest.scope);
+    expect(manifest.display).toBe('standalone');
+  });
+
+  it('offers a maskable icon as well as the plain ones', () => {
+    // Android crops to whatever shape the launcher uses. Without a maskable variant the
+    // mark loses its corners to the crop.
+    const manifest = JSON.parse(readFileSync(join(DIST, 'site.webmanifest'), 'utf8'));
+    const sizes = manifest.icons.map((i: { sizes: string }) => i.sizes);
+    expect(sizes).toContain('192x192');
+    expect(sizes).toContain('512x512');
+    expect(manifest.icons.some((i: { purpose?: string }) => i.purpose === 'maskable')).toBe(true);
+  });
+
+  it('ships every file it names', () => {
+    const manifest = JSON.parse(readFileSync(join(DIST, 'site.webmanifest'), 'utf8'));
+    for (const icon of manifest.icons as Array<{ src: string }>) {
+      expect(existsSync(join(DIST, icon.src)), `${icon.src} is named but not shipped`).toBe(true);
+    }
+    for (const asset of ['brand/favicon.svg', 'brand/icon-180.png', 'brand/og.png']) {
+      expect(existsSync(join(DIST, asset)), `${asset} is referenced but not shipped`).toBe(true);
+    }
+  });
+
+  it('keeps the reserved colour reserved', () => {
+    // The export is explicit: coral means one record, re-identified, and nothing else
+    // may use it. The manifest paints chrome, so it takes ink and paper.
+    const manifest = JSON.parse(readFileSync(join(DIST, 'site.webmanifest'), 'utf8'));
+    expect(manifest.theme_color.toUpperCase()).not.toBe(BRAND.coral);
+    expect(manifest.background_color.toUpperCase()).not.toBe(BRAND.coral);
   });
 });
 

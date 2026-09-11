@@ -9,7 +9,14 @@
       content="An explainer on re-identification. All records are generated. No real person's data is used or accepted."
     />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23ECEEE7'/%3E%3Crect x='2' y='2' width='4' height='4' fill='%2314170F'/%3E%3Crect x='8' y='2' width='4' height='4' fill='%2314170F'/%3E%3Crect x='2' y='8' width='4' height='4' fill='%2314170F'/%3E%3Crect x='10' y='10' width='4' height='4' fill='%23A8452C'/%3E%3C/svg%3E" />
+    <!--
+      The mark, from the brand export. An SVG for anything that takes one, a 180 px PNG
+      for the iOS home screen, and the manifest for Android and desktop installs. The
+      previous inline data URI drew a different mark by hand; these are the real one.
+    -->
+    <link rel="icon" href="brand/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="brand/icon-180.png" />
+    <link rel="manifest" href="site.webmanifest" />
     <!--
       The ground is applied before first paint, so a reader who has chosen the plate does
       not get a frame of the ledger first. Kept in the document rather than in the bundle

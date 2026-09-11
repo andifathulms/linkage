@@ -31,3 +31,23 @@ export const LANDING_TITLE = `${NAME}. ${THESIS}`;
 
 /** The application itself. */
 export const APP_TITLE = `${NAME}. ${THESIS}`;
+
+/**
+ * The brand palette, from the export's own README.
+ *
+ * Quoted here because the export is not in the repository and the manifest needs two of
+ * these values. The reserved one is coral: it means one record, re-identified, and the
+ * export is explicit that nothing else may use it. The application's own --exposed token
+ * is a different value, tuned for its two grounds; these are the mark's colours, not the
+ * interface's.
+ */
+export const BRAND = {
+  /** Ink ground. */
+  ink: '#0B0D0F',
+  /** Paper, and the icon's field. */
+  paper: '#E8ECEE',
+  /** Reserved. One record, re-identified. Never decorative. */
+  coral: '#F4523B',
+  /** The crowd: records still at k greater than one. */
+  slate: '#5C6B73',
+} as const;

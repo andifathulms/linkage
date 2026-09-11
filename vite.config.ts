@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
-import { NAME, THESIS, DESCRIPTION, APP_TITLE, LANDING_TITLE } from './src/meta';
+import { NAME, THESIS, DESCRIPTION, APP_TITLE, LANDING_TITLE, BRAND } from './src/meta';
 
 const BASE = process.env.VITE_BASE ?? '/linkage/';
 
@@ -33,9 +33,17 @@ function tagsFor(title: string, url: string): string {
     `<meta property="og:title" content="${escape(title)}" />`,
     `<meta property="og:description" content="${escape(DESCRIPTION)}" />`,
     `<meta property="og:url" content="${url}" />`,
-    `<meta name="twitter:card" content="summary" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${escape(title)}" />`,
     `<meta name="twitter:description" content="${escape(DESCRIPTION)}" />`,
+    // The brand export ships a 1200x630 card, so a shared link can render a real
+    // preview now. An earlier pass used twitter:card=summary because there was no
+    // image to point at; there is one.
+    `<meta property="og:image" content="${APP_URL}brand/og.png" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:alt" content="${escape(THESIS)}" />`,
+    `<meta name="twitter:image" content="${APP_URL}brand/og.png" />`,
   ]
     .map((tag) => '    ' + tag)
     .join('\n');
@@ -91,6 +99,39 @@ function metadata(): Plugin {
       } catch {
         // No landing page in this build. Nothing to annotate.
       }
+      /**
+       * The web app manifest, so the mark is what an Android or desktop install shows.
+       * No service worker: that would put a network layer in front of an application
+       * whose whole claim is that it makes no requests, and there is nothing to cache
+       * that the browser does not already cache.
+       */
+      writeFileSync(
+        resolve(out, 'site.webmanifest'),
+        JSON.stringify(
+          {
+            name: APP_TITLE,
+            short_name: NAME,
+            description: DESCRIPTION,
+            start_url: BASE,
+            scope: BASE,
+            display: 'standalone',
+            background_color: BRAND.paper,
+            theme_color: BRAND.ink,
+            icons: [
+              { src: 'brand/icon-192.png', sizes: '192x192', type: 'image/png' },
+              { src: 'brand/icon-512.png', sizes: '512x512', type: 'image/png' },
+              {
+                src: 'brand/icon-maskable-512.png',
+                sizes: '512x512',
+                type: 'image/png',
+                purpose: 'maskable',
+              },
+            ],
+          },
+          null,
+          2,
+        ) + '\n',
+      );
       writeFileSync(
         resolve(out, 'robots.txt'),
         `User-agent: *\nAllow: /\nSitemap: ${SITE}${BASE}sitemap.xml\n`,
